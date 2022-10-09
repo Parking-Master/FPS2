@@ -503,6 +503,10 @@
         "hole": (new THREE.TextureLoader).load("images/textures/bullethole.png"),
         "scratch": (new THREE.TextureLoader).load("images/textures/scratch.png")
       };
+      weaponFireTimeouts = {
+        "Assault_Rifle": 0,
+        "Desert_Eagle": 200
+      }
       /* End global variables */
       function animate() {
         requestAnimationFrame(animate);
@@ -594,8 +598,11 @@
           secondaryWeapon.object = model.scene;
           animations.push(model.animations);
           let mixer = new THREE.AnimationMixer(secondaryWeapon.object);
-          mixer.speed = 0;
+          mixer.speed = 1;
+          let weaponIndex = gunIndexes[loadout[1]];
           mixers.push(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
         }), 2: new THREE.GLTFLoader(loadingManager).load("models/muzzle_flash.glb", (model) => {
           muzzleFlash = model.scene;
         }), 3: new THREE.GLTFLoader(loadingManager).load("models/maps/CARGO/scene.gltf", (model) => {
@@ -662,6 +669,8 @@
           scene.add(flash);
           setTimeout(() => scene.remove(flash), 10);
         }, 100);
+        fullAutoFiring ? canFire = true : canFire = false;
+        fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
       }
       function switchWeapon() {
         let weapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
@@ -689,12 +698,12 @@
         isReloading = true;
         let gunRotate1;
         let gunRotate = setInterval(() => {
-          if (gunRotation >= .5) {
-            return gunRotation = .5, setTimeout(() => { gunRotate1 = setInterval(() => {
+          if (gunRotation >= ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? 1 : .5)) {
+            return gunRotation = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? 1 : .5), setTimeout(() => { gunRotate1 = setInterval(() => {
               if (gunRotation <= 0) {
                 return gunRotation = 0, setInterval, clearInterval(gunRotate1);
               }
-              gunRotation += -.01;
+              gunRotation += -(((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? .02 : .01));
             }) }, 2000), clearInterval(gunRotate);
           }
           gunRotation += .01;
@@ -703,7 +712,7 @@
         mixers[weaponIndex].clipAction(animations[weaponIndex][1]).reset();
         if (weapon.rounds <= 0) {
           reloads[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].full.cloneNode().play();
-          let clip = mixers[0].clipAction(animations[0][4]);
+          let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][4]);
           clip.loop = THREE.LoopOnce;
           clip.reset();
           clip.play();
@@ -739,10 +748,16 @@
         if (fullAutoFiring) {
           fire(1);
         }
-      }, 140);
+      }, 120);
       document.addEventListener("mousedown", (e) => {
-        fullAutoFiring = true;
-        whatStartedFiring = "click";
+        let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
+        if (currentWeapon == "Assault_Rifle") {
+          fullAutoFiring = true;
+          whatStartedFiring = "click";
+        }
+        if (currentWeapon == "Desert_Eagle") {
+          fire(1);
+        }
       });
       document.addEventListener("mouseup", (e) => {
         fullAutoFiring = false;
@@ -823,8 +838,14 @@
           reload();
         }
         if (e.key == "f" && (whatStartedFiring == "key" || !whatStartedFiring)) {
-          fullAutoFiring = true;
-          whatStartedFiring = "key";
+          let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
+          if (currentWeapon == "Assault_Rifle") {
+            fullAutoFiring = true;
+            whatStartedFiring = "click";
+          }
+          if (currentWeapon == "Desert_Eagle" && !e.repeat) {
+            fire(1);
+          }
         }
         if (e.key == "y" && !e.repeat) {
           switchWeapon();
