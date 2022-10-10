@@ -375,12 +375,19 @@
       };
       players = 0;
       otherUsername = null;
+      countdown = false;
       /* Gametime.js initialization */
       gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
       gametime.set("channel", new URLSearchParams(location.search).get("lobby"));
       gametime.make("connect");
       gametime.make("countdown");
       gametime.make("data");
+      gametime.on("countdown", function(user) {
+        if (user == gametime.user.position) {
+          return;
+        }
+        countdown = true;
+      });
       gametime.on("data", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
           return;
@@ -389,28 +396,41 @@
       });
       gametime.on("connect", function() {
         players++;
-        gametime.run("data", [gametime.user.position+","+gametime.user.username]);
       });
       gametime.onconnect = function() {
         gametime.run("connect");
       };
-      let options = document.createElement("div");
-      options.innerHTML = `
-      <a href="" onclick="event.preventDefault(); alert('This dialog shows when there are not enough players to start. You can choose to wait for players, or start a bot(s) if you don\\'t want to wait.')">What is this?</a>
-      <details>
-        <summary>Menu</summary>
-        <a onclick="getLink(this)" style="text-decoration:underline">Share Link</a><br>
-        <a onclick="bot()" style="text-decoration:underline">Start bot</a><br>
-        <a onclick="freePlay()" style="text-decoration:underline">Free play</a><br>
-        <a onclick="cancelSearch()" style="text-decoration:underline">Stop Search</a>
-      </details>
-      `;
       function start(username) {
         // (renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true);
         swal({
           title: "Player(s) found",
-          text: "\"" + username + "\" Joined the game"
-        })
+          text: "\"" + username + "\" Joined the game",
+          button: "Cancel",
+          closeOnEsc: false,
+          closeOnEnterKey: false,
+          closeOnSpaceKey: false,
+          closeOnClickOutside: false
+        });
+        setTimeout(() => {
+          gametime.run("countdown", [gametime.user.position]);
+        }, 3000);
+        let sync = setInterval(() => {
+          if (countdown) {
+            let seconds = 5;
+            swal({
+              title: "Get ready",
+              text: "Starting in " + seconds + " seconds"
+            });
+            setInterval(() => {
+              seconds--;
+              if (seconds <= 3) {
+                document.querySelector("#countdown").play();
+              }
+              document.querySelector(".swal-text").textContent = document.querySelector(".swal-text").textContent.replace(/[0-9]/gi, seconds);
+            }, 1000);
+            clearInterval(sync);
+          }
+        });
       }
       swal({
         title: "Searching for players...",
@@ -425,6 +445,7 @@
         searchingEngine = setInterval(() => {
           if (players >= 2 && document.querySelector(".loader") == null) {
             gametime.user.username=localStorage["username"]||generateName();
+            gametime.run("data", [gametime.user.position+","+gametime.user.username]);
             setTimeout(() => {
               start(otherUsername);
             }, 1000);
