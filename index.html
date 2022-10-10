@@ -611,7 +611,7 @@
           map.scale.set(1.6,1.6,1.6);
           map.position.y = -300;
           map.getObjectByProperty("type", "DirectionalLight").visible = false;
-        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/player.glb", (model) => {
+        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
           player = model.scene;
           animations.push(model.animations);
           let mixer = new THREE.AnimationMixer(player);
