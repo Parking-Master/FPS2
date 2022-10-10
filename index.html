@@ -401,7 +401,6 @@
         gametime.run("connect");
       };
       function start(username) {
-        // (renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true);
         swal({
           title: "Player(s) found",
           text: "\"" + username + "\" Joined the game",
@@ -412,7 +411,7 @@
           closeOnClickOutside: false
         });
         setTimeout(() => {
-          gametime.run("countdown", [gametime.user.position]);
+        gametime.run("countdown", [gametime.user.position]);
         }, 3000);
         let sync = setInterval(() => {
           if (countdown) {
@@ -421,12 +420,13 @@
               title: "Get ready",
               text: "Starting in " + seconds + " seconds"
             });
-            setInterval(() => {
+            let counting = setInterval(() => {
               seconds--;
-              if (seconds <= 3) {
+              if (seconds <= 4) {
+                seconds < 0 && (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
                 document.querySelector("#countdown").play();
               }
-              document.querySelector(".swal-text").textContent = document.querySelector(".swal-text").textContent.replace(/[0-9]/gi, seconds);
+              seconds < 0 || (document.querySelector(".swal-text").textContent = document.querySelector(".swal-text").textContent.replace(/[0-9]/gi, seconds));
             }, 1000);
             clearInterval(sync);
           }
@@ -634,7 +634,7 @@
       animate();
       (() => { let loader=new THREE.TextureLoader;loader.load("images/clouds.png",(function(e){var a=new THREE.SphereGeometry(500,60,40),o=new THREE.MeshBasicMaterial({map:e,side:THREE.DoubleSide});a.scale(-1,1,1);d=new THREE.Mesh(a,o);sky=d;sky.material.map.generateMipmaps=!1,sky.material.map.minFilter=THREE.LinearMipMapLinearFilter,sky.material.map.needsUpdate=!0,sky.rotation.y=-.2,scene.add(d),d.position.set(0,0,0)})); })();
       controls = new PointerLockControls(camera, renderer.domElement);
-      controls.isLocked = true;
+      controls.isLocked = false;
       /* Start Model loaders */
       loadingProgress = 0;
       const loadingManager = new THREE.LoadingManager();
@@ -823,6 +823,9 @@
         }
       }, 120);
       document.addEventListener("mousedown", (e) => {
+        if (!controls.isLocked) {
+          return;
+        }
         let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
         if (currentWeapon == "Assault_Rifle") {
           fullAutoFiring = true;
@@ -878,6 +881,9 @@
       const clickZoom = (o, e) => o >= 20 && e == "zoomIn" ? o - 5 : o <= 75 && e == "zoomOut" ? o + 5 : o;
       const getFov = () => Math.floor(2 * Math.atan(camera.getFilmHeight() / 2 / camera.getFocalLength()) * 180 / Math.PI);
       document.addEventListener("keydown", (e) => {
+        if (!controls.isLocked) {
+          return;
+        }
         if (e.key == "i" && !e.repeat) {
           isZoomed ? (document.querySelector(".crosshair").style.visibility = "visible", (() => { for (let i = 0; i < 5; i++) zoomOutFunction(100) })(), isZoomed = false) : (document.querySelector(".crosshair").style.visibility = "hidden", (() => { for (let i = 0; i < 5; i++) zoomInFunction(100) })(), isZoomed = true);
         }
