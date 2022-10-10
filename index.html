@@ -469,14 +469,18 @@
         clips: 3,
         defaultRounds: 36,
         object: new THREE.Mesh(),
-        name: loadout[0]
+        name: loadout[0],
+        easyReloadTimeout: 4500,
+        fullReloadTimeout: 6500
       };
       secondaryWeapon = {
         rounds: 10,
         clips: 4,
         defaultRounds: 10,
         object: new THREE.Mesh(),
-        name: loadout[1]
+        name: loadout[1],
+        easyReloadTimeout: 2000,
+        fullReloadTimeout: 3000
       };
       weaponPosition = "primary";
       isReloading = false;
@@ -694,6 +698,7 @@
         didIdle = false;
       }
       function reload() {
+        canFire = false;
         let weapon = weaponPosition == "primary" ? primaryWeapon : secondaryWeapon;
         if (isReloading || !(weapon.rounds < weapon.defaultRounds) || weapon.clips <= 0) {
           return;
@@ -727,7 +732,7 @@
             isReloading = false;
             canFire = true;
             mixers[weaponIndex].clipAction(animations[weaponIndex][1]).play();
-          }, 6500);
+          }, weapon.fullReloadTimeout);
         } else {
           reloads[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].easy.cloneNode().play();
           let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][3]);
@@ -740,7 +745,7 @@
             isReloading = false;
             canFire = true;
             mixers[weaponIndex].clipAction(animations[weaponIndex][1]).play();
-          }, 4500);
+          }, weapon.easyReloadTimeout);
         }
         (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=gunClip.clone();e.position.copy(gun.position),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e);let h=setInterval(()=>{map.traverse(x=>{if(x.isObject3D&&!/scene|Scene/gi.test(x.name)&&collision(e,x)){return clearInterval(h)}e.position.y+=-.001})});setTimeout(()=>{scene.remove(e),clearInterval(h)},3000)})();
       }
