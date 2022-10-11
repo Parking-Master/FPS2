@@ -327,7 +327,7 @@
     <audio id="ambience" src="sounds/ambience.mp3" autoplay loop volume="1"></audio>
     <audio id="Desert_Eagle_fire" src="sounds/guns/Desert_Eagle/fire.mp3"></audio>
     <audio id="Assault_Rifle_fire" src="sounds/guns/Assault_Rifle/fire.mp3"></audio>
-    <audio id="countdown" src="sounds/countdown.mp3"></audio>
+    <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
     <audio id="warthog-sound" src="sounds/warthog.mp3" loop></audio>
@@ -411,20 +411,32 @@
           closeOnClickOutside: false
         });
         setTimeout(() => {
-        gametime.run("countdown", [gametime.user.position]);
+          gametime.run("countdown", [gametime.user.position]);
+          gametime.run("countdown", [gametime.user.position]);
         }, 3000);
         let sync = setInterval(() => {
           if (countdown) {
             let seconds = 5;
             swal({
               title: "Get ready",
-              text: "Starting in " + seconds + " seconds"
+              text: "Starting in " + seconds + " seconds",
+              button: false,
+              closeOnEsc: false,
+              closeOnEnterKey: false,
+              closeOnSpaceKey: false,
+              closeOnClickOutside: false
             });
             let counting = setInterval(() => {
               seconds--;
               if (seconds <= 4) {
-                seconds < 0 && (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
-                document.querySelector("#countdown").play();
+                if (seconds < 0) {
+                  let weaponIndex = gunIndexes[loadout[0]];
+                  mixers[weaponIndex].clipAction(animations[weaponIndex][0]).loop = THREE.LoopOnce;
+                  mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
+                  scene.add(primaryWeapon.object);
+                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
+                }
+                document.querySelector("#countdown_sound").play();
               }
               seconds < 0 || (document.querySelector(".swal-text").textContent = document.querySelector(".swal-text").textContent.replace(/[0-9]/gi, seconds));
             }, 1000);
@@ -434,25 +446,13 @@
       }
       swal({
         title: "Searching for players...",
-        button: "Cancel",
+        button: "Cancel Search",
         closeOnEsc: false,
         closeOnEnterKey: false,
         closeOnSpaceKey: false,
         closeOnClickOutside: false
       });
       let searchingEngine;
-      window.addEventListener("load", () => {
-        searchingEngine = setInterval(() => {
-          if (players >= 2 && document.querySelector(".loader") == null) {
-            gametime.user.username=localStorage["username"]||generateName();
-            gametime.run("data", [gametime.user.position+","+gametime.user.username]);
-            setTimeout(() => {
-              start(otherUsername);
-            }, 1000);
-            clearInterval(searchingEngine);
-          }
-        });
-      });
       /* End Gametime.js initialization */
       defaultKeys = "f,b,r, ,t,m,y,i,z,p";
       keyControls = {
@@ -641,8 +641,22 @@
       loadingManager.onProgress = function(e, a, n) {
         loadingProgress = (a / n * 100).toFixed(0)
       };
+      didBackupSync = false;
       let loadingVerbose = setInterval(() => {
         if (loadingProgress >= 100) {
+          searchingEngine = setInterval(() => {
+            if (players >= 2) {
+              gametime.user.username=localStorage["username"]||generateName();
+              gametime.run("data", [gametime.user.position+","+gametime.user.username]);
+              gametime.run("data", [gametime.user.position+","+gametime.user.username]);
+              setTimeout(() => {
+                let dataSync = setInterval(() => {
+                  otherUsername != null && otherUsername != undefined && otherUsername != "undefined" && (start(otherUsername), clearInterval(dataSync));
+                });
+              }, 1000);
+              clearInterval(searchingEngine);
+            }
+          });
           return document.querySelector(".loader").remove(), clearInterval(loadingVerbose);
         }
         document.querySelector("#progress").style.width = loadingProgress + "%";
@@ -655,7 +669,6 @@
       let Loaders = {
         0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
           primaryWeapon.object = model.scene;
-          scene.add(primaryWeapon.object);
           animations.push(model.animations);
           let mixer = new THREE.AnimationMixer(primaryWeapon.object);
           mixer.speed = 0;
