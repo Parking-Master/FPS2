@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPS2 Multiplayer</title>
+    <style>
+      html, body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        /* cursor: default url(./cursors/cursor2.png), auto!important; */
+        overflow: hidden !important;
+        user-select: none !important;
+        transition: top .2s;
+        background: #eeeeee;
+        font-family: "Default" !important;
+      }
+      @font-face {
+        font-family: "Default";
+        src: url(./fonts/Default/Default.ttf);
+      }
+      * {
+        font-family: "Default" !important;
+        /* cursor: url(./cursors/cursor1.png), auto !important; */
+      }
+      .ui {
+        z-index: 99999;
+      }
+      canvas {
+        position: relative;
+        box-shadow: 0 0 200px rgba(255, 255, 255, .9) inset;
+      }
+      .scoreboard {
+        position: absolute;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        width: 100px;
+        text-align: center;
+        height: 100px;
+        padding: 5px;
+        border-radius: 5px;
+        z-index: 9999;
+        left: 90%;
+        top: 80vh;
+        font-size: 12px;
+        letter-spacing: 2px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,.5) 100%);
+        color: #fff;
+        border: 5px solid #fff;
+      }
+      hr {
+        position: relative;
+        outline: none !important;
+        width: 100%;
+        margin-top: 10px;
+        height: 2px;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff;
+      }
+      .ui #status {
+        position: absolute;
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,.5) 100%);
+        right: 90%;
+        top: 80vh;
+        width: 100px;
+        text-align: center;
+        color: #fff;
+        padding: 5px;
+        border: 5px solid #fff;
+        border-radius: 5px;
+        perspective: 1600px;
+        perspective-origin: 50% -240px;
+        transform-style: preserve-3d;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        letter-spacing: 2px;
+        height: 100px;
+        z-index: 9999;
+      }
+      .ui img:not(.statustext) {
+        position: absolute;
+        left: 0;
+        top: -10px;
+        margin: 0;
+        padding: 0;
+      }
+      .swal-overlay {
+        background: transparent !important;
+        pointer-events: none !important;
+      }
+      .swal-title {
+        font-size: 30px;
+      }
+      .health {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,.5) 100%);
+      }
+      .health-wrapper {
+        position: absolute;
+        width: 400px;
+        height: 30px;
+        left: 50%;
+        margin-left: -200px;
+        top: 20px;
+        border-radius: 5px;
+        border: 5px solid #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        z-index: 99999;
+      }
+      body {
+        top: 0px;
+      }
+      .statustext {
+        position: absolute;
+        top: -10%;
+        left: 50%;
+        width: 50%;
+        margin-left: -25%;
+        display: none;
+      }
+      .ui .radar {
+        position: absolute;
+        left: 50px !important;
+        top: 70% !important;
+      }
+      #visor {
+        pointer-events: none !important;
+      }
+      canvas:first {
+        position: absolute;
+        width: 62.5vw;
+        height: 100vw;
+        left: 50% !important;
+        margin-left: -31.25vw !important;
+      }
+      .crosshair {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        margin: 0;
+        padding: 0;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        left: 50%;
+        top: 50%;
+        margin-left: -2.5px;
+        margin-top: -2.5px;
+        z-index: 9999;
+      }
+      .swal-modal {
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,.5) 100%);
+        width: 100% !important;
+        padding-top: 50px;
+        padding-bottom: 50px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+      }
+      .swal-modal * {
+        color: #79c9ff;
+      }
+      .swal-button {
+        width: 100% !important;
+        margin: 10px !important;
+        background: #fff !important;
+        border: 3px solid #79c9ff;
+        border-radius: 0 !important;
+        color: #79c9ff !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+      .swal-button-container {
+        width: 100% !important;
+        margin: 20px !important;
+        margin-left: -10px !important;
+      }
+      * {
+        white-space: nowrap;
+      }
+      .loader {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,1) 100%);
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        margin: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 999999;
+        background-repeat: no-repeat;
+      }
+      .loader-1 {
+        position: absolute;
+        width: 10vmax;
+        height: 10vmax;
+        border-right: 10px solid #fff;
+        border-radius: 100%;
+        animation: spinRight 800ms linear infinite;
+        margin: 0;
+        left: 50%;
+        margin-left: -5vmax;
+        margin-top: 200px;
+      }
+      @keyframes spinLeft {
+      	from {
+          transform: rotate(0deg);
+      	}
+      	to {
+      	  transform: rotate(720deg);
+      	}
+      }
+      @keyframes spinRight {
+      	from {
+      	  transform: rotate(360deg);
+      	}
+      	to {
+      	  transform: rotate(0deg);
+      	}
+      }
+      .progress-bar {
+        position: absolute;
+        margin-top: 90px;
+        width: 30%;
+        height: 30px;
+        padding: 5px;
+        background: #fff;
+        left: 50%;
+        margin-left: -15%;
+      }
+      #progress {
+        margin: 0;
+        width: 1%;
+        height: 100%;
+        background: #79c9ff;
+      }
+      #weapontext {
+        position: absolute;
+        left: 50%;
+        color: #333;
+        text-shadow: 0 2px #ff4444;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: monospace, Arial;
+        z-index: 9999;
+        bottom: 50px;
+        width: 1000px;
+        margin-left: -500px;
+        text-align: center;
+      }
+      a:active {
+        border: 2px solid currentColor;
+        border-radius: 2px;
+      }
+      .pause-menu {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: #333;
+        background: rgba(15,15,15,.5);
+        z-index: 9999;
+      }
+      .pause-tab {
+        position: relative;
+        top: 200px;
+        left: 0;
+        margin: 0;
+        margin-bottom: 30px;
+        background: #444;
+        display: inline-block;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        padding: 5px;
+        width: 250px;
+        color: #333;
+        text-shadow: 0 2px #25750a;
+        text-align: center;
+        box-shadow: 0 3px 5px #25750a;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js@latest/js/username-generator.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  </head>
+  <body style="margin:0!important;">
+    <div class="loader">
+      <div class="loader-1"></div>
+      <br>
+      <h2 style="position:absolute;font-size:100px;padding:0;top:40%;width:100%;color:#fff;font-style:italic;left:50%!important;margin-left:-25%">
+        LOADING
+        <br>
+        <div style="position:absolute;width:100%;margin:0;left:0!important;font-size:50px"><span id="progress-status">0</span> % <span style="text-decoration:line-through">&nbsp;&nbsp;&nbsp;</span> <small id="progress-est">0 Seconds Left</small></div> 
+      </h2>
+      <div class="progress-bar">
+        <div id="progress"></div>
+      </div>
+    </div>
+    <div class="pause-menu" style="display:none">
+      <h1 style="color:#25750a;font-weight:bold;font-family:monospace;position:absolute;left:20px;top:20px;font-size:75px;margin:0">PAUSED</h1>
+      <div class="pause-tab" onclick="unpause()">Continue</div><br>
+      <div class="pause-tab" onclick="confirm('Are you sure? All player will be disconnected.')&&cancelSearch()">Leave game</div><br>
+      <div class="pause-tab" onclick="openSettings()">Settings</div><br>
+    </div>
+    <audio id="ricochet1" src="sounds/ricochet1.mp3"></audio>
+    <audio id="ricochet2" src="sounds/ricochet2.mp3"></audio>
+    <audio id="ricochet3" src="sounds/ricochet3.mp3"></audio>
+    <audio id="explosion" src="sounds/explosion.mp3" loop volume=".5"></audio>
+    <audio id="walking" src="sounds/walking.mp3" loop volume=".5"></audio>
+    <audio id="ambience" src="sounds/ambience.mp3" autoplay loop volume="1"></audio>
+    <audio id="Desert_Eagle_fire" src="sounds/guns/Desert_Eagle/fire.mp3"></audio>
+    <audio id="Assault_Rifle_fire" src="sounds/guns/Assault_Rifle/fire.mp3"></audio>
+    <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
+    <audio id="game-over" src="sounds/game_over.mp3"></audio>
+    <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
+    <audio id="warthog-sound" src="sounds/warthog.mp3" loop></audio>
+    <audio id="punch" src="sounds/punch.mp3"></audio>
+    <audio id="slayer" src="sounds/slayer.mp3"></audio>
+    <audio id="click" src="sounds/click.mp3"></audio>
+    <audio id="surge" src="sounds/surge.mp3"></audio>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/js/libs/fflate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
+    <audio id="Assault_Rifle_reloadeasy" src="sounds/guns/Assault_Rifle/easy.mp3"></audio>
+    <audio id="Assault_Rifle_reloadfull" src="sounds/guns/Assault_Rifle/full.mp3"></audio>
+    <audio id="Desert_Eagle_reloadeasy" src="sounds/guns/Desert_Eagle/easy.mp3"></audio>
+    <audio id="Desert_Eagle_reloadfull" src="sounds/guns/Desert_Eagle/full.mp3"></audio>
+    <div class="ui">
+      <div class="scoreboard">
+        <span class="player1">A - <span class="score">0</span></span>
+        <hr>
+        <span class="player2">B - <span class="score">0</span></span>
+        <hr>
+        <div id="time"><span id="minutes">0</span>:<span id="seconds">00</span></div>
+      </div>
+      <div class="health-wrapper">
+        <div class="health"></div>
+      </div>
+      <img src="images/vignette.png" style="position:fixed;height:102%;width:100%;z-index:9999;pointer-events:none;filter:invert(100%);opacity:.5" />
+      <div class="crosshair"></div>
+      <div id="status">
+        <img src="images/assault.png" style="width:90%;margin-left:5%;top:15px;background:transparent">
+        <br style="margin-bottom:25px">
+        <span id="rounds">0</span> &bullet; <span id="clips">0</span>
+      </div>
+      <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
+    </div>
+    <!-- <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p> -->
+    <!-- <script type="module">
+      import * as CANNON from 'https://unpkg.com/cannon-es@0.19.0/dist/cannon-es.js';
+      window.CANNON = CANNON;
+    </script> -->
+    <script>
+      sandbox = {
+        players: 2
+      };
+      players = 0;
+      otherUsername = null;
+      countdown = false;
+      /* Gametime.js initialization */
+      gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
+      gametime.set("channel", new URLSearchParams(location.search).get("lobby"));
+      gametime.make("connect");
+      gametime.make("countdown");
+      gametime.make("data");
+      gametime.make("add");
+      gametime.on("add", function(data) {
+        if (data.split(",")[0] == gametime.user.position) {
+          return;
+        }
+        if (data.split(",")[1] == "hole") {
+          let x = data.split(",")[2] - 0;
+          let y = data.split(",")[3] - 0;
+          let z = data.split(",")[4] - 0;
+          let x1 = data.split(",")[5] - 0;
+          let y1 = data.split(",")[6] - 0;
+          let z1 = data.split(",")[7] - 0;
+          let hole = new THREE.Mesh(new THREE.CircleGeometry(.125, 30), new THREE.MeshPhongMaterial({ opacity: 0, transparent: true, side: THREE.DoubleSide }));
+          hole.receiveShadow = true;
+          hole.castShadow = true;
+          hole.position.set(x, y, z);
+          hole.rotation.set(x1, y1, z1);
+          scene.add(hole);
+        }
+      });
+      gametime.on("countdown", function(user) {
+        if (user == gametime.user.position) {
+          return;
+        }
+        countdown = true;
+      });
+      gametime.on("data", function(data) {
+        if (data.split(",")[0] == gametime.user.position) {
+          return;
+        }
+        otherUsername = data.split(",")[1];
+      });
+      gametime.on("connect", function() {
+        players++;
+      });
+      gametime.onconnect = function() {
+        gametime.run("connect");
+      };
+      function start(username) {
+        swal({
+          title: "Player(s) found",
+          text: "\"" + username + "\" Joined the game",
+          button: "Cancel",
+          closeOnEsc: false,
+          closeOnEnterKey: false,
+          closeOnSpaceKey: false,
+          closeOnClickOutside: false
+        });
+        setTimeout(() => {
+          gametime.run("countdown", [gametime.user.position]);
+          gametime.run("countdown", [gametime.user.position]);
+        }, 3000);
+        let sync = setInterval(() => {
+          if (countdown) {
+            let seconds = 5;
+            swal({
+              title: "Get ready",
+              text: "Starting in " + seconds + " seconds",
+              button: false,
+              closeOnEsc: false,
+              closeOnEnterKey: false,
+              closeOnSpaceKey: false,
+              closeOnClickOutside: false
+            });
+            let counting = setInterval(() => {
+              seconds--;
+              if (seconds <= 4) {
+                if (seconds < 0) {
+                  let weaponIndex = gunIndexes[loadout[0]];
+                  mixers[weaponIndex].clipAction(animations[weaponIndex][0]).loop = THREE.LoopOnce;
+                  mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
+                  scene.add(primaryWeapon.object);
+                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
+                }
+                document.querySelector("#countdown_sound").play();
+              }
+              seconds < 0 || (document.querySelector(".swal-text").textContent = document.querySelector(".swal-text").textContent.replace(/[0-9]/gi, seconds));
+            }, 1000);
+            clearInterval(sync);
+          }
+        });
+      }
+      swal({
+        title: "Searching for players...",
+        button: "Cancel Search",
+        closeOnEsc: false,
+        closeOnEnterKey: false,
+        closeOnSpaceKey: false,
+        closeOnClickOutside: false
+      });
+      let searchingEngine;
+      /* End Gametime.js initialization */
+      defaultKeys = "f,b,r, ,t,m,y,i,z,p";
+      keyControls = {
+        "shoot": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[0],
+        "punch": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[1],
+        "reload": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[2],
+        "jump": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[3],
+        "interact": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[4],
+        "throwGrenade": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[5],
+        "switchWeapon": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[6],
+        "zoomIn": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[7],
+        "zoomOut": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[8],
+        "pause": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[9]
+      };
+      function showText(e) {
+        document.querySelector("#weapontext").textContent = e;
+        document.querySelector("#weapontext").style.display = "block";
+      }
+      function hideText() {
+        document.querySelector("#weapontext").textContent = "";
+        document.querySelector("#weapontext").style.display = "none";
+      }
+      function checkTouching(e,t){let o=e.position.y-e.geometry.parameters.height/2,r=e.position.y+e.geometry.parameters.height/2,i=e.position.x+e.geometry.parameters.width/2,p=e.position.x-e.geometry.parameters.width/2,a=e.position.z-e.geometry.parameters.depth/2,m=e.position.z+e.geometry.parameters.depth/2,s=t.position.y-t.geometry.parameters.height/2,h=t.position.y+t.geometry.parameters.height/2,g=t.position.x+t.geometry.parameters.width/2,n=t.position.x-t.geometry.parameters.width/2,y=t.position.z-t.geometry.parameters.depth/2,d=t.position.z+t.geometry.parameters.depth/2;return!(r<s||i<n||o>h||p>g||a>d||m<y)}
+      connectedUsers = 0;
+      score1 = 0;
+      score2 = 0;
+      setScore = 10;
+      setTime = 10;
+      setGrenades = 2;
+      primaryRounds = 36;
+      secondaryRounds = 10;
+      gunMeleeRotationY = 0;
+      fullAutoFiring = false;
+      currentPerformance = (localStorage["performance"] || "100") - 0;
+      currentMap = (new URLSearchParams(location.search).get("map") || "haven").toUpperCase();
+      gunsounds = {
+        "Assault_Rifle": document.getElementById("Assault_Rifle_fire"),
+        "Desert_Eagle": document.getElementById("Desert_Eagle_fire")
+      };
+      reloads = {
+        "Assault_Rifle": {
+          "easy": document.getElementById("Assault_Rifle_reloadeasy"),
+          "full": document.getElementById("Assault_Rifle_reloadfull")
+        },
+        "Desert_Eagle": {
+          "easy": document.getElementById("Desert_Eagle_reloadeasy"),
+          "full": document.getElementById("Desert_Eagle_reloadfull")
+        }
+      };
+      /* Start renderer setup */
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .2, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setPixelRatio(1);
+      /* End renderer setup */
+      muzzleFlash = new THREE.Mesh();
+      bulletShell = new THREE.Mesh();
+      gunClip = new THREE.Mesh();
+      function isTouchDevice(){return!!window.matchMedia("(pointer: coarse)").matches}
+      isTouchDevice()?(()=>{const{Euler:e,EventDispatcher:t,Vector3:n}=THREE;var o;o=!1;var i=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),c=document.body.clientWidth/2,r=(document.body.clientHeight,window.innerHeight),s=function(t,s){o=!!i,void 0===s&&(console.warn('THREE.PointerLockControls: The second parameter "domElement" is now mandatory.'),s=document.body),this.domElement=s,this.isLocked=!1;var m,u,d,a=this,h={type:"change"},v={type:"lock"},l={type:"unlock"},E=new e(0,0,0,"YXZ"),p=Math.PI/2,k=Math.PI/3.8,L=Math.PI/9,f=new n,y=0,M=0;function x(){}function P(e){u=e.touches[0].clientY,m=e.touches[0].clientX,y=m-c,M=u-(r-100),E.setFromQuaternion(t.quaternion),E.y=.005*y,E.x=.005*M,E.x=Math.max(-p,Math.min(L,E.x)),E.y=Math.max(-k,Math.min(k,E.y)),t.quaternion.setFromEuler(E),a.dispatchEvent(h),console.log(M)}function w(e){}function g(e){if(!1!==a.isLocked){var n=e.movementX||e.mozMovementX||e.webkitMovementX||0,o=e.movementY||e.mozMovementY||e.webkitMovementY||0;E.setFromQuaternion(t.quaternion),E.y-=.002*n,E.x-=.002*o,E.x=Math.max(-p,Math.min(p,E.x)),E.y=Math.max(-k,Math.min(k,E.y)),t.quaternion.setFromEuler(E),a.dispatchEvent(h)}}function b(){document.pointerLockElement===a.domElement?(a.dispatchEvent(v),a.isLocked=!0):(a.dispatchEvent(l),a.isLocked=!1)}function F(){console.error("THREE.PointerLockControls: Unable to use Pointer Lock API")}this.connect=function(){document.addEventListener("mousemove",g,!1),document.addEventListener("touchstart",x,!1),document.addEventListener("touchmove",P,!1),document.addEventListener("pointerlockchange",b,!1),document.addEventListener("pointerlockerror",F,!1)},this.disconnect=function(){document.removeEventListener("mousemove",g,!1),document.removeEventListener("touchend",w,!1),document.removeEventListener("touchmove",onTouchmove,!1),document.removeEventListener("pointerlockchange",b,!1),document.removeEventListener("pointerlockerror",F,!1)},this.dispose=function(){this.disconnect()},this.getObject=function(){return t},this.getDirection=(d=new n(0,0,-1),function(e){return e.copy(d).applyQuaternion(t.quaternion)}),this.moveForward=function(e){f.setFromMatrixColumn(t.matrix,0),f.crossVectors(t.up,f),t.position.addScaledVector(f,e)},this.moveRight=function(e){f.setFromMatrixColumn(t.matrix,0),t.position.addScaledVector(f,e)},this.lock=1==o?function(){a.isLocked=!0,this.connect()}:function(){this.domElement.requestPointerLock()},this.unlock=function(){document.exitPointerLock()},this.connect()};(s.prototype=Object.create(t.prototype)).constructor=s,window.PointerLockControls=s})():(()=>{const _euler=new THREE.Euler(0,0,0,"YXZ"),_vector=new THREE.Vector3,_changeEvent={type:"change"},_lockEvent={type:"lock"},_unlockEvent={type:"unlock"},_PI_2=Math.PI/2;class PointerLockControls extends THREE.EventDispatcher{constructor(e,t){super(),void 0===t&&(console.warn('THREE.PointerLockControls: The second parameter "domElement" is now mandatory.'),t=document.body),this.domElement=t,this.isLocked=!1,this.minPolarAngle=0,this.maxPolarAngle=Math.PI,this.pointerSpeed=1;const o=this;function n(t){if(!1===o.isLocked)return;const n=t.movementX||t.mozMovementX||t.webkitMovementX||0,r=t.movementY||t.mozMovementY||t.webkitMovementY||0;_euler.setFromQuaternion(e.quaternion),_euler.y-=.002*n*o.pointerSpeed,_euler.x-=.002*r*o.pointerSpeed,_euler.x=Math.max(_PI_2-o.maxPolarAngle,Math.min(_PI_2-o.minPolarAngle,_euler.x)),e.quaternion.setFromEuler(_euler),o.dispatchEvent(_changeEvent)}function r(){o.domElement.ownerDocument.pointerLockElement===o.domElement?(o.dispatchEvent(_lockEvent),o.isLocked=!0):(o.dispatchEvent(_unlockEvent),o.isLocked=!1)}function c(){console.error("THREE.PointerLockControls: Unable to use Pointer Lock API")}this.connect=function(){o.domElement.ownerDocument.addEventListener("mousemove",n),o.domElement.ownerDocument.addEventListener("pointerlockchange",r),o.domElement.ownerDocument.addEventListener("pointerlockerror",c)},this.disconnect=function(){o.domElement.ownerDocument.removeEventListener("mousemove",n),o.domElement.ownerDocument.removeEventListener("pointerlockchange",r),o.domElement.ownerDocument.removeEventListener("pointerlockerror",c)},this.dispose=function(){this.disconnect()},this.getObject=function(){return e},this.getDirection=function(){const t=new THREE.Vector3(0,0,-1);return function(o){return o.copy(t).applyQuaternion(e.quaternion)}}(),this.moveForward=function(t){_vector.setFromMatrixColumn(e.matrix,0),_vector.crossVectors(e.up,_vector),e.position.addScaledVector(_vector,t)},this.moveRight=function(t){_vector.setFromMatrixColumn(e.matrix,0),e.position.addScaledVector(_vector,t)},this.lock=function(){this.domElement.requestPointerLock()},this.unlock=function(){o.domElement.ownerDocument.exitPointerLock()},this.connect()}}window.PointerLockControls=PointerLockControls})();
+      scene.add(camera);
+      map = new THREE.Mesh();
+      player = new THREE.Mesh();
+      light = new THREE.PointLight(0xf7f7ea,3),light.position.set(-10,20,-10);
+      clock = new THREE.Clock();
+      scene.add(light);
+      /* Start global variables */
+      loadout = ["Assault_Rifle", "Desert_Eagle"];
+      animations = [];
+      otherPlayer = new THREE.Mesh();
+      mixers = [];
+      primaryWeapon = {
+        rounds: 36,
+        clips: 3,
+        defaultRounds: 36,
+        object: new THREE.Mesh(),
+        name: loadout[0],
+        easyReloadTimeout: 4500,
+        fullReloadTimeout: 6500
+      };
+      secondaryWeapon = {
+        rounds: 10,
+        clips: 4,
+        defaultRounds: 10,
+        object: new THREE.Mesh(),
+        name: loadout[1],
+        easyReloadTimeout: 2000,
+        fullReloadTimeout: 3000
+      };
+      weaponPosition = "primary";
+      isReloading = false;
+      canFire = true;
+      gunRotation = 0;
+      isZoomed = false;
+      gunLocked = true;
+      cameraLocked = true;
+      defaultY = 0;
+      isJumping = false;
+      whatStartedFiring = null;
+      textures = {
+        "spark": (new THREE.TextureLoader).load("images/textures/spark.png"),
+        "smoke": (new THREE.TextureLoader).load("images/textures/smoke.png"),
+        "flame": (new THREE.TextureLoader).load("images/textures/flame.png"),
+        "hole": (new THREE.TextureLoader).load("images/textures/bullethole.png"),
+        "scratch": (new THREE.TextureLoader).load("images/textures/scratch.png")
+      };
+      weaponFireTimeouts = {
+        "Assault_Rifle": 0,
+        "Desert_Eagle": 200
+      }
+      /* End global variables */
+      function animate() {
+        requestAnimationFrame(animate);
+        camera.rotation.order = "YXZ";
+        player.rotation.order = "YXZ";
+        player.position.copy(camera.position);
+        player.rotation.y = camera.rotation.y;
+        player.updateMatrix();
+        player.translateY(-1.6);
+        player.rotateY(Math.PI);
+        player.translateZ(-.65);
+        if (cameraLocked) camera.position.y = defaultY;
+        if (gunLocked) {
+          if (isZoomed) {
+            primaryWeapon.object.position.copy(camera.position);
+            primaryWeapon.object.rotation.copy(camera.rotation);
+            primaryWeapon.object.updateMatrix();
+            primaryWeapon.object.translateX(-.15);
+            primaryWeapon.object.translateY(-.85);
+            primaryWeapon.object.translateZ(.4);
+            primaryWeapon.object.scale.set(.1,.1,.1);
+            primaryWeapon.object.rotateX(-(gunRotation/2));
+            primaryWeapon.object.rotateY(-.05);
+            primaryWeapon.object.translateZ(gunRotation/2);
+            primaryWeapon.object.translateY(-(gunRotation/3));
+            secondaryWeapon.object.position.copy(camera.position);
+            secondaryWeapon.object.rotation.copy(camera.rotation);
+            secondaryWeapon.object.updateMatrix();
+            secondaryWeapon.object.translateX(-.15);
+            secondaryWeapon.object.translateY(-.85);
+            secondaryWeapon.object.translateZ(.4);
+            secondaryWeapon.object.scale.set(.1,.1,.1);
+            secondaryWeapon.object.rotateX(-(gunRotation/2));
+            secondaryWeapon.object.rotateY(-.05);
+            secondaryWeapon.object.translateZ(gunRotation/2);
+            secondaryWeapon.object.translateY(-(gunRotation/3));
+          } else {
+            primaryWeapon.object.position.copy(camera.position);
+            primaryWeapon.object.rotation.copy(camera.rotation);
+            primaryWeapon.object.updateMatrix();
+            primaryWeapon.object.translateX(.1);
+            primaryWeapon.object.translateY(-.85);
+            primaryWeapon.object.translateZ(-.1);
+            primaryWeapon.object.scale.set(.1,.1,.1);
+            primaryWeapon.object.rotateX(-(gunRotation/2));
+            primaryWeapon.object.translateZ(gunRotation/2);
+            primaryWeapon.object.translateY(-(gunRotation/3));
+            secondaryWeapon.object.position.copy(camera.position);
+            secondaryWeapon.object.rotation.copy(camera.rotation);
+            secondaryWeapon.object.updateMatrix();
+            secondaryWeapon.object.translateX(.1);
+            secondaryWeapon.object.translateY(-.85);
+            secondaryWeapon.object.translateZ(-.1);
+            secondaryWeapon.object.scale.set(.1,.1,.1);
+            secondaryWeapon.object.rotateX(-(gunRotation/2));
+            secondaryWeapon.object.translateZ(gunRotation/2);
+            secondaryWeapon.object.translateY(-(gunRotation/3));
+          }
+        }
+        mixers.forEach((mixer) => {
+          mixer.update(clock.getDelta() + (mixer.speed / 100));
+        });
+        document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? primaryWeapon.rounds.toString() : secondaryWeapon.rounds.toString());
+        document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? primaryWeapon.clips.toString() : secondaryWeapon.clips.toString());
+        renderer.render(scene, camera);
+      }
+      animate();
+      (() => { let loader=new THREE.TextureLoader;loader.load("images/clouds.png",(function(e){var a=new THREE.SphereGeometry(500,60,40),o=new THREE.MeshBasicMaterial({map:e,side:THREE.DoubleSide});a.scale(-1,1,1);d=new THREE.Mesh(a,o);sky=d;sky.material.map.generateMipmaps=!1,sky.material.map.minFilter=THREE.LinearMipMapLinearFilter,sky.material.map.needsUpdate=!0,sky.rotation.y=-.2,scene.add(d),d.position.set(0,0,0)})); })();
+      controls = new PointerLockControls(camera, renderer.domElement);
+      controls.isLocked = false;
+      /* Start Model loaders */
+      loadingProgress = 0;
+      const loadingManager = new THREE.LoadingManager();
+      loadingManager.onProgress = function(e, a, n) {
+        loadingProgress = (a / n * 100).toFixed(0)
+      };
+      didBackupSync = false;
+      let loadingVerbose = setInterval(() => {
+        if (loadingProgress >= 100) {
+          searchingEngine = setInterval(() => {
+            if (players >= 2) {
+              gametime.user.username=localStorage["username"]||generateName();
+              gametime.run("data", [gametime.user.position+","+gametime.user.username]);
+              gametime.run("data", [gametime.user.position+","+gametime.user.username]);
+              setTimeout(() => {
+                let dataSync = setInterval(() => {
+                  otherUsername != null && otherUsername != undefined && otherUsername != "undefined" && (start(otherUsername), clearInterval(dataSync));
+                });
+              }, 1000);
+              clearInterval(searchingEngine);
+            }
+          });
+          return document.querySelector(".loader").remove(), clearInterval(loadingVerbose);
+        }
+        document.querySelector("#progress").style.width = loadingProgress + "%";
+        document.querySelector("#progress-status").textContent = loadingProgress;
+        document.querySelector("#progress-est").textContent = Math.abs((eval((loadingProgress-0)+(Date.now()/performance.now()).toFixed(0).split(""))*(loadingProgress-100))/4).toFixed(0)+" Seconds Left";
+      }, 100);
+      gunIndexes = {};
+      gunIndexes[loadout[0]] = 0;
+      gunIndexes[loadout[1]] = 1;
+      let Loaders = {
+        0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
+          primaryWeapon.object = model.scene;
+          animations.push(model.animations);
+          let mixer = new THREE.AnimationMixer(primaryWeapon.object);
+          mixer.speed = 0;
+          mixers.push(mixer);
+        }), 1: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[1] + ".glb", (model) => {
+          secondaryWeapon.object = model.scene;
+          animations.push(model.animations);
+          let mixer = new THREE.AnimationMixer(secondaryWeapon.object);
+          mixer.speed = 1;
+          let weaponIndex = gunIndexes[loadout[1]];
+          mixers.push(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
+        }), 2: new THREE.GLTFLoader(loadingManager).load("models/muzzle_flash.glb", (model) => {
+          muzzleFlash = model.scene;
+        }), 3: new THREE.GLTFLoader(loadingManager).load("models/maps/CARGO/scene.gltf", (model) => {
+          map = model.scene;
+          scene.add(map);
+          map.scale.set(1.6,1.6,1.6);
+          map.position.y = -300;
+          map.getObjectByProperty("type", "DirectionalLight").visible = false;
+        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
+          player = model.scene;
+          otherPlayer = model.scene.clone();
+          animations.push(model.animations);
+          let mixer = new THREE.AnimationMixer(player);
+          mixer.speed = 3.25;
+          mixers.push(mixer);
+          scene.add(player),player.scale.set(.015,.015,.015);let localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body2").material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body2").material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),-1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[0].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[0].material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),0);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[1].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[1].material.clipShadows=!0,player.getObjectByName("ak47glb").visible=false,player.getObjectByName("Ch49_body1").children[0].visible=false;
+        }), 5: new THREE.GLTFLoader(loadingManager).load("models/bullet_shell.glb", (model) => {
+          bulletShell = model.scene;
+        }), 6: new THREE.GLTFLoader(loadingManager).load("models/gun_clip.glb", (model) => {
+          gunClip = model.scene;
+        })
+      }
+      /* End Model loaders */
+      /* Start game scripts */
+      function collision(e,B){return firstBB=(new THREE.Box3).setFromObject(e),secondBB=(new THREE.Box3).setFromObject(B),firstBB.intersectsBox(secondBB)}
+      function distanceTo(t,n){var r=t.x-n.x,a=t.y-n.y,c=t.z-n.z;return Math.sqrt(r*r+a*a+c*c)}
+      function fire(rounds = 1) {
+        if (!canFire || (weaponPosition == "primary" ? (primaryWeapon.rounds) : (secondaryWeapon.rounds)) <= 0) {
+          return;
+        }
+        let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+        let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+        let e = new THREE.Mesh(new THREE.CircleGeometry(.125, 20));
+        e.position.copy(camera.position);
+        e.rotation.copy(camera.rotation);
+        e.updateMatrix();
+        e.translateY(.1);
+        let h = setInterval(() => {
+          map.traverse((x) => {
+            if (x.isObject3D && (!x.name.includes("scene") && !x.name.includes("Scene")) && collision(e, x)) {
+              return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), clearInterval(h);
+            }
+            e.translateZ(-.01);
+          });
+        }, 10);
+        let i = 0;
+        let firing = setInterval(() => {
+          if (i >= rounds) {
+            return mixers[weaponIndex].clipAction(animations[weaponIndex][2]).stop(), mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset(), clearInterval(firing);
+          }
+          i++;
+          weaponPosition == "primary" ? (primaryWeapon.rounds--, primaryWeapon.rounds <= 0 && reload()) : (secondaryWeapon.rounds--, secondaryWeapon.rounds <= 0 && reload());
+          gunsounds[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].cloneNode().play();
+          let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][2]);
+          clip.setDuration(.1);
+          clip.loop = THREE.LoopOnce;
+          clip.play();
+          setTimeout(() => (clip.stop(), clip.reset()), 50);
+          let flash = muzzleFlash.clone();
+          flash.position.copy(camera.position);
+          flash.scale.set(.3, .3, .3);
+          flash.rotation.copy(camera.rotation);
+          flash.updateMatrix();
+          flash.translateZ(-1.5);
+          flash.translateX(.15);
+          flash.translateY(-.08);
+          flash.rotateY(.5);
+          scene.add(flash);
+          setTimeout(() => scene.remove(flash), 10);
+          (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
+        }, 100);
+        fullAutoFiring ? canFire = true : canFire = false;
+        fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
+      }
+      function switchWeapon() {
+        let weapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+        let weaponIndex = weapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+        mixers[weaponIndex].clipAction(animations[weaponIndex][6]).stop();
+        mixers[weaponIndex].clipAction(animations[weaponIndex][6]).reset();
+        let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+        weaponPosition = currentWeapon == "primary" ? "secondary" : "primary";
+        if (weaponPosition == "primary") {
+          scene.remove(secondaryWeapon.object);
+          scene.add(primaryWeapon.object);
+        } else {
+          scene.remove(primaryWeapon.object);
+          scene.add(secondaryWeapon.object);
+        }
+        didIdle = false;
+      }
+      function reload() {
+        canFire = false;
+        let weapon = weaponPosition == "primary" ? primaryWeapon : secondaryWeapon;
+        if (isReloading || !(weapon.rounds < weapon.defaultRounds) || weapon.clips <= 0) {
+          return;
+        }
+        let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+        let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+        isReloading = true;
+        let gunRotate1;
+        let gunRotate = setInterval(() => {
+          if (gunRotation >= ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? 1 : .5)) {
+            return gunRotation = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? 1 : .5), setTimeout(() => { gunRotate1 = setInterval(() => {
+              if (gunRotation <= 0) {
+                return gunRotation = 0, setInterval, clearInterval(gunRotate1);
+              }
+              gunRotation += -(((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]) == "Desert_Eagle" ? .02 : .01));
+            }) }, 2000), clearInterval(gunRotate);
+          }
+          gunRotation += .01;
+        });
+        mixers[weaponIndex].clipAction(animations[weaponIndex][1]).stop();
+        mixers[weaponIndex].clipAction(animations[weaponIndex][1]).reset();
+        if (weapon.rounds <= 0) {
+          reloads[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].full.cloneNode().play();
+          let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][4]);
+          clip.loop = THREE.LoopOnce;
+          clip.reset();
+          clip.play();
+          setTimeout(() => {
+            weapon.clips--;
+            weapon.rounds = weapon.defaultRounds;
+            isReloading = false;
+            canFire = true;
+            mixers[weaponIndex].clipAction(animations[weaponIndex][1]).play();
+          }, weapon.fullReloadTimeout);
+        } else {
+          reloads[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].easy.cloneNode().play();
+          let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][3]);
+          clip.loop = THREE.LoopOnce;
+          clip.reset();
+          clip.play();
+          setTimeout(() => {
+            weapon.clips--;
+            weapon.rounds = weapon.defaultRounds;
+            isReloading = false;
+            canFire = true;
+            mixers[weaponIndex].clipAction(animations[weaponIndex][1]).play();
+          }, weapon.easyReloadTimeout);
+        }
+        (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=gunClip.clone();e.position.copy(gun.position),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e);let h=setInterval(()=>{map.traverse(x=>{if(x.isObject3D&&!/scene|Scene/gi.test(x.name)&&collision(e,x)){return clearInterval(h)}e.position.y+=-.001})});setTimeout(()=>{scene.remove(e),clearInterval(h)},3000)})();
+      }
+      function jump() {
+        let h = setInterval(() => { if (gunRotation >= .1) { return gunRotation = .1, clearInterval(h) } gunRotation += .01 }, 10);
+        (()=>{let waswalking=walkForward||walkBackward||walkLeft||walkRight;document.querySelector("#walking").pause();isJumping=true;cameraLocked=false;let t=.5;let h=setInterval(()=>{if(t<=0){return(clearInterval(h),(()=>{let t=0;let h=setInterval(()=>{if(camera.position.y<=defaultY){return(isJumping=false,clearInterval(h),cameraLocked=true,waswalking&&document.querySelector("#walking").play())}(t+=.05);(()=>{if(gunRotation<=0){return gunRotation=0}gunRotation+=-.01})(),camera.position.y+=-t},25)})())}(t+=-.05);camera.position.y+=t},25)})();
+      }
+      /* End game scripts */
+      fullAutoFiring = false;
+      setInterval(() => {
+        if (fullAutoFiring) {
+          fire(1);
+        }
+      }, 120);
+      document.addEventListener("mousedown", (e) => {
+        if (!controls.isLocked) {
+          return;
+        }
+        let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
+        if (currentWeapon == "Assault_Rifle") {
+          fullAutoFiring = true;
+          whatStartedFiring = "click";
+        }
+        if (currentWeapon == "Desert_Eagle") {
+          fire(1);
+        }
+      });
+      document.addEventListener("mouseup", (e) => {
+        fullAutoFiring = false;
+        whatStartedFiring = null;
+      });
+      didIdle = false;
+      setInterval(() => {
+        let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+        let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+        if (typeof mixers[weaponIndex] == "undefined") return;
+        didIdle || (mixers[weaponIndex].clipAction(animations[weaponIndex][1]).play(), didIdle = true);
+      });
+      const zoomInFunction = (o) => {
+        const e = getFov();
+        camera.fov = clickZoom(e, "zoomIn");
+        camera.updateProjectionMatrix();
+      };
+      const zoomOutFunction = (o) => {
+        const e = getFov();
+        camera.fov = clickZoom(e, "zoomOut");
+        camera.updateProjectionMatrix();
+      };
+      setInterval(() => {
+        if (walkForward) {
+          camera.translateZ(-walkForwardAcceleration);
+        }
+        if (walkBackward) {
+          camera.translateZ(walkBackwardAcceleration);
+        }
+        if (walkLeft) {
+          camera.translateX(-walkLeftAcceleration);
+        }
+        if (walkRight) {
+          camera.translateX(walkRightAcceleration);
+        }
+      });
+      walkForward = false;
+      walkBackward = false;
+      walkLeft = false;
+      walkRight = false;
+      walkForwardAcceleration = false;
+      walkBackwardAcceleration = false;
+      walkLeftAcceleration = false;
+      walkRightAcceleration = false;
+      const clickZoom = (o, e) => o >= 20 && e == "zoomIn" ? o - 5 : o <= 75 && e == "zoomOut" ? o + 5 : o;
+      const getFov = () => Math.floor(2 * Math.atan(camera.getFilmHeight() / 2 / camera.getFocalLength()) * 180 / Math.PI);
+      document.addEventListener("keydown", (e) => {
+        if (!controls.isLocked) {
+          return;
+        }
+        if (e.key == "i" && !e.repeat) {
+          isZoomed ? (document.querySelector(".crosshair").style.visibility = "visible", (() => { for (let i = 0; i < 5; i++) zoomOutFunction(100) })(), isZoomed = false) : (document.querySelector(".crosshair").style.visibility = "hidden", (() => { for (let i = 0; i < 5; i++) zoomInFunction(100) })(), isZoomed = true);
+        }
+        if (e.key.startsWith("Arrow")) {
+          let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+          let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+          document.querySelector("#walking").play();
+          mixers[weaponIndex].clipAction(animations[weaponIndex][6]).play();
+          mixers[2].clipAction(animations[2][0]).play();
+        }
+        if (e.key == "ArrowUp") {
+          walkForward = true;
+          walkForwardAcceleration = .02;
+        }
+        if (e.key == "ArrowDown") {
+          walkBackward = true;
+          walkBackwardAcceleration = .02;
+        }
+        if (e.key == "ArrowLeft") {
+          walkLeft = true;
+          walkLeftAcceleration = .02;
+        }
+        if (e.key == "ArrowRight") {
+          walkRight = true;
+          walkRightAcceleration = .02;
+        }
+        if (e.key == " " && !isJumping) {
+          jump();
+        }
+        if (e.key == "r" && !e.repeat) {
+          reload();
+        }
+        if (e.key == "f" && (whatStartedFiring == "key" || !whatStartedFiring)) {
+          let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
+          if (currentWeapon == "Assault_Rifle") {
+            fullAutoFiring = true;
+            whatStartedFiring = "click";
+          }
+          if (currentWeapon == "Desert_Eagle" && !e.repeat) {
+            fire(1);
+          }
+        }
+        if (e.key == "y" && !e.repeat) {
+          switchWeapon();
+        }
+        if (e.key == "m" && !e.repeat) {
+          throwGrenade();
+        }
+      });
+      function throwGrenade(){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.001,a.translateY(e)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshBasicMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0}));e.scale.set(.5,.5,.5);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.0025),e.material.opacity<0||(e.material.opacity+=-.0025)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{distanceTo(camera.position,e.position)<=4?(gametime.run("hit",[(((100-distanceTo(camera.position,e.position))*20).toFixed(2)>0?((100-distanceTo(camera.position,e.position))*20).toFixed(2):0)+","+gametime.user.position]),document.querySelector("#hiteffect").style.opacity=1,setTimeout(()=>{document.querySelector("#hiteffect").style.opacity=0},1000)):(distanceTo(otherPlayer.position,e.position)<=4&&gametime.run("eleminate",[1==gametime.user.position?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e)):(e.scale.set(e.scale.x+.3,e.scale.y+.3,e.scale.z+.3),e.material.opacity+=-.05)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
+      document.addEventListener("keyup", (e) => {
+        if (e.key.startsWith("Arrow")) {
+          document.querySelector("#walking").pause();
+          let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+          let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+          mixers[weaponIndex].clipAction(animations[weaponIndex][6]).stop();
+          mixers[weaponIndex].clipAction(animations[weaponIndex][6]).reset();
+          mixers[2].clipAction(animations[2][0]).stop();
+          mixers[2].clipAction(animations[2][0]).reset();
+        }
+        if (e.key == "ArrowUp") {
+          let h = setInterval(() => {
+            if (walkForwardAcceleration <= 0) {
+              return walkForward = false, clearInterval(h);
+            }
+            walkForwardAcceleration += -.0004;
+          });
+        }
+        if (e.key == "ArrowDown") {
+          let h = setInterval(() => {
+            if (walkBackwardAcceleration <= 0) {
+              return walkbackward = false, clearInterval(h);
+            }
+            walkBackwardAcceleration += -.0004;
+          });
+        }
+        if (e.key == "ArrowLeft") {
+          let h = setInterval(() => {
+            if (walkLeftAcceleration <= 0) {
+              return walkLeft = false, clearInterval(h);
+            }
+            walkLeftAcceleration += -.0004;
+          });
+        }
+        if (e.key == "ArrowRight") {
+          let h = setInterval(() => {
+            if (walkRightAcceleration <= 0) {
+              return walkRight = false, clearInterval(h);
+            }
+            walkRightAcceleration += -.0004;
+          });
+        }
+        if (e.key == "f") {
+          fullAutoFiring = false;
+          whatStartedFiring = null;
+        }
+      });
+      window.addEventListener("resize", function() { camera.aspect = window.innerWidth / window.innerHeight, camera.updateProjectionMatrix(), renderer.setSize(window.innerWidth, window.innerHeight) }, true);
+    </script>
+  </body>
+</html>
