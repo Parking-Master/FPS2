@@ -382,6 +382,26 @@
       gametime.make("connect");
       gametime.make("countdown");
       gametime.make("data");
+      gametime.make("add");
+      gametime.on("add", function(data) {
+        if (data.split(",")[0] == gametime.user.position) {
+          return;
+        }
+        if (data.split(",")[1] == "hole") {
+          let x = data.split(",")[2] - 0;
+          let y = data.split(",")[3] - 0;
+          let z = data.split(",")[4] - 0;
+          let x1 = data.split(",")[5] - 0;
+          let y1 = data.split(",")[6] - 0;
+          let z1 = data.split(",")[7] - 0;
+          let hole = new THREE.Mesh(new THREE.CircleGeometry(.125, 30), new THREE.MeshPhongMaterial({ opacity: 0, transparent: true, side: THREE.DoubleSide }));
+          hole.receiveShadow = true;
+          hole.castShadow = true;
+          hole.position.set(x, y, z);
+          hole.rotation.set(x1, y1, z1);
+          scene.add(hole);
+        }
+      });
       gametime.on("countdown", function(user) {
         if (user == gametime.user.position) {
           return;
@@ -722,7 +742,7 @@
         let h = setInterval(() => {
           map.traverse((x) => {
             if (x.isObject3D && (!x.name.includes("scene") && !x.name.includes("Scene")) && collision(e, x)) {
-              return scene.add(e), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), clearInterval(h);
+              return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), clearInterval(h);
             }
             e.translateZ(-.01);
           });
