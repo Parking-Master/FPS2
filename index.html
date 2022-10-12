@@ -196,11 +196,11 @@
             new Parse.Query(n).get(s[t].id).then((t => {
               const n = { name: t.get("name"), time: t.get("createdAt"), code: t.get("code") };
               if (e) {
-                document.querySelector(".swal-content").innerHTML += n.code.length > 0 ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./play.html?lobby=' + encodeURIComponent(n.name) + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+                document.querySelector(".swal-content").innerHTML += n.code.length > 0 ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby=' + encodeURIComponent(n.name) + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
               } else {
                 e = !0;
                 let content = document.createElement("div");
-                content.innerHTML = n.code.length > 0 ? "" : '<br><div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./play.html?lobby='+encodeURIComponent(n.name)+'\')">' + n.name+'</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+                content.innerHTML = n.code.length > 0 ? "" : '<br><div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby='+encodeURIComponent(n.name)+'\')">' + n.name+'</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
                 swal({
                   title: "FIND A LOBBY",
                   content: content
@@ -223,12 +223,12 @@
           content: "input",
           button: "Join"
         }).then((name) => {
-          swal({
+          !name || swal({
             title: "Searching...",
             text: "Attempting to find lobby",
             button: "Cancel"
           });
-          (async () => {
+          !name || (async () => {
             let e = !1;
             let code = name.toUpperCase();
             let codes = {};
