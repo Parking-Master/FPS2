@@ -114,7 +114,21 @@
         border-bottom: 2px solid #38b6ff;
         text-decoration: none !important;
       }
+      .swal-modal {
+        border-radius: none !important;
+        background: #fff;
+      }
+      .swal-modal * {
+        color: #38b6ff;
+        font-family: "AgrandirWideBlack";
+      }
+      .swal-button {
+        background: #38b6ff;
+        color: #fff !important;
+      }
     </style>
+    <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
   <body>
     <img id="background" src="text-images/rifles.png">
@@ -142,6 +156,104 @@
       <br>
     </div>
     <script>
+      Parse.initialize("bHe2YiXotGOruwjsso41nGjJEO4NfvcSIx0gUAhX","qnqEwzriDSdqq9LvcxleSthtLusd6HM5HisIaKUN"),Parse.serverURL="https://parseapi.back4app.com/";
+      Lobby = new Parse.Object.extend("Lobby");
+      createlobbytext = "";
+      function code(){let r="";for(let a=1;a<=6;a++)r+=a%2==0?String.fromCharCode(26*Math.random()+65):Math.ceil(9*Math.random());return r}
+      function createLobby() {
+        swal({
+          title: "Create a lobby",
+          text: "Enter a lobby name (2-10 characters:)",
+          content: "input",
+          button: "Create"
+        }).then(() => {
+          let name = createlobbytext;
+          console.log(name)
+          if (!name) return;
+          if (name.length < 2) return swal("Lobby name should be over 2 characters.");
+          if (name.length > 10) return swal("Lobby name should be under 10 characters.");
+          let lobby = new Lobby();
+          lobby.set("name", name);
+          lobby.set("code", document.getElementsByName("code")[0].checked ? code() : "");
+          lobby.save().then(() => (console.log("Lobby \"" + name.toString() + "\" saved"), lobby.get("code").length > 0 ? location.assign("src.html?lobby=" + encodeURIComponent(name) + "&code=" + lobby.get("code")) : findLobby(name)));
+          createlobbytext = "";
+        });
+        setTimeout(() => { document.querySelector(".swal-content__input").addEventListener("keyup", () => { createlobbytext = document.querySelector(".swal-content__input").value }) }, 500);
+        document.querySelector(".swal-content").innerHTML += `
+        <br>
+        <input type="checkbox" name="code">
+        <label for="code">Players have to enter a code</label>
+        `;
+      }
+      function findLobby(selected) {
+        (async() => {
+          let e = !1;
+          const t = Parse.Object.extend("Lobby");
+          const n = new Parse.Query(t);
+          const s = await n.find();
+          for (let t = 0; t < s.length; t++) {
+            const n = Parse.Object.extend("Lobby");
+            new Parse.Query(n).get(s[t].id).then((t => {
+              const n = { name: t.get("name"), time: t.get("createdAt"), code: t.get("code") };
+              if (e) {
+                document.querySelector(".swal-content").innerHTML += n.code.length > 0 ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./play.html?lobby=' + encodeURIComponent(n.name) + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+              } else {
+                e = !0;
+                let content = document.createElement("div");
+                content.innerHTML = n.code.length > 0 ? "" : '<br><div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./play.html?lobby='+encodeURIComponent(n.name)+'\')">' + n.name+'</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+                swal({
+                  title: "FIND A LOBBY",
+                  content: content
+                });
+              }
+            }));
+            setTimeout(() => {
+              if (selected) {
+                document.querySelector("#"+btoa(encodeURIComponent(selected)).replace(/(\=)/gi,"")).style.outline = "2px solid #38b6ff";
+                document.querySelector("#"+btoa(encodeURIComponent(selected)).replace(/(\=)/gi,"")).scrollIntoView();
+              }
+            }, 1000);
+          }
+        })();
+      }
+      function enterCode() {
+        swal({
+          title: "Enter a code",
+          text: "This will join a lobby with the selected code. Example: \"XXXXXX\"",
+          content: "input",
+          button: "Join"
+        }).then((name) => {
+          swal({
+            title: "Searching...",
+            text: "Attempting to find lobby",
+            button: "Cancel"
+          });
+          (async () => {
+            let e = !1;
+            let code = name.toUpperCase();
+            let codes = {};
+            const t = Parse.Object.extend("Lobby");
+            const n = new Parse.Query(t);
+            const s = await n.find();
+            let pause = false;
+            for (let t = 0; t < s.length; t++) {
+              let ot = t;
+              const n = Parse.Object.extend("Lobby");
+              new Parse.Query(n).get(s[t].id).then((t => {
+                const n = { name: t.get("name"), code: t.get("code") };
+                if (e) {
+                  codes[n.name] = (n.code);
+                } else {
+                  e = !0;
+                }
+                console.log(n.code, code);
+                console.log(n.code == code);
+                if (!pause) (n.code == (code) ? (pause = true, swal({ title: "Lobby found", text: "Do you want to join the lobby \"" + n.name + "\"?", buttons: ["Yes", "No"] }).then((e) => !e && location.assign("./src.html?lobby=" + encodeURIComponent(n.name) + "&code=" + code))) : ot + 1 >= s.length && swal({ title: "Lobby not found", text: "This lobby does not exist." }));
+              }));
+            }
+          })();
+        });
+      }
       didPlay = false;
       function play(button) {
         if (!didPlay) {

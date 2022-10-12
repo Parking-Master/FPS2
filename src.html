@@ -465,6 +465,9 @@
         }, 3000);
         let sync = setInterval(() => {
           if (countdown) {
+            if (new URLSearchParams(location.search).get("code")) {
+              document.querySelector("#code").remove();
+            }
             let seconds = 5;
             swal({
               title: "Get ready",
@@ -500,7 +503,11 @@
         closeOnEnterKey: false,
         closeOnSpaceKey: false,
         closeOnClickOutside: false
+      }).then(() => {
+        gametime.disconnect();
+        location.replace("/");
       });
+      document.querySelector(".swal-button").blur();
       let searchingEngine;
       /* End Gametime.js initialization */
       defaultKeys = "f,b,r, ,t,m,y,i,z,p";
@@ -1052,6 +1059,13 @@
         }
       });
       window.addEventListener("resize", function() { camera.aspect = window.innerWidth / window.innerHeight, camera.updateProjectionMatrix(), renderer.setSize(window.innerWidth, window.innerHeight) }, true);
+      if (new URLSearchParams(location.search).get("code")) {
+        let e = document.createElement("div");
+        e.style = "z-index:9999999;position:absolute;top:80vh;font-family:Arial,Helvetica,sans-serif!important;left:50%;margin-left:-250px;width:500px;font-size:40px;text-align:center;color:#fff;text-shadow:2px 2px #38b6ff";
+        e.id = "code";
+        e.textContent = "CODE: " + new URLSearchParams(location.search).get("code");
+        document.body.appendChild(e);
+      }
     </script>
   </body>
 </html>
