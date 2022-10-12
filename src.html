@@ -401,6 +401,35 @@
           hole.rotation.set(x1, y1, z1);
           scene.add(hole);
         }
+        if (data.split(",")[1] == "flash") {
+          let x = data.split(",")[2] - 0;
+          let y = data.split(",")[3] - 0;
+          let z = data.split(",")[4] - 0;
+          let x1 = data.split(",")[5] - 0;
+          let y1 = data.split(",")[6] - 0;
+          let z1 = data.split(",")[7] - 0;
+          let pos = {
+            x: x,
+            y: y,
+            z: z
+          };
+          let rot = {
+            x: x1,
+            y: y1,
+            z: z1
+          };
+          let flash = muzzleFlash.clone();
+          flash.position.copy(pos);
+          flash.scale.set(.3, .3, .3);
+          flash.rotation.copy(rot);
+          flash.updateMatrix();
+          flash.translateZ(-1.5);
+          flash.translateX(.15);
+          flash.translateY(-.08);
+          flash.rotateY(.5);
+          scene.add(flash);
+          setTimeout(() => scene.remove(flash), 10);
+        }
       });
       gametime.on("countdown", function(user) {
         if (user == gametime.user.position) {
@@ -722,7 +751,14 @@
           bulletShell = model.scene;
         }), 6: new THREE.GLTFLoader(loadingManager).load("models/gun_clip.glb", (model) => {
           gunClip = model.scene;
-        })
+        }), 7: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
+          otherPlayer = model.scene;
+          animations.push(model.animations);
+          let mixer = new THREE.AnimationMixer(otherPlayer);
+          mixer.speed = 3.25;
+          mixers.push(mixer);
+          scene.add(otherPlayer),otherPlayer.position.y=-1.6,otherPlayer.scale.set(.015,.015,.015);
+        }),
       }
       /* End Model loaders */
       /* Start game scripts */
@@ -771,6 +807,7 @@
           flash.rotateY(.5);
           scene.add(flash);
           setTimeout(() => scene.remove(flash), 10);
+          gametime.run("add", [gametime.user.position+",flash,"+flash.position.x+","+flash.position.y+","+flash.position.z+","+flash.rotation.x+","+flash.rotation.y+","+flash.rotation.z]);
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
         }, 100);
         fullAutoFiring ? canFire = true : canFire = false;
