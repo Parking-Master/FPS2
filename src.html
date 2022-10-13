@@ -381,6 +381,7 @@
         gametime.make = () => {};
         gametime.on = () => {};
         gametime.run = () => {};
+        didStart = true;
       }
       players = 0;
       otherUsername = null;
@@ -449,16 +450,16 @@
       });
       setInterval(() => {
         if (otherWalkForward) {
-          otherPlayer.translateZ(.01);
+          otherPlayer.translateZ(.02);
         }
         if (otherWalkBackward) {
-          otherPlayer.translateZ(-.01);
+          otherPlayer.translateZ(-.02);
         }
         if (otherWalkLeft) {
-          otherPlayer.translateX(.01);
+          otherPlayer.translateX(.02);
         }
         if (otherWalkRight) {
-          otherPlayer.translateX(-.01);
+          otherPlayer.translateX(-.02);
         }
       });
       gametime.on("add", function(data) {
@@ -569,6 +570,7 @@
                   scene.add(primaryWeapon.object);
                   scene.add(otherPlayer);
                   (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
+                  didStart = true;
                 }
                 document.querySelector("#countdown_sound").play();
               }
@@ -580,16 +582,17 @@
       }
       swal({
         title: "Searching for players...",
-        button: "Cancel Search",
+        buttons: ["free play", "cancel search"],
         closeOnEsc: false,
         closeOnEnterKey: false,
         closeOnSpaceKey: false,
         closeOnClickOutside: false
-      }).then(() => {
-        gametime.disconnect();
-        location.replace("/");
+      }).then((e) => {
+        !e ? freePlay() : (gametime.disconnect(), location.replace("/"));
       });
+      HTMLElement.prototype.insertAfter=function(){this.parentNode.insertBefore(arguments[0],this.nextSibling)};
       document.querySelector(".swal-button").blur();
+      document.querySelector(".swal-button-container").insertAfter(document.createElement("br"));
       let searchingEngine;
       /* End Gametime.js initialization */
       defaultKeys = "f,b,r, ,t,m,y,i,z,p";
@@ -702,7 +705,22 @@
       weaponFireTimeouts = {
         "Assault_Rifle": 0,
         "Desert_Eagle": 200
-      }
+      };
+      didStart = false;
+      let playerPositionSetter = setInterval(() => {
+        if (didStart) {
+          return clearInterval(playerPositionSetter);
+        }
+        if (gametime.user && gametime.user.position) {
+          if (gametime.user.position == 1) {
+            camera.position.set(30, 0, -30);
+            camera.rotation.set(0, -Math.PI, 0);
+          } else {
+            camera.position.set(38, 0, 1);
+            camera.rotation.set(0, Math.PI / 2, 0);
+          }
+        }
+      });
       /* End global variables */
       function animate() {
         requestAnimationFrame(animate);
@@ -795,6 +813,7 @@
               clearInterval(searchingEngine);
             }
           });
+          camera.position.set(30,0,-30),camera.rotation.set(0,-Math.PI,0);
           return document.querySelector(".loader").remove(), clearInterval(loadingVerbose);
         }
         document.querySelector("#progress").style.width = loadingProgress + "%";
@@ -1113,7 +1132,7 @@
         if (e.key == "ArrowUp") {
           let h = setInterval(() => {
             if (walkForwardAcceleration <= 0) {
-              return walkForward = false, clearInterval(h);
+              return walkForward = false, walkForwardAcceleration = 0, clearInterval(h);
             }
             walkForwardAcceleration += -.0004;
           });
@@ -1121,7 +1140,7 @@
         if (e.key == "ArrowDown") {
           let h = setInterval(() => {
             if (walkBackwardAcceleration <= 0) {
-              return walkbackward = false, clearInterval(h);
+              return walkbackward = false, walkBackwardAcceleration = 0, clearInterval(h);
             }
             walkBackwardAcceleration += -.0004;
           });
@@ -1129,7 +1148,7 @@
         if (e.key == "ArrowLeft") {
           let h = setInterval(() => {
             if (walkLeftAcceleration <= 0) {
-              return walkLeft = false, clearInterval(h);
+              return walkLeft = false, walkLeftAcceleration = 0, clearInterval(h);
             }
             walkLeftAcceleration += -.0004;
           });
@@ -1137,7 +1156,7 @@
         if (e.key == "ArrowRight") {
           let h = setInterval(() => {
             if (walkRightAcceleration <= 0) {
-              return walkRight = false, clearInterval(h);
+              return walkRight = false, walkRightAcceleration = 0, clearInterval(h);
             }
             walkRightAcceleration += -.0004;
           });
