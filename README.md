@@ -104,6 +104,46 @@ All controls are basically the same as the original.
 - Click "OPTIONS" in the drop down
 - Change to what you like.
 
+## Features and Misc Items
+### Menu Items
+- Performance Tuner
+- Custom loadouts
+- Main Menu customization
+- In-Game preferences
+### Game Items (Weapons, Characters, Maps and Vehicles)
+#### Weapons
+##### AK-47 Rifle
+The AK-47 is the most popular weapon in the game because many choose to keep it as their default rifle.
+
+The AK-47 Rifle variant is also a very reliable weapon with full auto mode and 1/4 damage.
+
+<img src="images/guns/Assault_Rifle.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+- Damage: 25/100
+- Accuracy: 50/100
+- Recoil: 15/100
+- Fire delay: 120 ms
+- Reload time: 6500 ms
+</details>
+
+##### Desert Eagle
+The .50 cal Desert Eagle ("Deagle") a very high-recoil and causes critical damage with just a single bullet.
+
+Specs & Details about this weapon are very straight-forward, a gun that's very hard to control, but it's all worth it when you see the damage.
+
+<img src="images/guns/Desert_Eagle.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+- Damage: 55/100
+- Accuracy: 20/100
+- Recoil: 70/100
+- Fire delay: 250 ms
+- Reload time: 3000 ms
+</details>
+
 ### In-game photos
 ![image](https://user-images.githubusercontent.com/88283567/195461720-389c8954-3d40-4b9e-a297-5f9f0b9e71d0.png)
 
