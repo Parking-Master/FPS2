@@ -1,5 +1,10 @@
 # <img src="favicon.ico" width="4%"> F-P-S <small>2</small>
-FPS2 is the all-new FPS, taken to the next level. A whole-new gaming experience with 4+ more maps, original characters and weapons, and a modern FPS feel.
+FPS2 is the all-new FPS, taken to the next level. A whole-new gaming experience with 4+ more maps, original characters and weapons, and a modern FPS feel.<br>
+A big thanks to some 3d model designers for helping create some items in this game. Credits are [below](#credits).
+
+### Ok, it's great. But where do I play it?
+There's already a working website for the game, _But just note_ that this is a work-in-progress, so the game may not be fully playable yet.
+<p align="center">>&nbsp;&nbsp;>&nbsp;&nbsp;<a href="https://www.fps2.ml">h t t p s : / / w w w . f p s 2 . m l</a>&nbsp;&nbsp;<&nbsp;&nbsp;<</p>
 
 ## About
 Why is FPS 2 better than the original?
@@ -121,11 +126,13 @@ The AK-47 Rifle variant is also a very reliable weapon with full auto mode and 1
 
 <details>
 <summary>Show details</summary>
-- Damage: 25/100
-- Accuracy: 50/100
-- Recoil: 15/100
-- Fire delay: 120 ms
-- Reload time: 6500 ms
+<ul>
+<li>Damage: 25/100</li>
+<li>Accuracy: 50/100</li>
+<li>Recoil: 15/100</li>
+<li>Fire delay: 120 ms</li>
+<li>Reload time: 6500 ms</li>
+</ul>
 </details>
 
 ##### Desert Eagle
@@ -137,11 +144,13 @@ Specs & Details about this weapon are very straight-forward, a gun that's very h
 
 <details>
 <summary>Show details</summary>
-- Damage: 55/100
-- Accuracy: 20/100
-- Recoil: 70/100
-- Fire delay: 250 ms
-- Reload time: 3000 ms
+<ul>
+<li>Damage: 55/100</li>
+<li>Accuracy: 20/100</li>
+<li>Recoil: 70/100</li>
+<li>Fire delay: 250 ms</li>
+<li>Reload time: 3000 ms</li>
+</ul>
 </details>
 
 ### In-game photos
@@ -154,22 +163,34 @@ Specs & Details about this weapon are very straight-forward, a gun that's very h
 ![image](https://user-images.githubusercontent.com/88283567/195461968-8e195d7a-0851-4bab-a13d-fdbfad0096d8.png)
 
 ## Credits
-###### _Credits coming soon._
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Animated AK-47 Arms](https://sketchfab.com/3d-models/ak47-6e51d6ffd33e412a930aff9f520066e1) by [kursat_sokmen](https://sketchfab.com/kursat_sokmen) - Licensed under CC 4.0
 
-## Suport & Contribution
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Animated AK-47 Rifle](https://sketchfab.com/3d-models/ak47-831519a097d84e079fd8bc4b15e5b57d) by [wburton95](https://sketchfab.com/wburton95) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Desert Eagle Pistol](https://sketchfab.com/3d-models/desert-eagle-gun-1605b6c38826433fb3fe564e1d043199) by [attix84work](https://sketchfab.com/attix84work) - Licensed under CC 4.0
+
+<img alt="Poly Haven" src="https://user-images.githubusercontent.com/88283567/195717428-d6f221ff-2a00-4aac-868b-670179f8731a.png" width="1%">&nbsp;&nbsp;[Sky Texture](https://polyhaven.com/a/veld_fire) by [Greg Zaal](https://polyhaven.com/all?a=Greg%20Zaal) - Licensed under CC0
+
+<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;[Steve the soldier](https://www.mixamo.com/#/?page=1&query=Steve&type=Character) by [mixamo.com](https://www.mixamo.com)
+
+<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;__All animations__ by [mixamo.com](https://www.mixamo.com)
+
+<img alt="Canva" src="https://user-images.githubusercontent.com/88283567/195719429-e892a70a-084c-4d48-957d-c9c9dfd68aa2.png" width="1%">&nbsp;&nbsp;__Website design__ by [Canva](https://canva.com)
+
+## Support & Contribution
 If you liked [this project](./) or any other ones, a good way to support us is by starring the repositories you like.<br>
 Another good way to support us is to let us know about bugs, give us ideas for future updates, etc.
 
 Email us at:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;[fps5@mail.com](mailto:fps5@mail.com)
+- [__fps5@mail.com__](mailto:fps5@mail.com)
 
 Or:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;[parkingmaster@email.com](mailto:parkingmaster@email.com)
+- [__parkingmaster@email.com__](mailto:parkingmaster@email.com)
 
-Or you can report bugs and send feature requests in the "Issues" section, [here](https://github.com/Parking-Master/FPS/issues/new).
+Or you can report bugs and send feature requests in the "Issues" section, [here](https://github.com/Parking-Master/FPS2/issues/new).
 
 If you don't, that's ok! Thanks for playing our games anyway.
 
 ## License & Copyright information
-&copy; 2021-2023 Parking Master.<br>
+&copy; 2021-2023 Parking Master<br>
 License: __MIT__
