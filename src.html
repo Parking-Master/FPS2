@@ -162,6 +162,7 @@
         padding-top: 50px;
         padding-bottom: 50px;
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: width 1s ease-in;
       }
       .swal-modal * {
         color: #79c9ff;
@@ -397,9 +398,53 @@
       gametime.make("rotate");
       gametime.make("stop");
       gametime.make("hit");
+      gametime.make("eliminate");
+      gametime.on("eliminate", function(player) {
+        if (player != gametime.user.position) {
+          return;
+        }
+        swal({
+          title: "You were eliminated",
+          text: "Respawning shortly",
+          button: false,
+          closeOnEsc: false,
+          closeOnEnterKey: false,
+          closeOnSpaceKey: false,
+          closeOnClickOutside: false
+        });
+        controls.isLocked = false;
+        let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
+        scene.remove(gun);
+        document.querySelector(".swal-modal").style = "width:10%!important";
+        document.querySelector(".swal-text").style.visibility = "hidden";
+        document.querySelector(".swal-title").style.visibility = "hidden";
+        setTimeout(() => {
+          document.querySelector(".swal-modal").style = "width:100%!important";
+        }, 100);
+        setTimeout(() => {
+          document.querySelector(".swal-text").style.visibility = "visible";
+          document.querySelector(".swal-title").style.visibility = "visible";
+        }, 1000);
+        setTimeout(() => {
+          swal.close();
+          let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
+          let spawnPoint1 = { position: { x: 38, y: 0, z: 1 }, rotation: { x: 0, y: Math.PI / 2, z: 0 } };
+          respawn((distanceTo(otherFollower.position, spawnPoint.position) < distanceTo(otherFollower.position, spawnPoint1.position) ? spawnPoint1.position : spawnPoint.position), distanceTo(otherFollower.position, spawnPoint.position) < distanceTo(otherFollower.position, spawnPoint1.position) ? spawnPoint1.rotation : spawnPoint.rotation);
+          document.querySelector(".swal-modal").style = "width:10%!important";
+          controls.isLocked = true;
+          let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
+          scene.add(gun);
+        }, 5000);
+      });
       gametime.on("hit", function(player) {
         if (player == gametime.user.position) {
           return;
+        }
+        if (health <= 0) {
+          if (backupHealth <= 0) {
+            return gametime.run("eliminate", [gametime.user.position]);
+          }
+          return backupHealth += -50;
         }
         health += -5;
       });
@@ -680,6 +725,7 @@
         rounds: 36,
         clips: 3,
         defaultRounds: 36,
+        defaultClips: 3,
         object: new THREE.Mesh(),
         name: loadout[0],
         easyReloadTimeout: 4500,
@@ -689,6 +735,7 @@
         rounds: 10,
         clips: 4,
         defaultRounds: 10,
+        defaultClips: 4,
         object: new THREE.Mesh(),
         name: loadout[1],
         easyReloadTimeout: 2000,
@@ -735,6 +782,7 @@
         }
       });
       health = 100;
+      backupHealth = 100;
       let raycaster = new THREE.Raycaster();
       raycastTargets = [otherFollower];
       intersection = null;
@@ -968,6 +1016,15 @@
           scene.add(secondaryWeapon.object);
         }
         didIdle = false;
+      }
+      function respawn(position, rotation) {
+        weaponPosition == "secondary" && switchWeapon();
+        camera.position.set(position.x, position.y, position.z);
+        camera.rotation.set(rotation.x, rotation.y, rotation.z);
+        primaryWeapon.rounds = primaryWeapon.defaultRounds;
+        primaryWeapon.clips = primaryWeapon.defaultClips;
+        secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
+        secondaryWeapon.clips = secondaryWeapon.defaultClips;
       }
       function reload() {
         canFire = false;
