@@ -396,6 +396,13 @@
       gametime.make("move");
       gametime.make("rotate");
       gametime.make("stop");
+      gametime.make("hit");
+      gametime.on("hit", function(player) {
+        if (player == gametime.user.position) {
+          return;
+        }
+        health += -5;
+      });
       gametime.on("move", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
           return;
@@ -666,6 +673,8 @@
       loadout = ["Assault_Rifle", "Desert_Eagle"];
       animations = [];
       otherPlayer = new THREE.Mesh();
+      otherFollower = new THREE.Mesh(new THREE.BoxGeometry(.6, 2, .5), new THREE.MeshPhongMaterial({ transparent: true, opacity: 0 }));
+      scene.add(otherFollower);
       mixers = [];
       primaryWeapon = {
         rounds: 36,
@@ -715,15 +724,24 @@
           if (gametime.user.position == 1) {
             camera.position.set(30, 0, -30);
             camera.rotation.set(0, -Math.PI, 0);
+            otherPlayer.position.set(38, -1.6, 1);
+            otherPlayer.rotation.set(0, -Math.PI / 2, 0);
           } else {
             camera.position.set(38, 0, 1);
             camera.rotation.set(0, Math.PI / 2, 0);
+            otherPlayer.position.set(30, -1.6, -30);
+            otherPlayer.rotation.set(0, Math.PI, 0);
           }
         }
       });
+      health = 100;
+      let raycaster = new THREE.Raycaster();
+      raycastTargets = [otherFollower];
+      intersection = null;
       /* End global variables */
       function animate() {
         requestAnimationFrame(animate);
+        document.querySelector(".health").style.width = health + "%";
         camera.rotation.order = "YXZ";
         player.rotation.order = "YXZ";
         player.position.copy(camera.position);
@@ -732,6 +750,14 @@
         player.translateY(-1.6);
         player.rotateY(Math.PI);
         player.translateZ(-.65);
+        camera.updateMatrixWorld(), raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+        let intersections = raycaster.intersectObjects(raycastTargets);
+        (intersection = intersections[0] || null);
+        if (intersection != null && intersection.object == otherFollower) {
+          document.querySelector(".crosshair").style.backgroundColor = "#ff0000";
+        } else {
+          document.querySelector(".crosshair").style.backgroundColor = "#fff";
+        }
         if (cameraLocked) camera.position.y = defaultY;
         if (gunLocked) {
           if (isZoomed) {
@@ -783,6 +809,8 @@
         mixers.forEach((mixer) => {
           mixer.update(clock.getDelta() + (mixer.speed / 100));
         });
+        otherFollower.position.set(otherPlayer.position.x, otherPlayer.position.y+1.2, otherPlayer.position.z);
+        otherFollower.rotation.copy(otherPlayer.rotation);
         document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? primaryWeapon.rounds.toString() : secondaryWeapon.rounds.toString());
         document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? primaryWeapon.clips.toString() : secondaryWeapon.clips.toString());
         renderer.render(scene, camera);
@@ -918,6 +946,9 @@
           setTimeout(() => scene.remove(flash), 10);
           gametime.run("add", [gametime.user.position+",flash,"+flash.position.x+","+flash.position.y+","+flash.position.z+","+flash.rotation.x+","+flash.rotation.y+","+flash.rotation.z]);
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
+          if (intersection != null && intersection.object == otherFollower) {
+            gametime.run("hit", [gametime.user.position]);
+          }
         }, 100);
         fullAutoFiring ? canFire = true : canFire = false;
         fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
