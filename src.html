@@ -104,13 +104,34 @@
       }
       .health-wrapper {
         position: absolute;
-        width: 400px;
+        width: 500px;
         height: 30px;
         left: 50%;
-        margin-left: -200px;
+        margin-left: -250px;
         top: 20px;
         border-radius: 5px;
         border: 5px solid #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        z-index: 99999;
+      }
+      .backuphealth {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,.5) 100%);
+      }
+      .backuphealth-wrapper {
+        position: absolute;
+        width: 300px;
+        height: 15px;
+        left: 50%;
+        margin-left: -150px;
+        top: 70px;
+        border-radius: 5px;
+        border: 3px solid #fff;
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
         z-index: 99999;
       }
@@ -356,6 +377,9 @@
       <div class="health-wrapper">
         <div class="health"></div>
       </div>
+      <div class="backuphealth-wrapper">
+        <div class="backuphealth"></div>
+      </div>
       <img src="images/vignette.png" style="position:fixed;height:102%;width:100%;z-index:9999;pointer-events:none;filter:invert(100%);opacity:.5" />
       <div class="crosshair"></div>
       <div id="status">
@@ -382,6 +406,7 @@
         gametime.make = () => {};
         gametime.on = () => {};
         gametime.run = () => {};
+        gametime.disconnect();
         didStart = true;
       }
       players = 0;
@@ -401,7 +426,15 @@
       gametime.make("eliminate");
       gametime.on("eliminate", function(player) {
         if (player != gametime.user.position) {
-          return;
+          return otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
+            let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
+            let spawnPoint1 = { position: { x: 38, y: 0, z: 1 }, rotation: { x: 0, y: Math.PI / 2, z: 0 } };
+            let position = distanceTo(camera.position, spawnPoint.position) < distanceTo(camera.position, spawnPoint1.position) ? spawnPoint1.position : spawnPoint.position;
+            let rotation = distanceTo(camera.position, spawnPoint.position) < distanceTo(camera.position, spawnPoint1.position) ? spawnPoint1.rotation : spawnPoint.rotation;
+            otherPlayer.position.set(position.x, position.y, position.z);
+            otherPlayer.rotation.set(rotation.x, rotation.y, rotation.z);
+            scene.add(otherPlayer);
+          }, 5000);
         }
         swal({
           title: "You were eliminated",
@@ -790,6 +823,7 @@
       function animate() {
         requestAnimationFrame(animate);
         document.querySelector(".health").style.width = health + "%";
+        document.querySelector(".backuphealth").style.width = backupHealth + "%";
         camera.rotation.order = "YXZ";
         player.rotation.order = "YXZ";
         player.position.copy(camera.position);
@@ -1025,6 +1059,19 @@
         primaryWeapon.clips = primaryWeapon.defaultClips;
         secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
         secondaryWeapon.clips = secondaryWeapon.defaultClips;
+        let transition = setInterval(() => {
+          if (backupHealth >= 100) {
+            return backupHealth = 100, (() => {
+              let transition = setInterval(() => {
+                if (health >= 100) {
+                  return health = 100, clearInterval(transition);
+                }
+                health++;
+              });
+            })(), clearInterval(transition);
+          }
+          backupHealth++;
+        });
       }
       function reload() {
         canFire = false;
