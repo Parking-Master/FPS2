@@ -389,7 +389,7 @@
       </div>
       <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
     </div>
-    <!-- <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p> -->
+    <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p>
     <!-- <script type="module">
       import * as CANNON from 'https://unpkg.com/cannon-es@0.19.0/dist/cannon-es.js';
       window.CANNON = CANNON;
@@ -1071,6 +1071,19 @@
             })(), clearInterval(transition);
           }
           backupHealth++;
+        });
+      }
+      function createWeapon(name, position) {
+        (new THREE.GLTFLoader).load("models/weapon_box.glb", (e) => {
+          e = e.scene;
+          e.position.set(position.x, position.y - 1.5, position.z);
+          scene.add(e);
+          setInterval(() => {
+            if (distanceTo(e.position, camera.position) <= 2) {
+              showText("Hold [T] to pickup " + name);
+              document.onkeydown = (z) => { z.key == "t" && z.repeat && pickupWeapon(name.toLowerCase().trim()) }
+            } else hideText();
+          });
         });
       }
       function reload() {
