@@ -153,6 +153,24 @@ Specs & Details about this weapon are very straight-forward, a gun that's very h
 </ul>
 </details>
 
+##### Sniper Rifle
+The Sniper Rifle or "Marksman Rifle" is a high-damage DMR that works for close-range and mid-range use.
+
+This weapon is in between two kinds of weapons: A .50 cal sniper rifle, and a mid-range DMR.
+
+<img src="images/guns/Sniper_Rifle.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 60/100</li>
+<li>Accuracy: 40/100</li>
+<li>Recoil: 30/100</li>
+<li>Fire delay: 250 ms</li>
+<li>Reload time: 2500 ms</li>
+</ul>
+</details>
+
 ### In-game photos
 ![image](https://user-images.githubusercontent.com/88283567/195461720-389c8954-3d40-4b9e-a297-5f9f0b9e71d0.png)
 
@@ -169,13 +187,17 @@ Specs & Details about this weapon are very straight-forward, a gun that's very h
 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Desert Eagle Pistol](https://sketchfab.com/3d-models/desert-eagle-gun-1605b6c38826433fb3fe564e1d043199) by [attix84work](https://sketchfab.com/attix84work) - Licensed under CC 4.0
 
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Sniper Rifle](https://sketchfab.com/3d-models/sniper-rifle-gameready-free-e520b234140049e7890db0b6c29d3925) by [pashtetuser](https://sketchfab.com/pashtetuser) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Weapon Box](https://sketchfab.com/3d-models/weapon-box-f59a809c194b459ca884796618315463) by [dwantin](https://sketchfab.com/dwantin) - Licensed under CC 4.0
+
 <img alt="Poly Haven" src="https://user-images.githubusercontent.com/88283567/195717428-d6f221ff-2a00-4aac-868b-670179f8731a.png" width="1%">&nbsp;&nbsp;[Sky Texture](https://polyhaven.com/a/veld_fire) by [Greg Zaal](https://polyhaven.com/all?a=Greg%20Zaal) - Licensed under CC0
 
-<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;[Steve the soldier](https://www.mixamo.com/#/?page=1&query=Steve&type=Character) by [mixamo.com](https://www.mixamo.com)
+<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;[Steve the soldier](https://www.mixamo.com/#/?page=1&query=Steve&type=Character) by [mixamo.com](https://www.mixamo.com) - _No License_
 
-<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;__All animations__ by [mixamo.com](https://www.mixamo.com)
+<img alt="Mixamo.com" src="https://user-images.githubusercontent.com/88283567/195718618-6bb8e70f-9d6e-4a35-aa4b-9371813aea60.png" width="1%">&nbsp;&nbsp;__All animations__ by [mixamo.com](https://www.mixamo.com) - _No License_
 
-<img alt="Canva" src="https://user-images.githubusercontent.com/88283567/195719429-e892a70a-084c-4d48-957d-c9c9dfd68aa2.png" width="1%">&nbsp;&nbsp;__Website design__ by [Canva](https://canva.com)
+<img alt="Canva" src="https://user-images.githubusercontent.com/88283567/195719429-e892a70a-084c-4d48-957d-c9c9dfd68aa2.png" width="1%">&nbsp;&nbsp;__Website design__ by [Canva](https://canva.com) - _No License_
 
 ## Support & Contribution
 If you liked [this project](./) or any other ones, a good way to support us is by starring the repositories you like.<br>
