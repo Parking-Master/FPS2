@@ -390,6 +390,7 @@
         <br style="margin-bottom:25px">
         <span id="rounds">0</span> &bullet; <span id="clips">0</span>
       </div>
+      <img id="scope" src="images/scopes/0.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:50vw;left:50%;margin-left:-25vw!important;z-index:999" />
       <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
     </div>
     <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p>
@@ -434,8 +435,8 @@
             let spawnPoint1 = { position: { x: 38, y: 0, z: 1 }, rotation: { x: 0, y: Math.PI / 2, z: 0 } };
             let position = distanceTo(camera.position, spawnPoint.position) < distanceTo(camera.position, spawnPoint1.position) ? spawnPoint1.position : spawnPoint.position;
             let rotation = distanceTo(camera.position, spawnPoint.position) < distanceTo(camera.position, spawnPoint1.position) ? spawnPoint1.rotation : spawnPoint.rotation;
-            otherPlayer.position.set(position.x, position.y, position.z);
-            otherPlayer.rotation.set(rotation.x, rotation.y, rotation.z);
+            otherPlayer.position.set(position.x, position.y - 1.6, position.z);
+            otherPlayer.rotation.set(rotation.x, rotation.y - 1.6, rotation.z);
             scene.add(otherPlayer);
           }, 5000);
         }
@@ -991,7 +992,7 @@
         }), 8: new THREE.GLTFLoader(loadingManager).load("models/weapons/Sniper_Rifle.glb", (model) => {
           animations[4]=(model.animations);
           let mixer = new THREE.AnimationMixer(model.scene);
-          mixer.speed = 1.1;
+          mixer.speed = .8;
           let weaponIndex = gunIndexes["Sniper_Rifle"];
           mixers[4]=(mixer);
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
@@ -1052,12 +1053,13 @@
           if (intersection != null && intersection.object == otherFollower) {
             gametime.run("hit", [gametime.user.position]);
           }
-          shake(camera, 1);
+          shake(camera, .5);
         }, 100);
         fullAutoFiring ? canFire = true : canFire = false;
         fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
       }
       function switchWeapon() {
+        isZoomed && activate("i");
         let weapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
         let weaponIndex = weapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
         mixers[weaponIndex].clipAction(animations[weaponIndex][6]).stop();
@@ -1113,13 +1115,13 @@
                 if (t >= intensity / 20) {
                   return clearInterval(h);
                 }
-                camera.rotateX(-.01);
-                t += .01;
+                camera.rotateX(-.005);
+                t += .005;
               });
             })(), clearInterval(h);
           }
-          camera.rotateX(.01);
-          t += .01;
+          camera.rotateX(.005);
+          t += .005;
         });
       }
       function pickupWeapon(name) {
@@ -1315,6 +1317,7 @@
         }
         if (e.key == "i" && !e.repeat) {
           if (isReloading) return;
+          isZoomed ? ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Sniper_Rifle" && (document.querySelector("#scope").style.opacity = "0", scene.add((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)))) : ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Sniper_Rifle" && (scene.remove((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)), document.querySelector("#scope").style.opacity = "1"));
           isZoomed ? (document.querySelector(".crosshair").style.visibility = "visible", (() => { for (let i = 0; i < 5; i++) zoomOutFunction(100) })(), isZoomed = false) : (document.querySelector(".crosshair").style.visibility = "hidden", (() => { for (let i = 0; i < 5; i++) zoomInFunction(100) })(), isZoomed = true);
         }
         if (e.key.startsWith("Arrow")) {
