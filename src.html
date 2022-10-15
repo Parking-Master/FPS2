@@ -317,6 +317,10 @@
         text-align: center;
         box-shadow: 0 3px 5px #25750a;
       }
+      img {
+        pointer-events: none !important;
+        user-select: none !important;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js@latest/js/username-generator.min.js"></script>
@@ -344,7 +348,7 @@
     <audio id="ricochet1" src="sounds/ricochet1.mp3"></audio>
     <audio id="ricochet2" src="sounds/ricochet2.mp3"></audio>
     <audio id="ricochet3" src="sounds/ricochet3.mp3"></audio>
-    <audio id="explosion" src="sounds/explosion.mp3" loop volume=".5"></audio>
+    <audio id="explosion" src="sounds/explosion.mp3" volume="1"></audio>
     <audio id="walking" src="sounds/walking.mp3" loop volume=".5"></audio>
     <audio id="ambience" src="sounds/ambience.mp3" autoplay loop volume="1"></audio>
     <audio id="Desert_Eagle_fire" src="sounds/guns/Desert_Eagle/fire.mp3"></audio>
@@ -761,6 +765,7 @@
       animations = [];
       otherPlayer = new THREE.Mesh();
       otherFollower = new THREE.Mesh(new THREE.BoxGeometry(.6, 2, .5), new THREE.MeshPhongMaterial({ transparent: true, opacity: 0 }));
+      follower = new THREE.Mesh(new THREE.BoxGeometry(.6, 2, .5), new THREE.MeshPhongMaterial({ transparent: true, opacity: 0 }));
       scene.add(otherFollower);
       mixers = [];
       primaryWeapon = {
@@ -832,6 +837,14 @@
       /* End global variables */
       function animate() {
         requestAnimationFrame(animate);
+        map.traverse((i) => {
+          if (i.isMesh && (i.name.includes("Container") || i.name.includes("Warthog")) && collision(i, follower)) {
+            stopMoving(true, i, camera);
+          }
+          if (i.isMesh && (i.name.includes("Container") || i.name.includes("Warthog")) && collision(i, otherFollower)) {
+            stopMoving(true, i, otherFollower);
+          }
+        });
         document.querySelector(".health").style.width = health + "%";
         document.querySelector(".backuphealth").style.width = backupHealth + "%";
         camera.rotation.order = "YXZ";
@@ -903,6 +916,7 @@
         });
         otherFollower.position.set(otherPlayer.position.x, otherPlayer.position.y+1.2, otherPlayer.position.z);
         otherFollower.rotation.copy(otherPlayer.rotation);
+        follower.position.copy(camera.position);
         document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? primaryWeapon.rounds.toString() : secondaryWeapon.rounds.toString());
         document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? primaryWeapon.clips.toString() : secondaryWeapon.clips.toString());
         renderer.render(scene, camera);
@@ -1004,6 +1018,36 @@
       /* Start game scripts */
       function collision(e,B){return firstBB=(new THREE.Box3).setFromObject(e),secondBB=(new THREE.Box3).setFromObject(B),firstBB.intersectsBox(secondBB)}
       function distanceTo(t,n){var r=t.x-n.x,a=t.y-n.y,c=t.z-n.z;return Math.sqrt(r*r+a*a+c*c)}
+      function stopMoving(e = false, i, camera) {
+        let f = new THREE.Mesh();
+        f.position.copy(camera.position);
+        f.rotation.copy(camera.rotation);
+        f.updateMatrix();
+        f.translateX(-.1);
+        let d = new THREE.Mesh();
+        d.position.copy(camera.position);
+        d.rotation.copy(camera.rotation);
+        d.updateMatrix();
+        d.translateZ(-.1);
+        let left = distanceTo(f.position, i.position);
+        let right = distanceTo(camera.position, i.position);
+        let up = distanceTo(d.position, i.position);
+        let down = distanceTo(camera.position, i.position);
+        if (left > right) {
+          camera.translateX(.2);
+        } else if (right > left) {
+          camera.translateX(-.2);
+        }
+        if (up > down) {
+          camera.translateZ(.2);
+        } else if (down > up) {
+          camera.translateZ(-.2);
+        }
+        walkForward = false;
+        walkBackward = false;
+        walkLeft = false;
+        walkRight = false;
+      }
       function fire(rounds = 1) {
         if (!canFire || (weaponPosition == "primary" ? (primaryWeapon.rounds) : (secondaryWeapon.rounds)) <= 0) {
           return;
@@ -1328,19 +1372,19 @@
           mixers[2].clipAction(animations[2][0]).play();
           !e.repeat && gametime.run("move", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+e.key]);
         }
-        if (e.key == "ArrowUp") {
+        if (e.key == "ArrowUp" && !e.repeat) {
           walkForward = true;
           walkForwardAcceleration = .02;
         }
-        if (e.key == "ArrowDown") {
+        if (e.key == "ArrowDown" && !e.repeat) {
           walkBackward = true;
           walkBackwardAcceleration = .02;
         }
-        if (e.key == "ArrowLeft") {
+        if (e.key == "ArrowLeft" && !e.repeat) {
           walkLeft = true;
           walkLeftAcceleration = .02;
         }
-        if (e.key == "ArrowRight") {
+        if (e.key == "ArrowRight" && !e.repeat) {
           walkRight = true;
           walkRightAcceleration = .02;
         }
@@ -1367,7 +1411,108 @@
           throwGrenade();
         }
       });
-      function throwGrenade(){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.001,a.translateY(e)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshBasicMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0}));e.scale.set(.5,.5,.5);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.0025),e.material.opacity<0||(e.material.opacity+=-.0025)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{distanceTo(camera.position,e.position)<=4?(gametime.run("hit",[(((100-distanceTo(camera.position,e.position))*20).toFixed(2)>0?((100-distanceTo(camera.position,e.position))*20).toFixed(2):0)+","+gametime.user.position]),document.querySelector("#hiteffect").style.opacity=1,setTimeout(()=>{document.querySelector("#hiteffect").style.opacity=0},1000)):(distanceTo(otherPlayer.position,e.position)<=4&&gametime.run("eleminate",[1==gametime.user.position?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e)):(e.scale.set(e.scale.x+.3,e.scale.y+.3,e.scale.z+.3),e.material.opacity+=-.05)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
+      function throwGrenade() {
+        let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
+        let b = 0;
+        "undefined" == typeof grenade || grenadesLeft <= 0 || !canThrowGrenade || (canThrowGrenade = !1, grenadesLeft--, grenade.position.copy(camera.position), grenade.rotation.copy(camera.rotation), grenade.scale.set(.2, .2, .2), (() => {
+          let e, a = grenade.clone();
+          scene.add(a);
+          a.updateMatrix();
+          a.translateZ(-.5);
+          let t = setInterval((() => {
+            map.traverse((n => {
+              collision(a, n) && n != gun && n != a && n instanceof THREE.Mesh && (() => {
+                let g = document.querySelector("#ricochet" + (Math.floor(Math.random() * 3) + 1)).cloneNode();
+                let u = (1 - (distanceTo(a.position, camera.position) / 5));
+                (u <= 0 && (u = 0));
+                (u >= 1 && (u = 1));
+                g.volume = u;
+                g.play();
+                return true;
+              })() && ((n.name.includes("Container") || n.name.includes("Warthog")) && (e = n, (() => {
+                let e = .1, t = setInterval((() => {
+                  map.traverse((e => {
+                    collision(a, e) && e instanceof THREE.Mesh && e != gun && e != a && e instanceof THREE.Mesh && (() => {
+                      let g = document.querySelector("#ricochet" + (Math.floor(Math.random() * 3) + 1)).cloneNode();
+                      let u = (1 - (distanceTo(a.position, camera.position) / 5));
+                      (u <= 0 && (u = 0));
+                      (u >= 1 && (u = 1));
+                      g.volume = u;
+                      g.play();
+                      return true;
+                    })() && (() => {
+                      let e = .1, t=setInterval((() => {
+                        map.traverse((e => {
+                          collision(a, e) && e instanceof THREE.Mesh && e != gun && e != a && e instanceof THREE.Mesh && (() => {
+                            let g = document.querySelector("#ricochet" + (Math.floor(Math.random() * 3) + 1)).cloneNode();
+                            let u = (1 - (distanceTo(a.position, camera.position) / 5));
+                            (u <= 0 && (u = 0));
+                            (u >= 1 && (u = 1));
+                            g.volume = u;
+                            g.play();
+                            return true;
+                          })() && clearInterval(t);
+                        }));
+                        e += -.001;
+                        a.translateY(e);
+                      }))
+                    })();
+                    clearInterval(t);
+                  }));
+                  e += -.001;
+                  a.translateY(e);
+                }));
+              }))());
+              setTimeout(() => {
+                let e = new THREE.Mesh(new THREE.CircleGeometry(2, 30), new THREE.MeshBasicMaterial({ color: 16777215, map: (new THREE.TextureLoader).load("images/textures/explosion.png"), transparent: !0 }));
+                e.scale.set(.5,.5,.5);
+                let g = document.querySelector("#explosion").cloneNode();
+                let u = (1 - (distanceTo(a.position, camera.position) / 5)) + .2;
+                (u <= 0 && (u = .2));
+                (u >= 1 && (u = 1));
+                g.volume = u;
+                g.play();
+                scene.remove(a);
+                e.position.copy(a.position);
+                e.rotation.copy(a.rotation);
+                a.updateMatrix();
+                e.translateY(2);
+                (() => {
+                  let e = new THREE.Mesh(new THREE.CircleGeometry(4, 30), new THREE.MeshBasicMaterial({ map: textures["smoke"], transparent: !0 }));
+                  e.position.copy(a.position);
+                  e.rotation.copy(a.rotation);
+                  e.updateMatrix();
+                  e.lookAt(camera.position);
+                  e.translateY(1);
+                  let t = setInterval((() => {
+                    e.translateY(.0025);
+                    e.material.opacity < 0 || (e.material.opacity += -.0025);
+                  }));
+                  setTimeout((() => clearInterval(t)), 10000);
+                })();
+                e.lookAt(camera.position);
+                scene.add(e);
+                let t = setInterval(() => {
+                  distanceTo(camera.position, e.position) <= 3 ? (gametime.run("hit", [(((100 - distanceTo(camera.position, e.position)) * 20).toFixed(2) > 0 ? ((100 - distanceTo(camera.position, e.position)) * 20).toFixed(2) : 0) + "," + gametime.user.position]), document.querySelector("#hiteffect").style.opacity = 1, setTimeout(() => {
+                    document.querySelector("#hiteffect").style.opacity = 0
+                  }, 1000)) : (distanceTo(otherPlayer.position, e.position) <= 4 && gametime.run("eleminate", [1 == gametime.user.position ? 2 : 1]));
+                  e.material.opacity <= 0 ? (clearInterval(t), scene.remove(e)) : (e.scale.set(e.scale.x + .3, e.scale.y + .3, e.scale.z + .3));
+                  e.material.opacity += -.05;
+                });
+              }, 2000), clearInterval(t);
+            }));
+            b += .001;
+            a.translateZ(-.1);
+            a.translateY(-b);
+          }))
+        })());
+        setTimeout(() => { canThrowGrenade = !0 }, 750);
+      }
+      grenadesLeft = setGrenades;
+      canThrowGrenade = !0;
+      (new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb", (e) => {
+        grenade = e.scene;
+      });
       document.addEventListener("keyup", (e) => {
         if (e.key.startsWith("Arrow")) {
           document.querySelector("#walking").pause();
