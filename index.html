@@ -126,7 +126,17 @@
         background: #38b6ff;
         color: #fff !important;
       }
+      .simple-keyboard {
+        position: fixed;
+        margin: 0;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        z-index: 999999;
+        display: none;
+      }
     </style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
@@ -155,7 +165,62 @@
       <a href="" onclick="event.preventDefault(); enterCode()">ENTER CODE</a>
       <br>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
+    <div class="simple-keyboard"></div>
     <script>
+      gameControl.on("connect", (controller) => {
+        window.controller = controller;
+        lookSensitivity=.003;lookAcc=0;lookMax=.1;(()=>{let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))}))})(),controller.on('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('up0',()=>{lookAcc=0}),controller.on('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('down0',()=>{lookAcc=0}),controller.on('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('left1',()=>{lookAcc=0}),controller.on('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('right1',()=>{lookAcc=0}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
+      });
+      let Keyboard = SimpleKeyboard.default;
+      let keyboard = new Keyboard({
+        onChange: input => onChange(input),
+        onKeyPress: button => onKeyPress(button)
+      });
+      currentFocus = null;
+      currentScroll = 0;
+      focusMax = null;
+      function onKeyPress(button) {
+        console.log(button);
+      }
+      setInterval(() => {
+        for (let i = 0; i < document.querySelectorAll("a").length; i++) {
+          Object.values(document.querySelectorAll("a")[i].classList).indexOf("focus")>-1||document.querySelectorAll("a")[i].classList.add("focus");
+        }
+        for (let i = 0; i < document.querySelectorAll("button").length; i++) {
+          Object.values(document.querySelectorAll("button")[i].classList).indexOf("focus")>-1||document.querySelectorAll("button")[i].classList.add("focus");
+        }
+        for (let i = 0; i < document.querySelectorAll("input").length; i++) {
+          Object.values(document.querySelectorAll("input")[i].classList).indexOf("focus")>-1||document.querySelectorAll("input")[i].classList.add("focus");
+        }
+        if(currentFocus!=null&&document.querySelector(".tabfocus"+currentFocus).tagName.toLowerCase()=="input"){
+          document.querySelector(".tabfocus"+currentFocus).addEventListener("input", (event) => {
+            keyboard.setInput(event.target.value);
+          });
+          lockInput&&(document.querySelector(".simple-keyboard").style.display = "block");
+          document.querySelectorAll(".hg-button")[keyfocus].style.outline="4px solid #38b6ff";
+          let e=Object.values(document.querySelectorAll(".hg-button"));e=e.filter((function(e){return e!=document.querySelectorAll(".hg-button")[keyfocus]}));for(let t=0;t<e.length;t++)e[t].style.outline="none";
+          window.onChange = function(input) {
+            document.querySelector(".tabfocus"+currentFocus).value = input;
+            createlobbytext = input;
+          }
+        }else{
+          document.querySelector(".simple-keyboard").style.display = "none";
+        }
+        for (let i = 0; i < document.querySelectorAll(".focus").length; i++) {
+          Object.values(document.querySelectorAll(".focus")[0].classList).indexOf("tabfocus"+i)>-1||document.querySelectorAll(".focus")[i].classList.add("tabfocus"+i);
+          focusMax = document.querySelectorAll(".focus").length - 1;
+        }
+      });
+      setInterval(() => {
+        if (!currentFocus && currentFocus != 0) { return }
+        document.querySelector(".tabfocus"+currentFocus).style.outline = "4px solid #eee";
+        for (let i = 0; i < Object.values(document.querySelectorAll(".focus")).filter(e => e !== document.querySelector(".tabfocus"+currentFocus)).length; i++) {
+          Object.values(document.querySelectorAll(".focus")).filter(e => e !== document.querySelector(".tabfocus"+currentFocus))[i].style.outline = "none";
+        }
+      });
+      lockInput = null;
       Parse.initialize("bHe2YiXotGOruwjsso41nGjJEO4NfvcSIx0gUAhX","qnqEwzriDSdqq9LvcxleSthtLusd6HM5HisIaKUN"),Parse.serverURL="https://parseapi.back4app.com/";
       Lobby = new Parse.Object.extend("Lobby");
       createlobbytext = "";
@@ -278,6 +343,35 @@
           document.querySelector(".cover").style.top = t + "%";
         });
       }
+      let s = swal.close;
+      swal.close = function() {
+        currentFocus = 0;
+        s();
+      }
+      keyfocusmax=document.querySelectorAll(".hg-button").length;
+      keyfocus=0;
+      setInterval(() => { document.querySelector(".swal-button") != null && (document.querySelector(".swal-button").onclick = () => (currentFocus = 0)) }, 100);
+      gameControl.on("connect", (controller) => {
+        (()=>{let p=false;let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&(p||(p=true,keyfocus--)),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return dl=!1,p=false,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&(p||(p=true,keyfocus++)),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return dl=!1,p=false,clearInterval(e)})))}))})();
+        window.controller = controller;
+        controller.on("left0", () => {}).before("left0", () => lockInput?(keyfocus=keyfocus-Object.values(document.querySelectorAll(".hg-row")[Object.values(document.querySelectorAll(".hg-row")).indexOf(document.querySelectorAll(".hg-button")[keyfocus].parentElement)].children).length):(currentFocus==null?currentFocus=0:(currentFocus<1?currentFocus=focusMax:currentFocus--)));
+        controller.on("right0", () => {}).before("right0", () => lockInput?(keyfocus=keyfocus+Object.values(document.querySelectorAll(".hg-row")[Object.values(document.querySelectorAll(".hg-row")).indexOf(document.querySelectorAll(".hg-button")[keyfocus].parentElement)].children).length):(currentFocus==null?currentFocus=0:(currentFocus+1>focusMax?currentFocus=0:currentFocus++)));
+        controller.on("button0", () => {}).before("button0", () => {
+          lockInput&&(document.querySelector(".tabfocus"+currentFocus).value+=document.querySelectorAll(".hg-button")[keyfocus].textContent,createlobbytext=document.querySelector(".tabfocus"+currentFocus).value);
+          if(currentFocus!=null&&document.querySelector(".tabfocus"+currentFocus).tagName.toLowerCase()=="input"){
+            lockInput = document.querySelector(".tabfocus"+currentFocus);
+          }
+          (currentFocus==null||document.querySelector(".tabfocus"+currentFocus).click());
+        });
+        controller.on("button1", () => {}).before("button1", () => (keyfocus=0,lockInput=null,createlobbytext="",swal(),setTimeout(()=>swal.close())));
+        controller.on("right1", () => {typeof document.querySelector(".dialog-content")!="undefined"&&(document.querySelector(".dialog-content").scroll(0,currentScroll),currentScroll++)});
+        controller.on("button11", () => {lockInput&&(lockInput=null);currentFocus+1>focusMax?currentFocus=0:currentFocus++});
+        controller.on("button16", () => {currentFocus=focusMax});
+        controller.on("button15", () => {currentFocus=0});
+        controller.on("button15", () => {currentFocus=0});
+        controller.on("button3", () => {}).before("button3", () => {lockInput&&(lockInput.value=lockInput.value.split("").reverse().splice(1).reverse().join("")),createlobbytext=lockInput.value});
+        controller.on("button12", () => {}).before("button12", () => {location.reload()});
+      });
     </script>
   </body>
 </html>
