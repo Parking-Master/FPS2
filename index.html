@@ -164,11 +164,184 @@
       <br>
       <a href="" onclick="event.preventDefault(); enterCode()">ENTER CODE</a>
       <br>
+      <a href="" onclick="event.preventDefault(); autoSearch()">AUTO SEARCH</a>
+      <br>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
     <div class="simple-keyboard"></div>
     <script>
+/**
+  * @license
+  * Copyright (c) 2021 Parking-Master / (Gametime.js)
+  * Licensed under the MIT License (https://mit-license.org)
+  * More license and copyright information at https://github.com/Parking-Master/Gametime.js/blob/main/LICENSE
+*/
+function setCookie(e, n, t) {
+  let i = "";
+  if (t) {
+  let o = new Date;
+  o.setTime(o.getTime() + 24 * t * 60 * 60 * 1e3), i = "; expires=" + o.toUTCString()
+  }
+  document.cookie = e + "=" + (n || "") + i + "; path=/"
+}
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+  let c = ca[i];
+  while (c.charAt(0) == ' ') {
+  c = c.substring(1);
+  }
+  if (c.indexOf(name) == 0) {
+  return c.substring(name.length, c.length);
+  }
+  }
+  return null;
+}
+window.pubnub = undefined;
+window.ms = Date.now();
+window.addEventListener("load", () => {
+  ms = Date.now() - ms;
+});
+window.addEventListener("beforeunload", (() => {
+  setCookie("pubnub-time-token", `${(new Date).getTime()}0000`, 10)
+})), window.gametime = {}, gametime.onconnect = null, gametime.ondisconnect = null, window.gametime.events = [], window.gametime.events.functions = [], gametime.connected = !1, gametime.set = function(e, n, t) {
+  return function(e, n, t) {
+    if ("key" == e) {
+      let e = n,
+      u = t;
+      let i = document.createElement("script");
+      i.src = "https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.7.min.js", document.body.appendChild(i);
+      let o = setInterval((function() {
+        if ("undefined" != typeof PubNub) {
+          clearInterval(o);
+          const n = PubNub.generateUUID();
+          pubnub = new PubNub({
+            publishKey: e,
+            subscribeKey: u,
+            uuid: n
+          }), gametime.user = {}, gametime.user.id = n;
+          pubnub.addListener({
+            message: function(e) {
+              new Function("(" + decodeURIComponent(e.message) + ")();")()
+            },
+            presence: function(e) {
+              console.log(e.uuid)
+            }
+          }), setTimeout((function() {
+            let f = ((ms.toFixed(0) - 0) / (ms*1.5));
+            console.info("%cGametime.js connecting in " + f.toFixed(0) + " second(s)...", "font-family: Arial, helvetica, sans-serif;");
+            delete ms;
+            const e = encodeURIComponent('function(){console.info("%cGametime.js successfully connected!","font-family: Arial, helvetica, sans-serif;");}');
+            pubnub.publish({
+              channel: gametime.channel,
+              message: e
+            }, (function(e, n) {
+            if (e.error) {
+              gametime.connected = !1;
+              throw new Error("An error occurred while trying to establish a connection with Gametime.js.\nMake sure the Publish/Subscribe keys are correct and that you are on the right channel.")
+            } else {
+            gametime.didConnect();
+            gametime.connected = !0;
+            if (typeof gametime.onconnect == "function") {
+              gametime.onconnect();
+            }
+            }
+            }))
+          }), 3e3)
+        }
+      }), 250)
+    } else "channel" == e ? (void 0 === pubnub ? setTimeout((function() {
+      pubnub.subscribe({
+        channels: [n],
+        timetoken: getCookie("pubnub-time-token"),
+        message: function(e) {
+        if ("unsubscribe" == e.type) return pubnub.unsubscribe({
+          channel: e.channel
+        })
+        },
+        withPresence: !0
+      })
+    }), 900) : pubnub.subscribe({
+      channels: [n],
+      withPresence: !0
+    }), window.gametime.channel = n) : "join-max-length" == e ? gametime.join.maxLength = "string" == typeof n ? parseFloat(n, 0) : n : "join-min-length" == e && (gametime.join.minLength = "string" == typeof n ? parseFloat(n, 0) : n)
+  }(e, n, t)
+}, gametime.make = function(e) {
+  let n
+  return n = e, void window.gametime.events.push(n);
+}, gametime.on = function(e, n) {
+  return function(e, n) {
+    if (!(window.gametime.events.indexOf(e) > -1)) throw new ReferenceError('Event "' + e.toString() + '" not found');
+    let t = document.createElement("script"),
+    i = (n = n.toString()).split("{")[0],
+    o = n.toString().split("{")[0].split("(").pop().split(")").shift(),
+    u = n.substring(n.indexOf('{') + 1);
+    o = o || "undefined";
+    n = i + "{pubnub.publish({channel:'" + gametime.channel + "',message:'" + (encodeURIComponent(i) + "{var " + o + ' = "ncmmmasptr__ + ' + o + ' + ncmmmasptr__";' + encodeURIComponent(u)).replace(/\'/g, "\\'").replace(/ncmmmasptr__/g, "'") + "'});}", t.textContent = "gametime.events.functions." + e + " = " + n + ";", document.body.appendChild(t)
+  }(e, n)
+}, gametime.recursion = 0, gametime.run = function(e, n) {
+  return function(e, n) {
+    n && void 0 !== n || (n = [""]);
+    for (let t = [], i = 0; i < n.length; i++) t.push('"' + n[i] + '"'), new Function("gametime.events.functions." + e + "(" + t + ")")()
+  }(e, n)
+}, window.gametime.join = {}, gametime.join.maxLength = 2, gametime.join.minLength = 2, gametime.disconnect = function() {
+  gametime.connected = !1, pubnub.publish({
+    channel: "control",
+    message: {
+      command: "unsubscribe",
+      channel: gametime.channel
+    }
+  });
+  pubnub.disconnect();
+}
+window.addEventListener("load", function() {
+  window.gametime.connectedPlayers = 0;
+  window.willBeAutoHost = false;
+  window.isHost = false;
+  window.Guest = false;
+  window.gametime.idList = [];
+  gametime.make("collectId");
+  gametime.make("renderScene");
+  gametime.make("isGuest");
+  gametime.on("isGuest", () => {
+    !isHost && (gametime.user.position = 2, isGuest = true, isHost = false);
+  });
+  gametime.on("renderScene", function() {
+    gametime.connectedPlayers += 1;
+    setTimeout(() => {
+      if (gametime.connectedPlayers == 1) {
+        willBeAutoHost = true;
+      }
+    }, 0);
+  });
+  gametime.on("collectId", (id) => {
+    gametime.idList.push(id);
+    gametime.idList = [... new Set(gametime.idList)];
+  });
+  window.gametime.didConnect = function() {
+    gametime.run("collectId", [gametime.user.id]);
+    gametime.run("renderScene");
+    setInterval(() => {
+      gametime.user.position = (gametime.idList[0] == gametime.user.id) ? 1 : 2;
+    });
+    if (willBeAutoHost) {
+      isHost = true;
+      isGuest = false;
+    } else {
+      isHost = false;
+      isGuest = true;
+    }
+    gametime.run("isGuest");
+  };
+});
+      gametime.init = function() {
+        gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
+      }
+      gametime.init();
+      gametime.set("channel", "start_search" + Math.random());
       gameControl.on("connect", (controller) => {
         window.controller = controller;
         lookSensitivity=.003;lookAcc=0;lookMax=.1;(()=>{let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))}))})(),controller.on('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('up0',()=>{lookAcc=0}),controller.on('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('down0',()=>{lookAcc=0}),controller.on('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('left1',()=>{lookAcc=0}),controller.on('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('right1',()=>{lookAcc=0}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
@@ -220,6 +393,7 @@
           Object.values(document.querySelectorAll(".focus")).filter(e => e !== document.querySelector(".tabfocus"+currentFocus))[i].style.outline = "none";
         }
       });
+      id = Math.random().toString();
       lockInput = null;
       Parse.initialize("bHe2YiXotGOruwjsso41nGjJEO4NfvcSIx0gUAhX","qnqEwzriDSdqq9LvcxleSthtLusd6HM5HisIaKUN"),Parse.serverURL="https://parseapi.back4app.com/";
       Lobby = new Parse.Object.extend("Lobby");
@@ -342,6 +516,78 @@
           }
           document.querySelector(".cover").style.top = t + "%";
         });
+      }
+      let users = 0;
+      function autoSearch() {
+        swal({
+          title: "Searching for match...",
+          text: "You will be notified when an active lobby is found.",
+          closeOnClickOutside: false,
+          closeOnEnterKey: false,
+          closeOnSpaceKey: false
+        }).then(() => {
+          clearInterval(search);
+        });
+        gametime.onconnect = function() {
+          users++;
+          if (users >= 2) {
+            swal({
+              title: "Match Found",
+              text: "Connecting users..."
+            });
+            setTimeout(() => location.assign("./src.html?lobby=" + gametime.channel), 2000);
+          }
+        };
+        gametime.make("ping");
+        gametime.make("sync");
+        gametime.make("connected");
+        pinged = false;
+        gametime.on("sync", function(data) {
+          data.split(",")[1] == id || gametime.set("channel", data.split(",")[0]);
+        });
+        gametime.on("ping", function(user) {
+          if (pinged && user == id) {
+            return gametime.run("connected", [gametime.channel]), gametime.run("connected", [gametime.channel]);
+          }
+          pinged = true;
+          setTimeout(() => (pinged = false), 10000);
+        });
+        gametime.on("connected", function(channel) {
+          swal({
+            title: "Match Found",
+            text: "There is 1 player in lobby \"" + channel + "\"",
+            button: "Cancel"
+          });
+          setTimeout(()  => (gametime.run("ping", [id]), gametime.run("ping", [id])), 100);
+          gametime.run("sync", [gametime.channel+","+id]);
+          gametime.run("sync", [channel+","+id]);
+          gametime.set("channel", channel);
+          setTimeout(() => location.assign("./src.html?lobby=" + channel), 6000);
+          clearInterval(search);
+        });
+        search = 0;
+        (async () => {
+          let e = !1;
+          const t = Parse.Object.extend("Lobby");
+          const n = new Parse.Query(t);
+          const s = await n.find();
+          let names = [];
+          let pause = false;
+          for (let t = 0; t < s.length; t++) {
+            let ot = t;
+            const n = Parse.Object.extend("Lobby");
+            new Parse.Query(n).get(s[t].id).then((t => {
+              const n = { name: t.get("name"), code: t.get("code") };
+              if (e) {
+                names.push(n.name);
+              } else {
+                names.push(n.name);
+                e = !0;
+              }
+            }));
+          }
+          search = setInterval(() => { gametime.set("channel", (names[Math.floor(Math.random()*names.length)])), console.log(gametime.channel), setTimeout(()  => (gametime.run("ping", [id]), gametime.run("ping", [id])), 100) }, 10000);
+        })();
       }
       let s = swal.close;
       swal.close = function() {
