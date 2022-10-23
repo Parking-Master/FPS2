@@ -354,6 +354,7 @@
     <audio id="Desert_Eagle_fire" src="sounds/guns/Desert_Eagle/fire.mp3"></audio>
     <audio id="Assault_Rifle_fire" src="sounds/guns/Assault_Rifle/fire.mp3"></audio>
     <audio id="Sniper_Rifle_fire" src="sounds/guns/Sniper_Rifle/fire.mp3"></audio>
+    <audio id="Rail_Gun_fire" src="sounds/guns/Rail_Gun/fire.mp3"></audio>
     <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
@@ -494,8 +495,14 @@
         }, 5000);
       });
       gametime.on("hit", function(data) {
+        health += -(data.split(",")[1]-0);
         if (data.split(",")[0] == gametime.user.position) {
           return;
+        }
+        if (data.split(",")[1] >= 200) {
+          health = 0;
+          backupHealth = 0;
+          return gametime.run("eliminate", [gametime.user.position]);
         }
         if (health <= 0) {
           health = 0;
@@ -504,7 +511,6 @@
           }
           return backupHealth += -50;
         }
-        health += -(data.split(",")[1]-0);
       });
       gametime.on("move", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
@@ -745,7 +751,8 @@
       gunsounds = {
         "Assault_Rifle": document.getElementById("Assault_Rifle_fire"),
         "Desert_Eagle": document.getElementById("Desert_Eagle_fire"),
-        "Sniper_Rifle": document.getElementById("Sniper_Rifle_fire")
+        "Sniper_Rifle": document.getElementById("Sniper_Rifle_fire"),
+        "Rail_Gun": document.getElementById("Rail_Gun_fire")
       };
       reloads = {
         "Assault_Rifle": {
@@ -759,6 +766,10 @@
         "Sniper_Rifle": {
           "easy": document.getElementById("Sniper_Rifle_reloadeasy"),
           "full": document.getElementById("Sniper_Rifle_reloadfull")
+        },
+        "Rail_Gun": {
+          "easy": document.getElementById("Rail_Gun_reloadeasy"),
+          "full": document.getElementById("Rail_Gun_reloadfull")
         }
       };
       /* Start renderer setup */
@@ -981,6 +992,7 @@
       gunIndexes[loadout[0]] = 0;
       gunIndexes[loadout[1]] = 1;
       gunIndexes["Sniper_Rifle"] = 4;
+      gunIndexes["Rail_Gun"] = 5;
       let Loaders = {
         0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
           primaryWeapon.object = model.scene;
@@ -1035,6 +1047,15 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
           weapons["Sniper_Rifle"] = model;
+        }), 9: new THREE.GLTFLoader(loadingManager).load("models/weapons/Rail_Gun.glb", (model) => {
+          animations[5]=(model.animations);
+          let mixer = new THREE.AnimationMixer(model.scene);
+          mixer.speed = .8;
+          let weaponIndex = gunIndexes["Rail_Gun"];
+          mixers[5]=(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
+          weapons["Rail_Gun"] = model;
         })
       }
       /* End Model loaders */
@@ -1120,7 +1141,7 @@
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
-            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"&&100));
+            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"&&200)));
             gametime.run("hit", [gametime.user.position + "," + damage]);
           }
           shake(camera, .5);
@@ -1240,6 +1261,14 @@
           currentWeapon.rounds = 6;
           currentWeapon.defaultRounds = 6;
         }
+        if (name == "Rail_Gun") {
+          let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
+          currentWeapon.easyReloadTimeout = 1500;
+          currentWeapon.fullReloadTimeout = 2000;
+          currentWeapon.clips = 4;
+          currentWeapon.rounds = 1;
+          currentWeapon.defaultRounds = 1;
+        }
         canFire = true;
       }
       ordinances = {};
@@ -1343,6 +1372,9 @@
         if (currentWeapon == "Sniper_Rifle") {
           fire(1);
         }
+        if (currentWeapon == "Rail_Gun") {
+          fire(1);
+        }
       });
       document.addEventListener("mouseup", (e) => {
         fullAutoFiring = false;
@@ -1439,6 +1471,9 @@
             whatStartedFiring = "click";
           }
           if (currentWeapon == "Desert_Eagle" && !e.repeat) {
+            fire(1);
+          }
+          if (currentWeapon == "Rail_Gun" && e.repeat) {
             fire(1);
           }
         }
