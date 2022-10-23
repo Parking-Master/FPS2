@@ -374,6 +374,8 @@
     <audio id="Desert_Eagle_reloadfull" src="sounds/guns/Desert_Eagle/full.mp3"></audio>
     <audio id="Sniper_Rifle_reloadeasy" src="sounds/guns/Sniper_Rifle/easy.mp3"></audio>
     <audio id="Sniper_Rifle_reloadfull" src="sounds/guns/Sniper_Rifle/full.mp3"></audio>
+    <audio id="Rail_Gun_reloadeasy" src="sounds/guns/Rail_Gun/easy.mp3"></audio>
+    <audio id="Rail_Gun_reloadfull" src="sounds/guns/Rail_Gun/full.mp3"></audio>
     <div class="ui">
       <div class="scoreboard">
         <span class="player1">A - <span class="score">0</span></span>
@@ -395,7 +397,8 @@
         <br style="margin-bottom:25px">
         <span id="rounds">0</span> &bullet; <span id="clips">0</span>
       </div>
-      <img id="scope" src="images/scopes/0.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:50vw;left:50%;margin-left:-25vw!important;z-index:999;top:5px" />
+      <img id="sniperscope" src="images/scopes/0.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:50vw;left:50%;margin-left:-25vw!important;z-index:999;top:5px" />
+      <img id="railscope" src="images/scopes/1.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:100vw;left:50%;margin-left:-50vw!important;z-index:999;top:0" />
       <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
     </div>
     <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p>
@@ -892,6 +895,8 @@
         (intersection = intersections[0] || null);
         if (intersection != null && intersection.object == otherFollower) {
           document.querySelector(".crosshair").style.backgroundColor = "#ff0000";
+        } else if (((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name)) == "Rail_Gun" && keyTicks > 0) {
+          document.querySelector(".crosshair").style.backgroundColor = "#0000ff";
         } else {
           document.querySelector(".crosshair").style.backgroundColor = "#fff";
         }
@@ -1050,7 +1055,7 @@
         }), 9: new THREE.GLTFLoader(loadingManager).load("models/weapons/Rail_Gun.glb", (model) => {
           animations[5]=(model.animations);
           let mixer = new THREE.AnimationMixer(model.scene);
-          mixer.speed = .8;
+          mixer.speed = 2;
           let weaponIndex = gunIndexes["Rail_Gun"];
           mixers[5]=(mixer);
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
@@ -1263,7 +1268,7 @@
         }
         if (name == "Rail_Gun") {
           let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
-          currentWeapon.easyReloadTimeout = 1500;
+          currentWeapon.easyReloadTimeout = 2000;
           currentWeapon.fullReloadTimeout = 2000;
           currentWeapon.clips = 4;
           currentWeapon.rounds = 1;
@@ -1291,6 +1296,9 @@
       function activate(key) {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: key }));
       }
+      function deactivate(key) {
+        document.dispatchEvent(new KeyboardEvent("keyup", { key: key }));
+      }
       function reload() {
         canFire = false;
         gametime.run("add", [gametime.user.position+",animate,reload"]);
@@ -1317,7 +1325,7 @@
         mixers[weaponIndex].clipAction(animations[weaponIndex][1]).stop();
         mixers[weaponIndex].clipAction(animations[weaponIndex][1]).reset();
         if (weapon.rounds <= 0) {
-          setTimeout(() => shake(camera, 1), 5300);
+          setTimeout(() => shake(camera, 1), weapon.fullReloadTimeout - 1200);
           reloads[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].full.cloneNode().play();
           let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][4]);
           clip.loop = THREE.LoopOnce;
@@ -1372,7 +1380,7 @@
         if (currentWeapon == "Sniper_Rifle") {
           fire(1);
         }
-        if (currentWeapon == "Rail_Gun") {
+        if (currentWeapon == "Rail_Gun" && e.detail == 2) {
           fire(1);
         }
       });
@@ -1423,6 +1431,7 @@
       walkBackwardAcceleration = false;
       walkLeftAcceleration = false;
       walkRightAcceleration = false;
+      keyTicks = 0;
       const clickZoom = (o, e) => o >= 20 && e == "zoomIn" ? o - 5 : o <= 75 && e == "zoomOut" ? o + 5 : o;
       const getFov = () => Math.floor(2 * Math.atan(camera.getFilmHeight() / 2 / camera.getFocalLength()) * 180 / Math.PI);
       document.addEventListener("keydown", (e) => {
@@ -1431,7 +1440,7 @@
         }
         if (e.key == "i" && !e.repeat) {
           if (isReloading) return;
-          isZoomed ? ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Sniper_Rifle" && (document.querySelector("#scope").style.opacity = "0", scene.add((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)))) : ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Sniper_Rifle" && (scene.remove((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)), document.querySelector("#scope").style.opacity = "1"));
+          isZoomed ? (/Sniper_Rifle|Rail_Gun/gi.test((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)) && (document.querySelector("#" + ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)).toLowerCase().split("_")[0] + "scope").style.opacity = "0", scene.add((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)))) : (/Sniper_Rifle|Rail_Gun/gi.test(weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) && (scene.remove((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)), document.querySelector("#" + ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)).toLowerCase().split("_")[0] + "scope").style.opacity = (((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)) == "Rail_Gun" ? ".5" : "1")));
           isZoomed ? (document.querySelector(".crosshair").style.visibility = "visible", (() => { for (let i = 0; i < 5; i++) zoomOutFunction(100) })(), isZoomed = false) : (document.querySelector(".crosshair").style.visibility = "hidden", (() => { for (let i = 0; i < 5; i++) zoomInFunction(100) })(), isZoomed = true);
         }
         if (e.key.startsWith("Arrow")) {
@@ -1465,7 +1474,7 @@
           reload();
         }
         if (e.key == "f" && (whatStartedFiring == "key" || !whatStartedFiring)) {
-          let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]));
+          let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name));
           if (currentWeapon == "Assault_Rifle") {
             fullAutoFiring = true;
             whatStartedFiring = "click";
@@ -1473,8 +1482,10 @@
           if (currentWeapon == "Desert_Eagle" && !e.repeat) {
             fire(1);
           }
-          if (currentWeapon == "Rail_Gun" && e.repeat) {
-            fire(1);
+          if (currentWeapon == "Rail_Gun") {
+            !e.repeat && document.querySelector("#surge").cloneNode().play();
+            keyTicks++;
+            keyTicks >= 4 && !isReloading && (fire(1), shake(camera, 1), deactivate(e.key), keyTicks = 0);
           }
         }
         if (e.key == "y" && !e.repeat) {
@@ -1529,10 +1540,11 @@
           });
         }
         if (e.key == "f") {
-        gametime.run("add", [gametime.user.position+",animate,stop"]);
+          gametime.run("add", [gametime.user.position+",animate,stop"]);
           fullAutoFiring = false;
           whatStartedFiring = null;
         }
+        keyTicks = 0;
       });
       document.addEventListener("mousemove", function(e) {
         if (!controls.isLocked) return;
