@@ -113,6 +113,7 @@
         border: 5px solid #fff;
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
         z-index: 99999;
+        backdrop-filter: blur(5px);
       }
       .backuphealth {
         position: relative;
@@ -184,6 +185,7 @@
         padding-bottom: 50px;
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
         transition: width 1s ease-in;
+        border-radius: 0 !important;
       }
       .swal-modal * {
         color: #79c9ff;
@@ -226,15 +228,15 @@
       }
       .loader-1 {
         position: absolute;
-        width: 10vmax;
-        height: 10vmax;
+        width: 200px;
+        height: 200px;
         border-right: 10px solid #fff;
         border-radius: 100%;
         animation: spinRight 800ms linear infinite;
         margin: 0;
         left: 50%;
-        margin-left: -5vmax;
-        margin-top: 200px;
+        margin-left: -100px;
+        margin-top: 100px;
       }
       @keyframes spinLeft {
       	from {
@@ -327,13 +329,13 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
   <body style="margin:0!important;">
-    <div class="loader">
+    <div class="loader" style="width:100%!important">
       <div class="loader-1"></div>
       <br>
-      <h2 style="position:absolute;font-size:100px;padding:0;top:40%;width:100%;color:#fff;font-style:italic;left:50%!important;margin-left:-25%">
+      <h2 style="position:relative;text-align:center;font-size:80px;padding:0;top:40%;color:#fff">
         LOADING
         <br>
-        <div style="position:absolute;width:100%;margin:0;left:0!important;font-size:50px"><span id="progress-status">0</span> % <span style="text-decoration:line-through">&nbsp;&nbsp;&nbsp;</span> <small id="progress-est">0 Seconds Left</small></div> 
+        <div style="position:absolute;width:100%;margin:0;left:0!important;font-size:30px"><span id="progress-status">0</span> % <span style="text-decoration:line-through">&nbsp;&nbsp;&nbsp;</span> <small id="progress-est">0 Seconds Left</small></div> 
       </h2>
       <div class="progress-bar">
         <div id="progress"></div>
@@ -501,10 +503,10 @@
         }, 5000);
       });
       gametime.on("hit", function(data) {
-        health += -(data.split(",")[1]-0);
         if (data.split(",")[0] == gametime.user.position) {
           return;
         }
+        health += -(data.split(",")[1]-0);
         if (data.split(",")[1] >= 200) {
           health = 0;
           backupHealth = 0;
@@ -519,6 +521,7 @@
         }
       });
       gametime.on("move", function(data) {
+        console.log(data, gametime.user.position);
         if (data.split(",")[0] == gametime.user.position) {
           return;
         }
@@ -694,7 +697,7 @@
                   mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
                   scene.add(primaryWeapon.object);
                   scene.add(otherPlayer);
-                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true,player.traverse((x)=>{x.castShadow=true}),light.shadow.radius=3)})(), clearInterval(counting));
+                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.castShadow=true,player.traverse((x)=>{x.castShadow=true}),otherPlayer.traverse((x)=>{x.castShadow=true}),light.shadow.radius=3)})(), clearInterval(counting));
                   didStart = true;
                 }
                 document.querySelector("#countdown_sound").play();
@@ -881,6 +884,7 @@
       isTouchingOrdinance = false;
       /* End global variables */
       function animate() {
+        health >= 100 ? health = 100 : health += .1;
         requestAnimationFrame(animate);
         light1.position.copy(camera.position);
         light1.rotation.copy(camera.rotation);
@@ -1056,7 +1060,7 @@
           let mixer = new THREE.AnimationMixer(otherPlayer);
           mixer.speed = 3.25;
           mixers[3]=(mixer);
-          otherPlayer.position.y=-1.6,otherPlayer.scale.set(.015,.015,.015);
+          otherPlayer.position.y=-1.6,otherPlayer.scale.set(.015,.013,.015);
         }), 8: new THREE.GLTFLoader(loadingManager).load("models/weapons/Sniper_Rifle.glb", (model) => {
           animations[4]=(model.animations);
           let mixer = new THREE.AnimationMixer(model.scene);
@@ -1169,7 +1173,7 @@
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
-            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"&&200)));
+            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"&&5))));
             gametime.run("hit", [gametime.user.position + "," + damage]);
           }
           shake(camera, .5);
