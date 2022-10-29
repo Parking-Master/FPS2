@@ -28,7 +28,7 @@
       }
       canvas {
         position: relative;
-        box-shadow: 0 0 200px rgba(255, 255, 255, .9) inset;
+        filter: contrast(110%) brightness(90%) saturate(80%);
       }
       .scoreboard {
         position: absolute;
@@ -355,6 +355,7 @@
     <audio id="Assault_Rifle_fire" src="sounds/guns/Assault_Rifle/fire.mp3"></audio>
     <audio id="Sniper_Rifle_fire" src="sounds/guns/Sniper_Rifle/fire.mp3"></audio>
     <audio id="Rail_Gun_fire" src="sounds/guns/Rail_Gun/fire.mp3"></audio>
+    <audio id="P90_SMG_fire" src="sounds/guns/P90_SMG/fire.mp3"></audio>
     <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
@@ -376,6 +377,8 @@
     <audio id="Sniper_Rifle_reloadfull" src="sounds/guns/Sniper_Rifle/full.mp3"></audio>
     <audio id="Rail_Gun_reloadeasy" src="sounds/guns/Rail_Gun/easy.mp3"></audio>
     <audio id="Rail_Gun_reloadfull" src="sounds/guns/Rail_Gun/full.mp3"></audio>
+    <audio id="P90_SMG_reloadeasy" src="sounds/guns/P90_SMG/easy.mp3"></audio>
+    <audio id="P90_SMG_reloadfull" src="sounds/guns/P90_SMG/full.mp3"></audio>
     <div class="ui">
       <div class="scoreboard">
         <span class="player1">A - <span class="score">0</span></span>
@@ -390,7 +393,7 @@
       <div class="backuphealth-wrapper">
         <div class="backuphealth"></div>
       </div>
-      <img src="images/vignette.png" style="position:fixed;height:102%;width:100%;z-index:9999;pointer-events:none;filter:invert(100%);opacity:.5" />
+      <img src="images/vignette.png" style="position:fixed;height:102%;width:100%;z-index:9999;pointer-events:none;filter:invert(0%);opacity:.5" />
       <div class="crosshair"></div>
       <div id="status">
         <img src="images/assault.png" style="width:90%;margin-left:5%;top:15px;background:transparent">
@@ -691,7 +694,7 @@
                   mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
                   scene.add(primaryWeapon.object);
                   scene.add(otherPlayer);
-                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true)})(), clearInterval(counting));
+                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=32))})),light.shadow.bias=-1e-4,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.shadow.radius=1,light.castShadow=true,player.traverse((x)=>{x.castShadow=true}),light.shadow.radius=3)})(), clearInterval(counting));
                   didStart = true;
                 }
                 document.querySelector("#countdown_sound").play();
@@ -755,7 +758,8 @@
         "Assault_Rifle": document.getElementById("Assault_Rifle_fire"),
         "Desert_Eagle": document.getElementById("Desert_Eagle_fire"),
         "Sniper_Rifle": document.getElementById("Sniper_Rifle_fire"),
-        "Rail_Gun": document.getElementById("Rail_Gun_fire")
+        "Rail_Gun": document.getElementById("Rail_Gun_fire"),
+        "P90_SMG": document.getElementById("P90_SMG_fire")
       };
       reloads = {
         "Assault_Rifle": {
@@ -773,6 +777,10 @@
         "Rail_Gun": {
           "easy": document.getElementById("Rail_Gun_reloadeasy"),
           "full": document.getElementById("Rail_Gun_reloadfull")
+        },
+        "P90_SMG": {
+          "easy": document.getElementById("P90_SMG_reloadeasy"),
+          "full": document.getElementById("P90_SMG_reloadfull")
         }
       };
       /* Start renderer setup */
@@ -792,8 +800,10 @@
       map = new THREE.Mesh();
       player = new THREE.Mesh();
       light = new THREE.PointLight(0xf7f7ea,3),light.position.set(-10,20,-10);
+      light1 = new THREE.DirectionalLight(0xffffff,2);
       clock = new THREE.Clock();
       scene.add(light);
+      scene.add(light1);
       /* Start global variables */
       loadout = ["Assault_Rifle", "Desert_Eagle"];
       animations = [];
@@ -872,6 +882,9 @@
       /* End global variables */
       function animate() {
         requestAnimationFrame(animate);
+        light1.position.copy(camera.position);
+        light1.rotation.copy(camera.rotation);
+        light1.updateMatrix();
         map.traverse((i) => {
           if (i.isMesh && (i.name.includes("Container") || i.name.includes("Warthog")) && collision(i, follower)) {
             stopMoving(true, i, camera);
@@ -954,7 +967,7 @@
         otherFollower.position.set(otherPlayer.position.x, otherPlayer.position.y+1.2, otherPlayer.position.z);
         otherFollower.rotation.copy(otherPlayer.rotation);
         follower.position.copy(camera.position);
-        document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? primaryWeapon.rounds.toString() : secondaryWeapon.rounds.toString());
+        document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? (primaryWeapon.rounds <= 0 ? 0 : primaryWeapon.rounds).toString() : (secondaryWeapon.rounds <= 0 ? 0 : secondaryWeapon.rounds).toString());
         document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? primaryWeapon.clips.toString() : secondaryWeapon.clips.toString());
         document.querySelector(".player1").querySelector(".score").textContent = score1;
         document.querySelector(".player2").querySelector(".score").textContent = score2;
@@ -998,6 +1011,7 @@
       gunIndexes[loadout[1]] = 1;
       gunIndexes["Sniper_Rifle"] = 4;
       gunIndexes["Rail_Gun"] = 5;
+      gunIndexes["P90_SMG"] = 6;
       let Loaders = {
         0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
           primaryWeapon.object = model.scene;
@@ -1061,6 +1075,15 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
           weapons["Rail_Gun"] = model;
+        }), 10: new THREE.GLTFLoader(loadingManager).load("models/weapons/P90_SMG.glb", (model) => {
+          animations[6]=(model.animations);
+          let mixer = new THREE.AnimationMixer(model.scene);
+          mixer.speed = 2;
+          let weaponIndex = gunIndexes["P90_SMG"];
+          mixers[6]=(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
+          weapons["P90_SMG"] = model;
         })
       }
       /* End Model loaders */
@@ -1136,8 +1159,8 @@
           flash.scale.set(.3, .3, .3);
           flash.rotation.copy(camera.rotation);
           flash.updateMatrix();
-          flash.translateZ(-1.5);
-          flash.translateX(.15);
+          flash.translateZ(-1.35);
+          flash.translateX(.1);
           flash.translateY(-.08);
           flash.rotateY(.5);
           scene.add(flash);
@@ -1178,6 +1201,7 @@
         }
         didIdle = false;
         canFire = true;
+        gunRotation = 0;
       }
       function respawn(position, rotation) {
         primaryWeapon.object = weapons[loadout[0]].scene;
@@ -1274,6 +1298,14 @@
           currentWeapon.rounds = 1;
           currentWeapon.defaultRounds = 1;
         }
+        if (name == "P90_SMG") {
+          let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
+          currentWeapon.easyReloadTimeout = 2000;
+          currentWeapon.fullReloadTimeout = 2200;
+          currentWeapon.clips = 3;
+          currentWeapon.rounds = 48;
+          currentWeapon.defaultRounds = 48;
+        }
         canFire = true;
       }
       ordinances = {};
@@ -1361,10 +1393,17 @@
       /* End game scripts */
       fullAutoFiring = false;
       setInterval(() => {
+        let currentWeapon = (scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? primaryWeapon.name : secondaryWeapon.name;
         if (fullAutoFiring) {
-          fire(1);
+          if (currentWeapon == "Assault_Rifle") fire(1);
         }
       }, 120);
+      setInterval(() => {
+        let currentWeapon = (scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? primaryWeapon.name : secondaryWeapon.name;
+        if (fullAutoFiring) {
+          if (currentWeapon == "P90_SMG") fire(1);
+        }
+      }, 60);
       document.addEventListener("mousedown", (e) => {
         if (!controls.isLocked) {
           return;
@@ -1382,6 +1421,10 @@
         }
         if (currentWeapon == "Rail_Gun" && e.detail == 2) {
           fire(1);
+        }
+        if (currentWeapon == "P90_SMG") {
+          fullAutoFiring = true;
+          whatStartedFiring = "click";
         }
       });
       document.addEventListener("mouseup", (e) => {
@@ -1475,7 +1518,7 @@
         }
         if (e.key == "f" && (whatStartedFiring == "key" || !whatStartedFiring)) {
           let currentWeapon = ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name));
-          if (currentWeapon == "Assault_Rifle") {
+          if (currentWeapon == "Assault_Rifle" || currentWeapon == "P90_SMG") {
             fullAutoFiring = true;
             whatStartedFiring = "click";
           }
