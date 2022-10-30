@@ -897,10 +897,42 @@
       vehicleAcc = 0;
       currentVehicle = null;
       vehicleClones = [];
-      function destroyVehicle(object, vehicle) {
+      function destroyVehicle(i, vehicle) {
         if (vehicle.obstructed) return;
         vehicle.obstructed = true;
         document.querySelector("#explosion").play(), document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode().play();
+        let f = new THREE.Mesh();
+        f.position.copy(camera.position);
+        f.rotation.copy(camera.rotation);
+        f.updateMatrix();
+        f.translateX(-.1);
+        let d = new THREE.Mesh();
+        d.position.copy(camera.position);
+        d.rotation.copy(camera.rotation);
+        d.updateMatrix();
+        d.translateZ(-.1);
+        let left = distanceTo(f.position, i.position);
+        let right = distanceTo(camera.position, i.position);
+        let up = distanceTo(d.position, i.position);
+        let down = distanceTo(camera.position, i.position);
+        if (left > right) {
+          vehicle.rotateZ(1);
+          vehicle.translateY(2.5);
+        } else if (right > left) {
+          vehicle.rotateZ(-1);
+          vehicle.translateY(2.5);
+        }
+        if (up > down) {
+          vehicle.rotateX(-1);
+          vehicle.translateY(2.5);
+        } else if (down > up) {
+          vehicle.rotateX(-1);
+          vehicle.translateY(-2.5);
+        }
+        walkForward = false;
+        walkBackward = false;
+        walkLeft = false;
+        walkRight = false;
       }
       /* End global variables */
       function animate() {
@@ -1137,10 +1169,13 @@
           vehicles.push(model);
           let e = vehicles[0].scene.clone();
           e.name = "Vehicle";
+          raycastTargets.push(e);
+          e.health = 100;
           e.position.set(pos.x, pos.y-1.55, pos.z);
           e.rotation.set(rot.x, rot.y, rot.z);
           scene.add(e);
           let u = e.clone();
+          u.uuid = e.uuid;
           u.visible = false;
           let g = vehicleClones.length + 1;
           vehicleClones.push(u);
@@ -1204,6 +1239,7 @@
         controls.isLocked = false;
         let h = setInterval(() => {
           if (e.obstructed) return (scene.add(gun), controls.isLocked = true, cameraLocked = true, camera.rotation.set(0, 0, 0), isInVehicle = false, currentVehicle = null, document.onkeydown = null, document.onkeyup = null, clearInterval(h));
+          if (collision(e, otherFollower) && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) gametime.run("eleminate", [gametime.user.position == 1 ? 2 : 1]);
           e.rotation.order = "YXZ";
           camera.position.copy(e.position);
           camera.rotation.copy(e.rotation);
@@ -1213,11 +1249,12 @@
           camera.position.y += (2);
           cameraLocked = false;
           camera.translateZ(8);
+          vehicleAcc >= .1 || (vehicleAcc += .001);
           if (vehicleMovements["ArrowUp"]) {
-            e.translateZ(.1);
+            e.translateZ(vehicleAcc);
           }
           if (vehicleMovements["ArrowDown"]) {
-            e.translateZ(-.05);
+            e.translateZ(-(vehicleAcc / 2));
           }
           if (vehicleMovements["ArrowLeft"] && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) {
             e.rotateY(.005);
@@ -1227,21 +1264,30 @@
           }
           document.onkeydown = (t) => {
             if (t.key == "t" && !t.repeat) return (scene.add(gun), controls.isLocked = true, cameraLocked = true, camera.rotation.set(0, 0, 0), isInVehicle = false, currentVehicle = null, document.onkeydown = null, document.onkeyup = null, vehicleMovements["ArrowUp"] = false, vehicleMovements["ArrowDown"] = false, vehicleMovements["ArrowLeft"] = false, vehicleMovements["ArrowRight"] = false, clearInterval(h));
-            t.key.startsWith("Arrow") && (vehicleMovements[t.key] = true);
+            t.key.startsWith("Arrow") && (vehicleMovements[t.key] = true, /ArrowUp|ArrowDown/gi.test(t.key) && (vehicleAcc >= .1 || (vehicleAcc += .005)));
           }
         });
         document.onkeyup = (t) => {
-          if (t.key == "ArrowUp") {
-            vehicleMovements["ArrowUp"] = false;
-          }
-          if (t.key == "ArrowDown") {
-            vehicleMovements["ArrowDown"] = false;
-          }
-          if (t.key == "ArrowLeft") {
-            vehicleMovements["ArrowLeft"] = false;
-          }
-          if (t.key == "ArrowRight") {
-            vehicleMovements["ArrowRight"] = false;
+          if (t.key.startsWith("Arrow")) {
+            let f = setInterval(() => {
+              if (vehicleAcc <= 0) {
+                if (t.key == "ArrowUp") {
+                  vehicleMovements["ArrowUp"] = false;
+                }
+                if (t.key == "ArrowDown") {
+                  vehicleMovements["ArrowDown"] = false;
+                }
+                if (t.key == "ArrowLeft") {
+                  vehicleMovements["ArrowLeft"] = false;
+                }
+                if (t.key == "ArrowRight") {
+                  vehicleMovements["ArrowRight"] = false;
+                }
+                vehicleAcc = 0;
+                return clearInterval(f);
+              }
+              vehicleAcc += -.001;
+            });
           }
         }
       }
@@ -1289,6 +1335,9 @@
         let h = setInterval(() => {
           map.traverse((x) => {
             if (x.isObject3D && (!x.name.includes("scene") && !x.name.includes("Scene")) && collision(e, x)) {
+              vehicleClones.forEach(i => {
+                typeof i.getObjectByName(x.name) != "undefined" && (x.health <= 0 ? destroyVehicle(x, x) : x.health--);
+              });
               return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), clearInterval(h);
             }
             e.translateZ(-.01);
@@ -1326,6 +1375,10 @@
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
             let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"&&5))));
             gametime.run("hit", [gametime.user.position + "," + damage]);
+          } else if (intersection != null && typeof scene.getObjectByName("Vehicle").getObjectByName(intersection.object.name) != "undefined") {
+            vehicleClones.forEach((x) => {
+              scene.getObjectByProperty("uuid", x.uuid).getObjectByProperty("uuid", intersection.object.uuid) != "undefined" && (scene.getObjectByProperty("uuid", x.uuid).health <= 0 ? destroyVehicle(scene.getObjectByProperty("uuid", x.uuid), scene.getObjectByProperty("uuid", x.uuid)) : scene.getObjectByProperty("uuid", x.uuid).health--);
+            });
           }
           shake(camera, .5);
         }, 100);
