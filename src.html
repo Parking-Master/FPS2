@@ -890,6 +890,18 @@
       raycastTargets = [otherFollower];
       intersection = null;
       isTouchingOrdinance = false;
+      vehicles = [];
+      isPaused = false;
+      vehicleMovements = {};
+      isInVehicle = false;
+      vehicleAcc = 0;
+      currentVehicle = null;
+      vehicleClones = [];
+      function destroyVehicle(object, vehicle) {
+        if (vehicle.obstructed) return;
+        vehicle.obstructed = true;
+        document.querySelector("#explosion").play(), document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode().play();
+      }
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -898,8 +910,13 @@
         light1.rotation.copy(camera.rotation);
         light1.updateMatrix();
         map.traverse((i) => {
-          if (i.isMesh && (i.name.includes("Container") || i.name.includes("Warthog")) && collision(i, follower)) {
+          if (i.isMesh && (i.name.includes("Container") || vehicleClones.indexOf(i) > -1) && collision(i, follower)) {
             stopMoving(true, i, camera);
+          }
+          if (isInVehicle && currentVehicle) {
+            if (i.isMesh && (i.name.includes("Container") || (i.name.includes("Vehicle") && i != currentVehicle)) && i != currentVehicle && typeof currentVehicle.getObjectByName(i.name) == "undefined" && collision(i, currentVehicle)) {
+              destroyVehicle(i, currentVehicle);
+            }
           }
           if (i.isMesh && (i.name.includes("Container") || i.name.includes("Warthog")) && collision(i, otherFollower)) {
             stopMoving(true, i, otherFollower);
@@ -1106,12 +1123,128 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
           weapons["P90_SMG"] = model;
+        }), 11: new THREE.GLTFLoader(loadingManager).load("models/vehicles/humvee.glb", (model) => {
+          vehicles.push(model);
         })
       }
       /* End Model loaders */
       /* Start game scripts */
       function collision(e,B){return firstBB=(new THREE.Box3).setFromObject(e),secondBB=(new THREE.Box3).setFromObject(B),firstBB.intersectsBox(secondBB)}
       function distanceTo(t,n){var r=t.x-n.x,a=t.y-n.y,c=t.z-n.z;return Math.sqrt(r*r+a*a+c*c)}
+      function createVehicle(pos, rot) {
+        typeof vehicles[0] == "undefined" ? (() => {
+        new THREE.GLTFLoader().load("/models/vehicles/humvee.glb", (model) => {
+          vehicles.push(model);
+          let e = vehicles[0].scene.clone();
+          e.name = "Vehicle";
+          e.position.set(pos.x, pos.y-1.55, pos.z);
+          e.rotation.set(rot.x, rot.y, rot.z);
+          scene.add(e);
+          let u = e.clone();
+          u.visible = false;
+          let g = vehicleClones.length + 1;
+          vehicleClones.push(u);
+          map.children[g] = u;
+          setInterval(() => {
+            map.children[g] = u;
+            if (collision(e, follower)) {
+              camera.translateZ(.2);
+              walkForward = false;
+              walkBackward = false;
+              walkLeft = false;
+              walkRight = false;
+            }
+            if (distanceTo(e.position, follower.position) <= 3.5) {
+              showText("Hold [T] to get in vehicle");
+              document.onkeydown = (t) => {
+                t.key == "t" && !t.repeat && getInVehicle(e);
+              }
+            } else if (isInVehicle) {
+              hideText();
+            }
+          });
+        });
+        })() : (() => {
+        let e = vehicles[0].scene.clone();
+        e.name = "Vehicle";
+        e.position.set(pos.x, pos.y-1.55, pos.z);
+        e.rotation.set(rot.x, rot.y, rot.z);
+        scene.add(e);
+        let u = e.clone();
+        u.visible = false;
+        let g = vehicleClones.length + 1;
+        vehicleClones.push(u);
+        map.children[g] = u;
+        setInterval(() => {
+          map.children[g] = u;
+          if (collision(e, follower)) {
+            camera.translateZ(.2);
+            walkForward = false;
+            walkBackward = false;
+            walkLeft = false;
+            walkRight = false;
+          }
+          if (distanceTo(e.position, follower.position) <= 3.5) {
+            showText("Hold [T] to get in vehicle");
+            document.onkeydown = (t) => {
+              t.key == "t" && !t.repeat && getInVehicle(e);
+            }
+          } else if (isInVehicle) {
+            hideText();
+          }
+        });
+        })();
+      }
+      function getInVehicle(e) {
+        if (e.obstructed) return vehicleMovements["ArrowUp"] = false, vehicleMovements["ArrowDown"] = false, vehicleMovements["ArrowLeft"] = false, vehicleMovements["ArrowRight"] = false;
+        isInVehicle = true;
+        currentVehicle = e;
+        let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
+        scene.remove(gun);
+        controls.isLocked = false;
+        let h = setInterval(() => {
+          if (e.obstructed) return (scene.add(gun), controls.isLocked = true, cameraLocked = true, camera.rotation.set(0, 0, 0), isInVehicle = false, currentVehicle = null, document.onkeydown = null, document.onkeyup = null, clearInterval(h));
+          e.rotation.order = "YXZ";
+          camera.position.copy(e.position);
+          camera.rotation.copy(e.rotation);
+          camera.updateMatrix();
+          camera.rotation.y += (Math.PI);
+          camera.rotation.x += (-.4);
+          camera.position.y += (2);
+          cameraLocked = false;
+          camera.translateZ(8);
+          if (vehicleMovements["ArrowUp"]) {
+            e.translateZ(.1);
+          }
+          if (vehicleMovements["ArrowDown"]) {
+            e.translateZ(-.05);
+          }
+          if (vehicleMovements["ArrowLeft"] && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) {
+            e.rotateY(.005);
+          }
+          if (vehicleMovements["ArrowRight"] && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) {
+            e.rotateY(-.005);
+          }
+          document.onkeydown = (t) => {
+            if (t.key == "t" && !t.repeat) return (scene.add(gun), controls.isLocked = true, cameraLocked = true, camera.rotation.set(0, 0, 0), isInVehicle = false, currentVehicle = null, document.onkeydown = null, document.onkeyup = null, vehicleMovements["ArrowUp"] = false, vehicleMovements["ArrowDown"] = false, vehicleMovements["ArrowLeft"] = false, vehicleMovements["ArrowRight"] = false, clearInterval(h));
+            t.key.startsWith("Arrow") && (vehicleMovements[t.key] = true);
+          }
+        });
+        document.onkeyup = (t) => {
+          if (t.key == "ArrowUp") {
+            vehicleMovements["ArrowUp"] = false;
+          }
+          if (t.key == "ArrowDown") {
+            vehicleMovements["ArrowDown"] = false;
+          }
+          if (t.key == "ArrowLeft") {
+            vehicleMovements["ArrowLeft"] = false;
+          }
+          if (t.key == "ArrowRight") {
+            vehicleMovements["ArrowRight"] = false;
+          }
+        }
+      }
       function stopMoving(e = false, i, camera) {
         let f = new THREE.Mesh();
         f.position.copy(camera.position);
@@ -1667,6 +1800,8 @@
       /* Game misc setup */
       createWeapon("Sniper_Rifle", new THREE.Vector3(38, 0, -20));
       createWeapon("P90_SMG", new THREE.Vector3(20, 0, -14));
+      createVehicle(new THREE.Vector3(26, 0, 7), new THREE.Vector3(0, Math.PI-1, 0));
+      createVehicle(new THREE.Vector3(12, 0, -28), new THREE.Vector3(0, Math.PI/2, 0));
       /* End game misc setup */
       function pause() {
         document.querySelector(".pause-menu").style.display = document.querySelector(".pause-menu").style.display == "block" ? "none" : "block";
