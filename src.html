@@ -270,19 +270,25 @@
         height: 100%;
         background: #79c9ff;
       }
-      #weapontext {
+      #status-text {
         position: absolute;
         left: 50%;
         color: #333;
-        text-shadow: 0 2px #ff4444;
         font-size: 20px;
         font-weight: 600;
+        letter-spacing: -1px;
         font-family: monospace, Arial;
+        color: #fff;
         z-index: 9999;
         bottom: 50px;
-        width: 1000px;
-        margin-left: -500px;
+        width: 500px;
+        margin-left: -250px;
         text-align: center;
+        background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(121,201,255,1) 100%);
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        padding: 6px;
+        border-radius: 3px;
+        font-family: monospace, Arial !important;
       }
       a:active {
         border: 2px solid currentColor;
@@ -300,7 +306,7 @@
         right: 0;
         background: #333;
         background: rgba(15,15,15,.5);
-        z-index: 9999;
+        z-index: 9999999999;
       }
       .pause-tab {
         position: relative;
@@ -314,10 +320,10 @@
         border-bottom-right-radius: 10px;
         padding: 5px;
         width: 250px;
-        color: #333;
-        text-shadow: 0 2px #25750a;
+        color: #fff;
+        text-shadow: 0 2px #79c9ff;
         text-align: center;
-        box-shadow: 0 3px 5px #25750a;
+        box-shadow: 0 2px 2px #79c9ff;
       }
       img {
         pointer-events: none !important;
@@ -342,10 +348,10 @@
       </div>
     </div>
     <div class="pause-menu" style="display:none">
-      <h1 style="color:#25750a;font-weight:bold;font-family:monospace;position:absolute;left:20px;top:20px;font-size:75px;margin:0">PAUSED</h1>
-      <div class="pause-tab" onclick="unpause()">Continue</div><br>
-      <div class="pause-tab" onclick="confirm('Are you sure? All player will be disconnected.')&&cancelSearch()">Leave game</div><br>
-      <div class="pause-tab" onclick="openSettings()">Settings</div><br>
+      <h1 style="color:#fff;font-weight:bold;font-family:monospace;position:absolute;left:20px;top:20px;font-size:75px;margin:0">PAUSED</h1>
+      <div class="pause-tab" onclick="pause()">Continue</div><br>
+      <div class="pause-tab" onclick="confirm('Are you sure? All player will be disconnected.') && (gametime.disconnect(), location.replace('/'))">Leave game</div><br>
+      <div class="pause-tab" onclick="settings()">Settings</div><br>
     </div>
     <audio id="punchSound" src="sounds/punch.mp3"></audio>
     <audio id="ricochet1" src="sounds/ricochet1.mp3"></audio>
@@ -408,11 +414,7 @@
       <img id="railscope" src="images/scopes/1.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:100vw;left:50%;margin-left:-50vw!important;z-index:999;top:0" />
       <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
     </div>
-    <p id="weapontext" style="display:none">Hold [T] to pick up <span class="weapon-name"></span></p>
-    <!-- <script type="module">
-      import * as CANNON from 'https://unpkg.com/cannon-es@0.19.0/dist/cannon-es.js';
-      window.CANNON = CANNON;
-    </script> -->
+    <p id="status-text" style="display:none"></p>
     <script>
       sandbox = {
         players: 2
@@ -740,12 +742,12 @@
         "pause": (localStorage["prefsKeyControls"] || defaultKeys).split(",")[9]
       };
       function showText(e) {
-        document.querySelector("#weapontext").textContent = e;
-        document.querySelector("#weapontext").style.display = "block";
+        document.querySelector("#status-text").textContent = e;
+        document.querySelector("#status-text").style.display = "block";
       }
       function hideText() {
-        document.querySelector("#weapontext").textContent = "";
-        document.querySelector("#weapontext").style.display = "none";
+        document.querySelector("#status-text").textContent = "";
+        document.querySelector("#status-text").style.display = "none";
       }
       function checkTouching(e,t){let o=e.position.y-e.geometry.parameters.height/2,r=e.position.y+e.geometry.parameters.height/2,i=e.position.x+e.geometry.parameters.width/2,p=e.position.x-e.geometry.parameters.width/2,a=e.position.z-e.geometry.parameters.depth/2,m=e.position.z+e.geometry.parameters.depth/2,s=t.position.y-t.geometry.parameters.height/2,h=t.position.y+t.geometry.parameters.height/2,g=t.position.x+t.geometry.parameters.width/2,n=t.position.x-t.geometry.parameters.width/2,y=t.position.z-t.geometry.parameters.depth/2,d=t.position.z+t.geometry.parameters.depth/2;return!(r<s||i<n||o>h||p>g||a>d||m<y)}
       connectedUsers = 0;
@@ -913,6 +915,12 @@
         player.translateY(-1.6);
         player.rotateY(Math.PI);
         player.translateZ(-.65);
+        (() => {
+          let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+          let rounds = currentWeapon == "primary" ? primaryWeapon.rounds : secondaryWeapon.rounds;
+          let clips = currentWeapon == "primary" ? primaryWeapon.clips : secondaryWeapon.clips;
+          clips <= 0 && rounds <= 0 && !isReloading && showText("No ammo left. Press [Y] to switch weapon");
+        })();
         camera.updateMatrixWorld(), raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
         let intersections = raycaster.intersectObjects(raycastTargets);
         (intersection = intersections[0] || null);
@@ -1334,7 +1342,7 @@
           scene.add(e);
           setInterval(() => {
             if (distanceTo(e.position, camera.position) <= 2) {
-              showText("Hold [T] to pickup " + name);
+              showText("Hold [T] to pick up " + name.replace(/(\_)/gi, " ").trim());
               isTouchingOrdinance = true;
               document.onkeydown = (z) => { z.key == "t" && !z.repeat && (scene.remove(e), e.position.y = -10000, pickupWeapon(name.trim(), n.trim())) }
             } else (isTouchingOrdinance = false, hideText());
@@ -1521,6 +1529,11 @@
       const clickZoom = (o, e) => o >= 20 && e == "zoomIn" ? o - 5 : o <= 75 && e == "zoomOut" ? o + 5 : o;
       const getFov = () => Math.floor(2 * Math.atan(camera.getFilmHeight() / 2 / camera.getFocalLength()) * 180 / Math.PI);
       document.addEventListener("keydown", (e) => {
+        if (e.key == "b" && !isPunching && !e.repeat) {
+          isPaused && pause();
+        }
+      });
+      document.addEventListener("keydown", (e) => {
         if (!controls.isLocked) {
           return;
         }
@@ -1584,7 +1597,7 @@
           throwGrenade();
         }
       });
-      function throwGrenade(){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.001,a.translateY(e)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshBasicMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0}));e.scale.set(.5,.5,.5);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.0025),e.material.opacity<0||(e.material.opacity+=-.0025)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{distanceTo(camera.position,e.position)<=3?(gametime.run("hit",[(gametime.user.position)+","+(((100-distanceTo(camera.position,e.position))*20).toFixed(2)>0?((100-distanceTo(camera.position,e.position))*20).toFixed(2):0)]),document.querySelector("#hiteffect").style.opacity=1,setTimeout(()=>{document.querySelector("#hiteffect").style.opacity=0},1000)):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e)):(e.scale.set(e.scale.x+.3,e.scale.y+.3,e.scale.z+.3),e.material.opacity+=-.05)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
+      function throwGrenade(){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.001,a.translateY(e)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshBasicMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0}));e.scale.set(.5,.5,.5);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.0025),e.material.opacity<0||(e.material.opacity+=-.0025)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position]),document.querySelector("#hiteffect").style.opacity=1,setTimeout(()=>{document.querySelector("#hiteffect").style.opacity=0},1000)):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e)):(e.scale.set(e.scale.x+.3,e.scale.y+.3,e.scale.z+.3),e.material.opacity+=-.05)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
       document.addEventListener("contextmenu", (e) => { return e.preventDefault() });
       document.addEventListener("keyup", (e) => {
         if (!controls.isLocked) {
@@ -1655,9 +1668,17 @@
       createWeapon("Sniper_Rifle", new THREE.Vector3(38, 0, -20));
       createWeapon("P90_SMG", new THREE.Vector3(20, 0, -14));
       /* End game misc setup */
+      function pause() {
+        document.querySelector(".pause-menu").style.display = document.querySelector(".pause-menu").style.display == "block" ? "none" : "block";
+        isPaused = document.querySelector(".pause-menu").style.display == "block";
+        isPaused ? (controls.isLocked = false) : (controls.isLocked = true);
+      }
       gameControl.on("connect", (controller) => {
         window.controller = controller;
-        lookSensitivity=.003;lookAcc=0;lookMax=.1;(()=>{let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))}))})(),controller.on('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('up0',()=>{lookAcc=0}),controller.on('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('down0',()=>{lookAcc=0}),controller.on('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('left1',()=>{lookAcc=0}),controller.on('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).before('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("playerRotate", [camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+gametime.user.position])}).after('right1',()=>{lookAcc=0}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
+        lookSensitivity=.004;lookAcc=0;lookMax=.1;(()=>{let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))}))})(),controller.on('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('up0',()=>{camera.rotation.y+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('up0',()=>{lookAcc=0}),controller.on('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('down0',()=>{camera.rotation.y+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('down0',()=>{lookAcc=0}),controller.on('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('left1',()=>{camera.rotation.x+=lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('left1',()=>{lookAcc=0}),controller.on('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('right1',()=>{camera.rotation.x+=-lookAcc;lookAcc>=lookMax||(lookAcc+=(lookSensitivity)),gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('right1',()=>{lookAcc=0}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
+        controller.on("button11", () => {}).before("button11", () => {
+          pause();
+        });
       });
       setInterval(()=>{for(let i=0;i<document.querySelectorAll("a").length;i++){document.querySelectorAll("a")[i].addEventListener("mousedown",()=>{document.querySelector("#mousedownSound").play()}),document.querySelectorAll("a")[i].addEventListener("mouseup",()=>{document.querySelector("#mouseupSound").play()})}},1000);
       setInterval(()=>{for(let i=0;i<document.querySelectorAll("button").length;i++){document.querySelectorAll("button")[i].addEventListener("mousedown",()=>{document.querySelector("#mousedownSound").play()}),document.querySelectorAll("button")[i].addEventListener("mouseup",()=>{document.querySelector("#mouseupSound").play()})}},1000);
