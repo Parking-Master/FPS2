@@ -365,6 +365,7 @@
     <audio id="Sniper_Rifle_fire" src="sounds/guns/Sniper_Rifle/fire.mp3"></audio>
     <audio id="Rail_Gun_fire" src="sounds/guns/Rail_Gun/fire.mp3"></audio>
     <audio id="P90_SMG_fire" src="sounds/guns/P90_SMG/fire.mp3"></audio>
+    <audio id="Grenade_Launcher_fire" src="sounds/guns/Grenade_Launcher/fire.mp3"></audio>
     <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
@@ -389,6 +390,8 @@
     <audio id="Rail_Gun_reloadfull" src="sounds/guns/Rail_Gun/full.mp3"></audio>
     <audio id="P90_SMG_reloadeasy" src="sounds/guns/P90_SMG/easy.mp3"></audio>
     <audio id="P90_SMG_reloadfull" src="sounds/guns/P90_SMG/full.mp3"></audio>
+    <audio id="Grenade_Launcher_reloadeasy" src="sounds/guns/Grenade_Launcher/easy.mp3"></audio>
+    <audio id="Grenade_Launcher_reloadfull" src="sounds/guns/Grenade_Launcher/full.mp3"></audio>
     <div class="ui">
       <div class="scoreboard">
         <span class="player1">A - <span class="score">0</span></span>
@@ -775,7 +778,8 @@
         "Desert_Eagle": document.getElementById("Desert_Eagle_fire"),
         "Sniper_Rifle": document.getElementById("Sniper_Rifle_fire"),
         "Rail_Gun": document.getElementById("Rail_Gun_fire"),
-        "P90_SMG": document.getElementById("P90_SMG_fire")
+        "P90_SMG": document.getElementById("P90_SMG_fire"),
+        "Grenade_Launcher": document.getElementById("Grenade_Launcher_fire")
       };
       reloads = {
         "Assault_Rifle": {
@@ -797,6 +801,10 @@
         "P90_SMG": {
           "easy": document.getElementById("P90_SMG_reloadeasy"),
           "full": document.getElementById("P90_SMG_reloadfull")
+        },
+        "Grenade_Launcher": {
+          "easy": document.getElementById("Grenade_Launcher_reloadeasy"),
+          "full": document.getElementById("Grenade_Launcher_reloadfull")
         }
       };
       /* Start renderer setup */
@@ -1092,6 +1100,7 @@
       gunIndexes["Sniper_Rifle"] = 4;
       gunIndexes["Rail_Gun"] = 5;
       gunIndexes["P90_SMG"] = 6;
+      gunIndexes["Grenade_Launcher"] = 7;
       let Loaders = {
         0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
           primaryWeapon.object = model.scene;
@@ -1104,8 +1113,8 @@
           secondaryWeapon.object = model.scene;
           animations[1]=(model.animations);
           let mixer = new THREE.AnimationMixer(secondaryWeapon.object);
-          mixer.speed = 1;
           let weaponIndex = gunIndexes[loadout[1]];
+          mixer.speed = 2.5;
           mixers[1]=(mixer);
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
@@ -1140,7 +1149,7 @@
         }), 8: new THREE.GLTFLoader(loadingManager).load("models/weapons/Sniper_Rifle.glb", (model) => {
           animations[4]=(model.animations);
           let mixer = new THREE.AnimationMixer(model.scene);
-          mixer.speed = .8;
+          mixer.speed = 2;
           let weaponIndex = gunIndexes["Sniper_Rifle"];
           mixers[4]=(mixer);
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
@@ -1166,6 +1175,15 @@
           weapons["P90_SMG"] = model;
         }), 11: new THREE.GLTFLoader(loadingManager).load("models/vehicles/humvee.glb", (model) => {
           vehicles.push(model);
+        }), 12: new THREE.GLTFLoader(loadingManager).load("models/weapons/Grenade_Launcher.glb", (model) => {
+          animations[7]=(model.animations);
+          let mixer = new THREE.AnimationMixer(model.scene);
+          mixer.speed = 2.25;
+          let weaponIndex = gunIndexes["Grenade_Launcher"];
+          mixers[7]=(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
+          weapons["Grenade_Launcher"] = model;
         })
       }
       /* End Model loaders */
@@ -1383,7 +1401,7 @@
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xd3c172),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
-            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"&&5))));
+            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"?5:(gun=="Grenade_Launcher"&&5)))));
             gametime.run("hit", [gametime.user.position + "," + damage]);
           } else if (intersection != null && typeof scene.getObjectByName("Vehicle").getObjectByName(intersection.object.name) != "undefined") {
             vehicleClones.forEach((x) => {
@@ -1526,6 +1544,14 @@
           currentWeapon.rounds = 48;
           currentWeapon.defaultRounds = 48;
         }
+        if (name == "Grenade_Launcher") {
+          let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
+          currentWeapon.easyReloadTimeout = 3000;
+          currentWeapon.fullReloadTimeout = 3500;
+          currentWeapon.clips = 0;
+          currentWeapon.rounds = 6;
+          currentWeapon.defaultRounds = 6;
+        }
         canFire = true;
       }
       ordinances = {};
@@ -1666,6 +1692,18 @@
         if (currentWeapon == "Rail_Gun" && e.detail == 2) {
           fire(1);
         }
+        if (currentWeapon == "Grenade_Launcher") {
+          if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
+          grenadesLeft++;
+          gunsounds["Grenade_Launcher"].cloneNode().play();
+          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
+          let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+          let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
+          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
+          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
+          throwGrenade();
+        }
         if (currentWeapon == "P90_SMG") {
           fullAutoFiring = true;
           whatStartedFiring = "click";
@@ -1785,6 +1823,22 @@
             keyTicks++;
             keyTicks >= 4 && !isReloading && (fire(1), shake(camera, 1), deactivate(e.key), keyTicks = 0);
           }
+          if (currentWeapon == "Grenade_Launcher") {
+            if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
+            grenadesLeft++;
+            gunsounds["Grenade_Launcher"].cloneNode().play();
+            (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
+            let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+            let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+            mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
+            mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
+            mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
+            throwGrenade();
+          }
+          if (currentWeapon == "P90_SMG") {
+            fullAutoFiring = true;
+            whatStartedFiring = "click";
+          }
         }
         if (e.key == "y" && !e.repeat) {
           switchWeapon();
@@ -1863,6 +1917,7 @@
       /* Game misc setup */
       createWeapon("Sniper_Rifle", new THREE.Vector3(38, 0, -20));
       createWeapon("P90_SMG", new THREE.Vector3(20, 0, -14));
+      createWeapon("Grenade_Launcher", new THREE.Vector3(28, 0, -20));
       createVehicle(new THREE.Vector3(26, 0, 7), new THREE.Vector3(0, Math.PI-1, 0));
       createVehicle(new THREE.Vector3(12, 0, -28), new THREE.Vector3(0, Math.PI/2, 0));
       /* End game misc setup */
