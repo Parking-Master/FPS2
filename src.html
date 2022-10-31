@@ -447,6 +447,14 @@
       gametime.make("stop");
       gametime.make("hit");
       gametime.make("eliminate");
+      gametime.make("vehicle");
+      gametime.on("vehicle", function(data) {
+        if (data.split(",")[0] == gametime.user.position) {
+          return;
+        }
+        otherIsInVehicle ? otherIsInVehicle = false : otherIsInVehicle = true;
+        otherVehicle = scene.getObjectByProperty("uuid", vehicleClones.map(function(x) { return x["uuid"] })[data.split(",")[1] - 0]);
+      });
       gametime.on("remove", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
           return;
@@ -934,6 +942,7 @@
         walkLeft = false;
         walkRight = false;
       }
+      otherIsInVehicle = false;
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -1239,7 +1248,7 @@
         controls.isLocked = false;
         let h = setInterval(() => {
           if (e.obstructed) return (scene.add(gun), controls.isLocked = true, cameraLocked = true, camera.rotation.set(0, 0, 0), isInVehicle = false, currentVehicle = null, document.onkeydown = null, document.onkeyup = null, clearInterval(h));
-          if (collision(e, otherFollower) && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) gametime.run("eleminate", [gametime.user.position == 1 ? 2 : 1]);
+          if (collision(e, otherFollower) && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) gametime.run("eliminate", [gametime.user.position == 1 ? 2 : 1]);
           e.rotation.order = "YXZ";
           camera.position.copy(e.position);
           camera.rotation.copy(e.rotation);
@@ -1290,6 +1299,7 @@
             });
           }
         }
+        gametime.run("vehicle", [gametime.user.position + "," + vehicleClones.map(function(x) { return x["uuid"] }).indexOf(currentVehicle.uuid)]);
       }
       function stopMoving(e = false, i, camera) {
         let f = new THREE.Mesh();
