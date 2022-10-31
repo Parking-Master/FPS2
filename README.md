@@ -51,7 +51,7 @@ Obviously, new game can't be completely similar style-wise to the last one, we'v
 A lot of responsiveness has also been added not only for resize, but for touch support and spacing elements.
 
 ### #3: Features and Misc
-There's not much to say about the features, because we tried are hardest for full customization and other features in the original game.
+There's not much to say about the features, because we tried our hardest for full customization and other features in the original game.
 
 For the maps though, we brought back some old maps, and brought in some new maps. Some maps in the last game could not be added for in-game support reasons.
 
