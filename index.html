@@ -457,6 +457,13 @@
             }, 1000);
           }
         })();
+        setTimeout(() => {
+          swal.getState().isOpen || swal({
+            icon: "error",
+            title: "Error",
+            text: "Sorry, it looks like our lobby servers are down. Try again later to check if the issue is resolved."
+          });
+        }, 5000);
       }
       function enterCode() {
         swal({
