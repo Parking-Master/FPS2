@@ -627,6 +627,7 @@
           hole.position.set(x, y, z);
           hole.rotation.set(x1, y1, z1);
           scene.add(hole);
+          renderer.shadowMap.needsUpdate = true;
         }
         if (data.split(",")[1] == "flash") {
           let x = data.split(",")[2] - 0;
@@ -655,7 +656,10 @@
           flash.translateY(-.08);
           flash.rotateY(.5);
           scene.add(flash);
-          setTimeout(() => scene.remove(flash), 10);
+          let muzzleLight = new THREE.PointLight(0xf99c00, 1);
+          scene.add(muzzleLight);
+          muzzleLight.position.copy(flash.position);
+          setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 10);
         }
         if (data.split(",")[1] == "animate") {
           data.split(",")[2] == "start" ? mixers[3].clipAction(animations[3][8]).play() : (data.split(",")[2] == "reload" ? (mixers[3].clipAction(animations[3][6]).reset(), mixers[3].clipAction(animations[3][6]).loop = THREE.LoopOnce, mixers[3].clipAction(animations[3][6]).play()) : (mixers[3].clipAction(animations[3][8]).stop(), mixers[3].clipAction(animations[3][8]).reset()));
@@ -720,7 +724,7 @@
                   mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
                   scene.add(primaryWeapon.object);
                   scene.add(otherPlayer);
-                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),light.shadow.bias=-1e-5,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.castShadow=true,player.getObjectByName("Ch49_body2").parent.traverse((x)=>{x.castShadow=true}),otherPlayer.getObjectByName("Ch49_body2").parent.traverse((x)=>{x.castShadow=true}),light.shadow.radius=2.5)})(), clearInterval(counting));
+                  (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),light.shadow.bias=-1e-5,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.castShadow=true,light.shadow.radius=2.5,renderer.shadowMap.autoUpdate=false,renderer.shadowMap.needsUpdate=true)})(), clearInterval(counting));
                   didStart = true;
                   mixers[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]].clipAction(animations[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]][1]).play();
                 }
@@ -826,7 +830,7 @@
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
-      renderer.setPixelRatio(1);
+      renderer.setPixelRatio(renderer.setPixelRatio(1+(devicePixelRatio/4)));
       /* End renderer setup */
       muzzleFlash = new THREE.Mesh();
       bulletShell = new THREE.Mesh();
@@ -1164,7 +1168,7 @@
         }), 8: new THREE.GLTFLoader(loadingManager).load("models/weapons/Sniper_Rifle.glb", (model) => {
           animations[4]=(model.animations);
           let mixer = new THREE.AnimationMixer(model.scene);
-          mixer.speed = 2;
+          mixer.speed = 2.5;
           let weaponIndex = gunIndexes["Sniper_Rifle"];
           mixers[4]=(mixer);
           weapons["Sniper_Rifle"] = model;
@@ -1390,7 +1394,7 @@
               vehicleClones.forEach(i => {
                 typeof i.getObjectByName(x.name) != "undefined" && (x.health <= 0 ? destroyVehicle(x, x) : x.health--);
               });
-              return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), clearInterval(h);
+              return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), renderer.shadowMap.needsUpdate = true, clearInterval(h);
             }
             e.translateZ(-.01);
           });
