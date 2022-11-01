@@ -120,16 +120,16 @@ All controls are basically the same as the original.
 ##### AK-47 Rifle
 The AK-47 is the most popular weapon in the game because many choose to keep it as their default rifle.
 
-The AK-47 Rifle variant is also a very reliable weapon with full auto mode and 1/4 damage.
+The AK-47 Rifle variant is also a very reliable weapon with full auto mode and 1/20 damage.
 
 <img src="images/guns/Assault_Rifle.png" width="20%">
 
 <details>
 <summary>Show details</summary>
 <ul>
-<li>Damage: 25/100</li>
-<li>Accuracy: 50/100</li>
-<li>Recoil: 15/100</li>
+<li>Damage: 5/100</li>
+<li>Accuracy: 55/100</li>
+<li>Recoil: 20/100</li>
 <li>Fire delay: 120 ms</li>
 <li>Reload time: 6500 ms</li>
 </ul>
@@ -145,9 +145,9 @@ Specs & Details about this weapon are very straight-forward, a gun that's very h
 <details>
 <summary>Show details</summary>
 <ul>
-<li>Damage: 55/100</li>
-<li>Accuracy: 20/100</li>
-<li>Recoil: 70/100</li>
+<li>Damage: 15/100</li>
+<li>Accuracy: 30/100</li>
+<li>Recoil: 60/100</li>
 <li>Fire delay: 250 ms</li>
 <li>Reload time: 3000 ms</li>
 </ul>
@@ -163,12 +163,103 @@ This weapon is in between two kinds of weapons: A .50 cal sniper rifle, and a mi
 <details>
 <summary>Show details</summary>
 <ul>
-<li>Damage: 60/100</li>
+<li>Damage: 40/100</li>
 <li>Accuracy: 40/100</li>
 <li>Recoil: 30/100</li>
 <li>Fire delay: 250 ms</li>
 <li>Reload time: 2500 ms</li>
 </ul>
+</details>
+
+##### Remington Shotgun
+The Remington 870 Shotgun is a beautiful high-damaging rifle, with all kinds of finishing and a wooden grip.
+
+It fires tiny __Birdshot__ pellets from a 380 shotgun shell, as well as some varieties of __Buckshot__.
+
+<img src="images/guns/Remington_Shotgun.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 40/100</li>
+<li>Accuracy: 55/100</li>
+<li>Recoil: 35/100</li>
+<li>Fire delay: 100 ms</li>
+<li>Reload time: 3000 ms</li>
+</ul>
+</details>
+
+##### Railgun
+The Railgun is an electric weapon which fires ammunition by charging it through a coil tube.
+
+The Railgun can also inject objects with an explosive, or just use the plain ammuntion.
+
+<img src="images/guns/Rail_Gun.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 100/100</li>
+<li>Accuracy: 35/100</li>
+<li>Recoil: 50/100</li>
+<li>Fire delay: [N/A] ms</li>
+<li>Reload time: 2500 ms</li>
+</ul>
+</details>
+
+##### P90 SMG
+The P90 is a full auto SMG/UZI that uses very fast rapid-fire, and causes minimal damage on semi-auto mode.
+
+The P90 is a favored weapon for being __easy to use__, __reliable__, and __fast__.
+
+<img src="images/guns/P90_SMG.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 5/100</li>
+<li>Accuracy: 40/100</li>
+<li>Recoil: 15/100</li>
+<li>Fire delay: [N/A] ms</li>
+<li>Reload time: 2000 ms</li>
+</ul>
+</details>
+
+##### Grenade Launcher
+The M32 Grenade Launcher is a basic cannon that launches frag grenades up to 30m.
+
+This weapon is most commonly used in vehicle-operated warzones on the battlefield.
+
+<img src="images/guns/Grenade_Launcher.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: [N/A]</li>
+<li>Accuracy: 50/100</li>
+<li>Recoil: 20/100</li>
+<li>Fire delay: [N/A] ms</li>
+<li>Reload time: 0 ms</li>
+</ul>
+</details>
+
+#### Vehicles
+##### Army Humvee
+The Humvee Pickup is a reliable vehicle that takes 100+ damage without being destroyed, but watch out for those tight corners!
+
+<img src="images/vehicles/Humvee.png" width="100%">
+
+#### Maps
+##### Cargo Port
+The Cargo Port map appeared in the original FPS with low-poly textures, blurry lighting and no shadows.
+
+The all-new Cargo Port map features physically lighting, realistic shadows, and high-resolution textures, with light emitting from the sun.
+
+<img src="images/maps/cargo.png" width="100%">
+
+<details>
+<summary>Show old map</summary>
+<img src="https://fps5.ml/images/maps/cargo.png" width="100%">
 </details>
 
 ### In-game photos
@@ -188,6 +279,14 @@ This weapon is in between two kinds of weapons: A .50 cal sniper rifle, and a mi
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Desert Eagle Pistol](https://sketchfab.com/3d-models/desert-eagle-gun-1605b6c38826433fb3fe564e1d043199) by [attix84work](https://sketchfab.com/attix84work) - Licensed under CC 4.0
 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Sniper Rifle](https://sketchfab.com/3d-models/sniper-rifle-gameready-free-e520b234140049e7890db0b6c29d3925) by [pashtetuser](https://sketchfab.com/pashtetuser) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Remington Shotgun](https://sketchfab.com/3d-models/shotgun-bec49e6f99e347cbb60e6390b2c4202c) by [Jonathan Steylaerts](https://sketchfab.com/JonathanSteylaerts) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[P90 SMG](https://sketchfab.com/3d-models/smg-90-3b5371ff0db24407ab592997e5038ad3) by [TORI106](https://sketchfab.com/TORI106) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[M32 Grenade Launcher](https://sketchfab.com/3d-models/m32-grenade-laucher-f7dea83e9f114de99f2e964572f8d7d7) by [hpedrors](https://sketchfab.com/hpedrors) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Humvee Vehicle](https://sketchfab.com/3d-models/low-poly-humvee-vehicle-fac4178dc3db4eb9abf7f45425125e1e) by [Duane's Mind](https://sketchfab.com/duanesmind) - Licensed under CC 4.0
 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Weapon Box](https://sketchfab.com/3d-models/weapon-box-f59a809c194b459ca884796618315463) by [dwantin](https://sketchfab.com/dwantin) - Licensed under CC 4.0
 
