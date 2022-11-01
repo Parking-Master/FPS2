@@ -543,6 +543,11 @@
         if (data.split(",")[0] == gametime.user.position) {
           return;
         }
+        if (otherVehicle != null) {
+          let pos = new THREE.Vector3(data.split(",")[1]-0, data.split(",")[2]-1.6, data.split(",")[3]-0);
+          otherVehicle.position.copy(pos);
+          return;
+        }
         mixers[3].clipAction(animations[3][0]).play();
         otherPlayer.rotation.order = "YXZ";
         otherPlayer.position.set(data.split(",")[1]-0, data.split(",")[2]-1.6, data.split(",")[3]-0);
@@ -959,6 +964,7 @@
         walkRight = false;
       }
       otherIsInVehicle = false;
+      otherVehicle = null;
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -1297,9 +1303,11 @@
           vehicleAcc >= .1 || (vehicleAcc += .001);
           if (vehicleMovements["ArrowUp"]) {
             e.translateZ(vehicleAcc);
+            gametime.run("move", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+e.key]);
           }
           if (vehicleMovements["ArrowDown"]) {
             e.translateZ(-(vehicleAcc / 2));
+            gametime.run("move", [gametime.user.position+","+camera.position.x+","+(camera.position.y+2)+","+(camera.position.z+8)+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+e.key]);
           }
           if (vehicleMovements["ArrowLeft"] && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) {
             e.rotateY(.005);
@@ -1367,7 +1375,7 @@
         walkLeft = false;
         walkRight = false;
       }
-      function fire(rounds = 1, subtract = true) {
+      function fire(rounds = 1, subtract = true, timeout = 100) {
         if (!canFire || (weaponPosition == "primary" ? (primaryWeapon.rounds) : (secondaryWeapon.rounds)) <= 0) {
           return;
         }
@@ -1427,7 +1435,7 @@
             });
           }
           shake(camera, .5);
-        }, 100);
+        }, timeout);
         fullAutoFiring ? canFire = true : canFire = false;
         fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
       }
@@ -1719,7 +1727,7 @@
           fire(1);
         }
         if (currentWeapon == "Remington_Shotgun") {
-          for (let i = 0; i < 10; i++) { fire(1, false) }
+          fire(4, false, 0);
           weaponPosition == "primary" ? (primaryWeapon.rounds--) : (secondaryWeapon.rounds--);
         }
         if (currentWeapon == "Grenade_Launcher") {
