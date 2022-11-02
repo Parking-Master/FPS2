@@ -137,7 +137,10 @@
       }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
-    <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    <!-- This is the original Parse API script. It has been temporarily disabled until the service is fixed -->
+    <!-- <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script> -->
+    <script src="parse.min.js"></script>
+    <!-- This is the backup service script -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
   <body>
@@ -398,7 +401,7 @@
       });
       id = Math.random().toString();
       lockInput = null;
-      Parse.initialize("bHe2YiXotGOruwjsso41nGjJEO4NfvcSIx0gUAhX","qnqEwzriDSdqq9LvcxleSthtLusd6HM5HisIaKUN"),Parse.serverURL="https://parseapi.back4app.com/";
+      Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
       Lobby = new Parse.Object.extend("Lobby");
       createlobbytext = "";
       function code(){let r="";for(let a=1;a<=6;a++)r+=a%2==0?String.fromCharCode(26*Math.random()+65):Math.ceil(9*Math.random());return r}
@@ -628,6 +631,23 @@
         controller.on("button3", () => {}).before("button3", () => {lockInput&&(lockInput.value=lockInput.value.split("").reverse().splice(1).reverse().join("")),createlobbytext=lockInput.value});
         controller.on("button12", () => {}).before("button12", () => {location.reload()});
       });
+      // These are temporary function overwrites for the Parse API until it is fixed.
+      function enterCode() {
+        swal({
+          icon: "error",
+          title: "Error",
+          text: "Sorry, we're in the middle of upgrading and updating our database servers, and until we're done, this service is temporarily unavailable. Sorry for the inconvenience. In the mean time, try joining an existing lobby",
+          button: "Close"
+        });
+      }
+      function createLobby() {
+        swal({
+          icon: "error",
+          title: "Error",
+          text: "Sorry, we're in the middle of upgrading and updating our database servers, and until we're done, this service is temporarily unavailable. Sorry for the inconvenience. In the mean time, try joining an existing lobby",
+          button: "Close"
+        });
+      }
     </script>
   </body>
 </html>
