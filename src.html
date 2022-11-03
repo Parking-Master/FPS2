@@ -545,8 +545,11 @@
           return;
         }
         if (otherVehicle != null) {
-          let pos = new THREE.Vector3(data.split(",")[1]-0, data.split(",")[2]-1.6, data.split(",")[3]-0);
+          console.log(data)
+          let pos = new THREE.Vector3(data.split(",")[1]-0, data.split(",")[2]-0, data.split(",")[3]-0);
+          let rot = new THREE.Vector3(data.split(",")[4]-0, data.split(",")[5]-0, data.split(",")[6]-0);
           otherVehicle.position.copy(pos);
+          otherVehicle.rotation.copy(rot);
           return;
         }
         mixers[3].clipAction(animations[3][0]).play();
@@ -1317,11 +1320,11 @@
           vehicleAcc >= .1 || (vehicleAcc += .001);
           if (vehicleMovements["ArrowUp"]) {
             e.translateZ(vehicleAcc);
-            gametime.run("move", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+e.key]);
+            gametime.run("move", [gametime.user.position+","+currentVehicle.position.x+","+currentVehicle.position.y+","+currentVehicle.position.z+","+currentVehicle.rotation.x+","+currentVehicle.rotation.y+","+currentVehicle.rotation.z+","+e.key]);
           }
           if (vehicleMovements["ArrowDown"]) {
             e.translateZ(-(vehicleAcc / 2));
-            gametime.run("move", [gametime.user.position+","+camera.position.x+","+(camera.position.y+2)+","+(camera.position.z+8)+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z+","+e.key]);
+            gametime.run("move", [gametime.user.position+","+currentVehicle.position.x+","+(currentVehicle.position.y)+","+(currentVehicle.position.z)+","+currentVehicle.rotation.x+","+currentVehicle.rotation.y+","+currentVehicle.rotation.z+","+e.key]);
           }
           if (vehicleMovements["ArrowLeft"] && (vehicleMovements["ArrowUp"] || vehicleMovements["ArrowDown"])) {
             e.rotateY(.005);
