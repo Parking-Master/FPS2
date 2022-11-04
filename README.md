@@ -24,17 +24,16 @@ The original FPS was a great fun game with lots of features and misc, but when i
 If you add all of the lists together, then times it by 2, you'll get the total performance
 
 #### FPS 1
-- Total performance: 46/100
-
-#### FPS 2
 - Total performance: 18/100
 
-As you can see, FPS 2 has a much less impact on performance, even in multiplayer.
+#### FPS 2
+- Total performance: 50/100
+
+As you can see, FPS 2 has a much better on performance, even in multiplayer.
 
 ### #2: Style
 
-Obviously, new game can't be completely similar style-wise to the last one, we've make a huge change to menus, in-game UI, and much more.
-
+Obviously, new game can't be completely similar style-wise to the last one, we've make a huge change to Menus, In-Game UI, and much more.
 
 #### FPS 1
 <details>
@@ -65,12 +64,12 @@ An overall rating for FPS 1 is:<br>
 - +10 Style
 
 The overall rating for FPS 2 is:<br>
-90/100
+100/100
 
 - +40 for Fun and Game Experience
-- +20 Style
+- +25 Style
 - +20 for Features and Misc
-- +10 for Device Support
+- +15 for Device Support
 
 ## How to play
 All controls are basically the same as the original.
@@ -78,7 +77,7 @@ All controls are basically the same as the original.
 ### Key controls
 <blockquote>F &nbsp;&nbsp;- Fire</blockquote>
 <blockquote>R &nbsp;&nbsp;- Reload</blockquote>
-<blockquote>( ) - Jump</blockquote>
+<blockquote>[ ] - Jump</blockquote>
 <blockquote>M &nbsp;&nbsp;- Throw Grenade</blockquote>
 <blockquote>🖱 &nbsp;&nbsp;- Look Around</blockquote>
 <blockquote>ᐱ &nbsp;&nbsp;- Walk Forward</blockquote>
@@ -138,7 +137,7 @@ The AK-47 Rifle variant is also a very reliable weapon with full auto mode and 1
 ##### Desert Eagle
 The .50 cal Desert Eagle ("Deagle") a very high-recoil and causes critical damage with just a single bullet.
 
-Specs & Details about this weapon are very straight-forward, a gun that's very hard to control, but it's all worth it when you see the damage.
+It fires .50 Cal black-tip armor-piercing rounds.
 
 <img src="images/guns/Desert_Eagle.png" width="20%">
 
@@ -243,6 +242,24 @@ This weapon is most commonly used in vehicle-operated warzones on the battlefiel
 </ul>
 </details>
 
+##### Rocket Launcher
+The Rocket Launcher streams an Air Rocket into the target it's aiming at.
+
+This weapon is most commonly used in vehicle-operated warzones on the battlefield, just like the Grenade Launcher.
+
+<img src="images/guns/Rocket_Launcher.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 95/100</li>
+<li>Accuracy: 10/100</li>
+<li>Recoil: 25/100</li>
+<li>Fire delay: [N/A] ms</li>
+<li>Reload time: 0 ms</li>
+</ul>
+</details>
+
 #### Vehicles
 ##### Army Humvee
 The Humvee Pickup is a reliable vehicle that takes 100+ damage without being destroyed, but watch out for those tight corners!
@@ -285,6 +302,8 @@ The all-new Cargo Port map features physically lighting, realistic shadows, and 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[P90 SMG](https://sketchfab.com/3d-models/smg-90-3b5371ff0db24407ab592997e5038ad3) by [TORI106](https://sketchfab.com/TORI106) - Licensed under CC 4.0
 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[M32 Grenade Launcher](https://sketchfab.com/3d-models/m32-grenade-laucher-f7dea83e9f114de99f2e964572f8d7d7) by [hpedrors](https://sketchfab.com/hpedrors) - Licensed under CC 4.0
+
+<img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Rocket Launcher](https://sketchfab.com/3d-models/rocket-launcher-32177fca0bf54bf3a844b3ba61845c28) by [Ivan008](https://sketchfab.com/hukan008) - Licensed under CC 4.0
 
 <img alt="Sketchfab" src="https://user-images.githubusercontent.com/88283567/195716404-f131a400-c38b-47f1-be88-7772d19889dc.png" width="1%">&nbsp;&nbsp;[Humvee Vehicle](https://sketchfab.com/3d-models/low-poly-humvee-vehicle-fac4178dc3db4eb9abf7f45425125e1e) by [Duane's Mind](https://sketchfab.com/duanesmind) - Licensed under CC 4.0
 
