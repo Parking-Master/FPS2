@@ -12,7 +12,7 @@
         overflow: hidden !important;
         user-select: none !important;
         transition: top .2s;
-        background: #eeeeee;
+        background: #fff;
         font-family: "Default" !important;
       }
       @font-face {
@@ -420,8 +420,8 @@
       </div>
       <img id="sniperscope" src="images/scopes/0.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:50vw;left:50%;margin-left:-25vw!important;z-index:999;top:5px" />
       <img id="railscope" src="images/scopes/1.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:100vw;left:50%;margin-left:-50vw!important;z-index:999;top:0" />
-      <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="margin:0;padding:0;opacity:0;width:100vw;height:100vw" />
     </div>
+    <img id="hiteffect" src="images/hit.png" width="100%" height="100%" style="position:absolute;margin:0;padding:0;opacity:0;width:100vw;height:100vw;z-index:-1" />
     <p id="status-text" style="display:none"></p>
     <script>
       sandbox = {
@@ -774,6 +774,7 @@
         document.querySelector("#status-text").style.display = "block";
       }
       function hideText() {
+        if (nukeActivated) return;
         document.querySelector("#status-text").textContent = "";
         document.querySelector("#status-text").style.display = "none";
       }
@@ -980,6 +981,7 @@
       }
       otherIsInVehicle = false;
       otherVehicle = null;
+      nukeActivated = false;
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -1014,13 +1016,19 @@
           let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
           let rounds = currentWeapon == "primary" ? primaryWeapon.rounds : secondaryWeapon.rounds;
           let clips = currentWeapon == "primary" ? primaryWeapon.clips : secondaryWeapon.clips;
-          clips <= 0 && rounds <= 0 && !isReloading && showText("No ammo left. Press [Y] to switch weapon");
+          clips <= 0 && rounds <= 0 && !isReloading && !nukeActivated && showText("No ammo left. Press [Y] to switch weapon");
         })();
         camera.updateMatrixWorld(), raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
         let intersections = raycaster.intersectObjects(raycastTargets);
         (intersection = intersections[0] || null);
         if (intersection != null && intersection.object == otherFollower) {
           document.querySelector(".crosshair").style.backgroundColor = "#ff0000";
+        } else if (nukeActivated) {
+          document.querySelector(".crosshair").style.backgroundColor = "#ff0000";
+          document.querySelector(".crosshair").style.width = "20px";
+          document.querySelector(".crosshair").style.height = "20px";
+          document.querySelector(".crosshair").style.marginLeft = "-10px";
+          document.querySelector(".crosshair").style.marginTop = "-10px";
         } else if (((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name)) == "Rail_Gun" && keyTicks > 0) {
           document.querySelector(".crosshair").style.backgroundColor = "#0000ff";
         } else {
@@ -1274,7 +1282,7 @@
               walkRight = false;
             }
             if (distanceTo(e.position, follower.position) <= 3.5) {
-              showText("Hold [T] to get in vehicle");
+              !nukeActivated && showText("Hold [T] to get in vehicle");
               document.onkeydown = (t) => {
                 t.key == "t" && !t.repeat && getInVehicle(e);
               }
@@ -1304,7 +1312,7 @@
             walkRight = false;
           }
           if (distanceTo(e.position, follower.position) <= 3.5) {
-            showText("Hold [T] to get in vehicle");
+            !nukeActivated && showText("Hold [T] to get in vehicle");
             document.onkeydown = (t) => {
               t.key == "t" && !t.repeat && getInVehicle(e);
             }
@@ -1653,7 +1661,7 @@
           scene.add(e);
           let k = setInterval(() => {
             if (distanceTo(e.position, camera.position) <= 2) {
-              showText("Hold [T] to pick up " + name.replace(/(\_)/gi, " ").trim());
+              !nukeActivated && showText("Hold [T] to pick up " + name.replace(/(\_)/gi, " ").trim());
               isTouchingOrdinance = true;
               document.onkeydown = (z) => { z.key == "t" && !z.repeat && (scene.remove(e), e.position.y = -10000, pickupWeapon(name.trim(), n.trim()), clearInterval(k)) }
             } else (isTouchingOrdinance = false, hideText());
@@ -1829,29 +1837,39 @@
         }
         if (currentWeapon == "Nuke_Launcher") {
           if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
-          let i=gunsounds["Nuke_Launcher"].cloneNode();
-          i.play();
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
-          let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
-          let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
-          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
-          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
-          mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
-          (()=>{let timeout=setTimeout(()=>{let a=y;let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));let it=new THREE.PointLight(0xf88b00,3);let k=setInterval((()=>{if(it.intensity>=10)return clearInterval(k);it.intensity+=.1}),10);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera.position);distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))},8000);let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let y=new THREE.Mesh(new THREE.CylinderGeometry(.1,.05,1.5),new THREE.MeshPhongMaterial({color:0x222222,shininess:10}));y.position.copy(gun.position),y.rotation.copy(gun.rotation),y.updateMatrix(),y.rotateX(Math.PI/2),y.translateY(-1),y.translateZ(-.65),y.translateX(.5);let f=setInterval(()=>{map.traverse((x)=>{if(collision(y,x)&&x!=gun&&(!x.name.includes("scene")&&!x.name.includes("Scene"))&&x!=y&&x!=camera&&x.isObject3D){console.log(x),scene.remove(y),(()=>{let a=y;let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));let it=new THREE.PointLight(0xf88b00,3);i.pause();let k=setInterval((()=>{if(it.intensity>=10)return clearInterval(k);it.intensity+=.1}),10);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera.position);distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))})(),clearTimeout(timeout),clearInterval(f)}});y.translateY(-.2)});scene.add(y)})();
-          let flash = muzzleFlash.clone();
-          flash.position.copy(camera.position);
-          flash.scale.set(.6, .6, .6);
-          flash.rotation.copy(camera.rotation);
-          flash.updateMatrix();
-          flash.translateZ(-2);
-          flash.translateX(.1);
-          flash.translateY(-.08);
-          flash.rotateY(.5);
-          scene.add(flash);
-          let muzzleLight = new THREE.PointLight(0xf99c00, 3);
-          scene.add(muzzleLight);
-          muzzleLight.position.copy(flash.position);
-          setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 50);
+          let l = 30;
+          let m = setInterval(() => {
+            l--;
+            nukeActivated = true;
+            showText("WARNING: NUKE ACTIVATING IN " + l + " SECONDS");
+            if (l <= 0) {
+              let i=gunsounds["Nuke_Launcher"].cloneNode();
+              i.play();
+              let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
+              let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
+              mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
+              mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
+              mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
+              ((() => { let k = new Audio(); k.src = "sounds/guns/Nuke_Launcher/recoil.mp3"; return k })().cloneNode().play(), (()=>{let timeout=setTimeout(()=>{let a=y;let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));document.querySelector("#hiteffect").style.opacity=1;document.querySelector("#hiteffect").style.zIndex=99999999;let it=new THREE.PointLight(0xf88b00,3);let k=setInterval((()=>{if(it.intensity>=10)return clearInterval(k);it.intensity+=.1}),10);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();(() => { let k = new Audio(); k.src = "sounds/guns/Nuke_Launcher/hit.mp3"; return k })().cloneNode().play();let j=100;setInterval((()=>{j++,light.intensity=j/50;renderer.domElement.style.filter="brightness("+j+"%)";j>=4000&&(renderer.domElement.style.display="none")}));let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera.position);distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))},8000);let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let y=new THREE.Mesh(new THREE.CylinderGeometry(.1,.05,3),new THREE.MeshPhongMaterial({color:0x222222,shininess:10}));y.position.copy(gun.position),y.rotation.copy(gun.rotation),y.updateMatrix(),y.rotateX(Math.PI/2),y.translateY(-1),y.translateZ(-.65),y.translateX(.5);let f=setInterval(()=>{map.traverse((x)=>{if(collision(y,x)&&x!=gun&&(!x.name.includes("scene")&&!x.name.includes("Scene"))&&x!=y&&x!=camera&&x.isObject3D){console.log(x),scene.remove(y),(()=>{let a=y;let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));document.querySelector("#hiteffect").style.opacity=1;document.querySelector("#hiteffect").style.zIndex=99999999;let it=new THREE.PointLight(0xf88b00,3);i.pause();let k=setInterval((()=>{if(it.intensity>=10)return clearInterval(k);it.intensity+=.1}),10);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();(() => { let k = new Audio(); k.src = "sounds/guns/Nuke_Launcher/hit.mp3"; return k })().cloneNode().play();let j=100;setInterval((()=>{j++,light.intensity=j/50;renderer.domElement.style.filter="brightness("+j+"%)";j>=4000&&(renderer.domElement.style.display="none")}));let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera.position);distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))})(),clearTimeout(timeout),clearInterval(f)}});y.translateY(-.02)});scene.add(y)})(), clearInterval(m));
+              let flash = muzzleFlash.clone();
+              flash.position.copy(camera.position);
+              flash.scale.set(1, 1, 1);
+              flash.rotation.copy(camera.rotation);
+              flash.updateMatrix();
+              flash.translateZ(-2);
+              flash.translateX(.1);
+              flash.translateY(-.08);
+              flash.rotateY(.5);
+              scene.add(flash);
+              let muzzleLight = new THREE.PointLight(0xf99c00, 8);
+              scene.add(muzzleLight);
+              muzzleLight.position.copy(flash.position);
+              document.querySelector(".ui").style.display = "none";
+              setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 500);
+              controls.isLocked = false;
+            }
+          }, 950);
         }
       });
       document.addEventListener("mouseup", (e) => {
