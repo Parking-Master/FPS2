@@ -12,7 +12,7 @@
       #input:disabled, form button:disabled { opacity: 0.5; }
       #close { cursor: pointer; color: #ff4444; user-select: none; }
       #option { cursor: pointer; color: #51bfff; user-select: none; }
-      #NotiflixNotifyWrap { border: 2px solid #38b6ff }
+      [id^="NotiflixNotify-"] { border: 2px solid #38b6ff }
       a { color: #38b6ff; font-weight: lighter; text-decoration: underline; }
     </style>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
@@ -28,14 +28,19 @@
       <input id="input" autocomplete="off" style="border: 2px solid #38b6ff; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)" /><button class="send">Send</button><button class="disconnect">Disconnect</button>
     </form>
     <script>
+      words = [];
+      fetch("words.json").then((e) => e.json()).then((e) => words = (e.words));
       gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
       gametime.set("channel", "world");
 
       gametime.make("message");
 
       function sendMessage(msg) {
+        let i = msg;
+        words.forEach((x)=>{i=i.replace(x.toString().toLowerCase(),((t)=>{let g="";t.forEach(()=>{g+="*"});return g})(x.toString().toLowerCase().split("")));msg=i});
+        msg = msg.replace(/\*/gi, "(|-star-|)");
         var item = document.createElement("li");
-        item.innerHTML = parseMarkdown(msg.replace(/\<\>/gi,"")).split("<p>")[1].split("</p>").reverse().splice(1).join("");
+        item.innerHTML = parseMarkdown(msg.replace(/\<\>/gi,"")).split("<p>")[1].split("</p>").reverse().splice(1).join("").split("(|-star-|)").join("*");
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
         var chatHistory = localStorage["history"];
@@ -88,7 +93,7 @@
           }, 2000);
         }
       };
-      Notiflix.Notify.init({plainText:false,messageMaxLength:1000,timeout:3000,position:"right-bottom",info:{background:"#fff",textColor:"#38b6ff",notiflixIconColor:"#38b6ff"}});
+      Notiflix.Notify.init({plainText:false,messageMaxLength:1000,timeout:3000,position:"right-top",info:{background:"#fff",textColor:"#38b6ff",notiflixIconColor:"#38b6ff"}});
       Notiflix.Notify.info("Hi! Please take a minute or two to review the <a href='/legal/roomrules.html' target='_blank'>Room Rules</a>, and make sure to be nice!");
       function invite() {
         Notiflix.Notify.info("In the input box, type the players username that you want to invite, starting with an \"@\". Then submit it to find an invite.");
