@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPS2 Support</title>
+    <style>
+      html, body {
+        overflow: hidden !important;
+        cursor: url(/cursors/cursor0.cur), auto !important;
+      }
+      body {
+        background: #fff;
+        background: linear-gradient(90deg, #fff 0%, #38b6ff 100%);
+      }
+      @font-face {
+        font-family: "BigShouldersDisplayBold";
+        src: url(/fonts/BigShouldersDisplay/BigShouldersDisplay-Bold.ttf);
+      }
+      @font-face {
+        font-family: "BigShouldersDisplayRegular";
+        src: url(/fonts/BigShouldersDisplay/BigShouldersDisplay-Light.ttf);
+      }
+      @font-face {
+        font-family: "AgrandirWideBlack";
+        src: url(/fonts/Agrandir/AgrandirWideBlack.ttf);
+      }
+      #heading0 {
+        position: relative;
+        left: 50%;
+        margin: 0;
+        width: 45%;
+        margin-left: -22.5%;
+      }
+      #heading1 {
+        color: #38b6ff;
+        font-family: "BigShouldersDisplayRegular";
+        font-size: 5.5vw;
+        text-align: center;
+      }
+      #background {
+        position: absolute;
+        width: 45%;
+        z-index: -1;
+        left: 50%;
+        margin-left: -22.5%;
+      }
+      #sidebar {
+        position: absolute;
+        top: 0;
+        height: 100vw !important;
+        margin: 0 !important;
+        width: 10%;
+        z-index: -1;
+        margin: 0;
+        left: 30px;
+      }
+      hr {
+        width: 50%;
+        padding: 0 !important;
+        background: #38b6ff;
+        outline: none !important;
+        border: none !important;
+        height: 4px;
+        margin-bottom: -2vw !important;
+        margin-top: -2vw !important;
+      }
+      img {
+        pointer-events: none !important;
+      }
+      * {
+        user-select: none !important;
+        cursor: url(/cursors/cursor0.cur), auto !important;
+      }
+      .overlay {
+        position: relative;
+        background: #fff;
+        width: 50%;
+        height: 500px;
+        border: 5px solid #38b6ff;
+        text-align: center;
+        left: 50%;
+        margin-left: -25%;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+        padding: 15px;
+        font-family: "AgrandirWideBlack" !important;
+        color: #38b6ff;
+        font-size: 15px;
+        transition: font-size .1s, padding .1s;
+        box-shadow: 0 1px 12px rgba(0, 0, 0, 0.12), 0 1px 8px rgba(0, 0, 0, 0.24);
+      }
+      button.button:hover {
+        font-size: 20px;
+        padding: 12px;
+      }
+      .cover {
+        position: fixed;
+        height: 50%;
+        width: 100%;
+        top: -100%;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        margin: 0;
+        background: #fff;
+        z-index: 9999;
+        margin-top: -10px;
+        border-bottom: 10px solid #38b6ff;
+        padding-top: 100px;
+        text-align: center;
+      }
+      a {
+        color: #38b6ff !important;
+        font-family: "AgrandirWideBlack";
+        border-bottom: 2px solid #38b6ff;
+        text-decoration: none !important;
+      }
+      .swal-modal {
+        border-radius: none !important;
+        background: #fff;
+      }
+      .swal-modal * {
+        color: #38b6ff;
+        font-family: "AgrandirWideBlack";
+      }
+      .swal-button {
+        background: #38b6ff;
+        color: #fff !important;
+      }
+      .simple-keyboard {
+        position: fixed;
+        margin: 0;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        z-index: 999999;
+        display: none;
+      }
+      #chatwin {
+        position: relative;
+        border: none;
+        margin: 0;
+      }
+      .tippy-box[data-theme~="fps"] {
+        background-color: #fff;
+        color: #38b6ff;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 3px solid #38b6ff;
+      }
+      .tippy-arrow::before {
+        border-top-color: #fff !important;
+      }
+      li {
+        text-align: left;
+      }
+    </style>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+    <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <img id="background" src="/text-images/rifles.png">
+    <hr>
+    <h1 id="heading1">Room Rules</h1>
+    <div class="overlay">
+      Welcome to the world chat! This chat room will allow you to send, receive, and view messages/invites from other players!
+      <br>
+      <br>
+      Here's the rules for what you're <b>NOT</b> allowed to do in this room:
+      <ul>
+        <li>Don't be dirty. Messages that include profanity or offend other users will be blocked by an AI, or your account will possibly be restricted.</li>
+        <br>
+        <li>Don't be mean. You should treat others how you like to be treated. Try welcoming other players and share some game invites!</li>
+        <br>
+        <li>Use good grammar. Your messages syntax should be nice and clean for others to read. Messages that are not worthy of posting will be possibly hidden.</li>
+      </ul>
+      Here's the rules for what you <b>ARE</b> allowed to do in this room:
+      <ul>
+        <li>Invite some players for a 1v1 match!</li>
+        <br>
+        <li>Be funny! Post some memes and upload some funny pictures.</li>
+        <br>
+        <li>Follow the room rules (obviously)</li>
+      </ul>
+    </div>
+    <p style="color:#38b6ff;font-family:Arial,Helvetica,sans-serif;font-weight:10;text-align:center;margin-top:0">&copy; 2021-2023 Parking Master</p>
+    <div class="cover">
+      <span id="close" style="color:#ff4444;font-size:25px" onclick="play()">&times;</span>
+      <h1 style="font-family:'BigShouldersDisplayRegular';font-size:50px;color:#38b6ff">&bullet; PLAY &bullet;</h1>
+      <br>
+      <a href="" onclick="event.preventDefault(); createLobby()">CREATE LOBBY</a>
+      <br>
+      <a href="" onclick="event.preventDefault(); findLobby()">FIND LOBBY</a>
+      <br>
+      <a href="" onclick="event.preventDefault(); enterCode()">ENTER CODE</a>
+      <br>
+      <a href="" onclick="event.preventDefault(); autoSearch()">AUTO SEARCH</a>
+      <br>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
+    <div class="simple-keyboard"></div>
+    <script src="https://cdn.jsdelivr.net/gh/notiflix/Notiflix@latest/dist/notiflix-aio-3.2.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/FPS-Tipper@main/tipper.js" defer async="false"></script>
+  </body>
+</html>

@@ -87,6 +87,7 @@
         color: #38b6ff;
         font-size: 15px;
         transition: font-size .1s, padding .1s;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
       }
       button.button:hover {
         font-size: 20px;
@@ -135,12 +136,28 @@
         z-index: 999999;
         display: none;
       }
+      #chatwin {
+        position: relative;
+        border: none;
+        margin: 0;
+      }
+      .tippy-box[data-theme~="fps"] {
+        background-color: #fff;
+        color: #38b6ff;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 3px solid #38b6ff;
+      }
+      .tippy-arrow::before {
+        border-top-color: #fff !important;
+      }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
   <body>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <img id="background" src="text-images/rifles.png">
     <img id="sidebar" src="text-images/sidebar.png">
     <img id="heading0" src="text-images/heading.png">
@@ -149,7 +166,7 @@
     <div class="buttons">
       <button class="button" onclick="play(this)">PLAY</button>
       <br>
-      <button class="button" onclick="chat()">CHAT</button>
+      <button class="button" onclick="chat(this)" id="chat">CHAT</button>
       <br>
       <button class="button" onclick="help()">HELP</button>
     </div>
@@ -504,6 +521,36 @@
         });
       }
       didPlay = false;
+      chatOpen = false;
+      window.onmessage = (e) => {
+        if (e.data == "close") document.querySelector("#chat").click();
+      };
+      document.addEventListener("click", (e) => {
+        if ((e.target.id != "chat" && (e != document.body ? true : !e.target.outerHTML.includes("tippy")))) {
+          chatOpen = true;
+          popper.remove();
+        }
+      });
+      let e = document.querySelector("#chat").onclick;
+      document.querySelector("#chat").onclick = null;
+      document.querySelector("#chat").click();
+      document.querySelector("#chat").onclick = e;
+      function chat(button) {
+        if (chatOpen) { return chatOpen = false, popper.remove() }
+        chatOpen = true;
+        let frame = document.createElement("iframe");
+        frame.src = "chat.html";
+        frame.id = "chatwin";
+        frame.style = "width:600px!important;height:400px!important";
+        popper = tippy("#chat", {
+          content: frame,
+          interactive: true,
+          hideOnClick: true,
+          trigger: "click",
+          theme: "fps",
+          maxWidth: frame.width
+        })[0].popper;
+      }
       function play(button) {
         if (!didPlay) {
           didPlay = true;
@@ -628,6 +675,7 @@
         controller.on("button3", () => {}).before("button3", () => {lockInput&&(lockInput.value=lockInput.value.split("").reverse().splice(1).reverse().join("")),createlobbytext=lockInput.value});
         controller.on("button12", () => {}).before("button12", () => {location.reload()});
       });
+      document.querySelector("#chat").click();
     </script>
   </body>
 </html>
