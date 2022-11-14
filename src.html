@@ -369,6 +369,7 @@
     <audio id="Remington_Shotgun_fire" src="sounds/guns/Remington_Shotgun/fire.mp3"></audio>
     <audio id="Rocket_Launcher_fire" src="sounds/guns/Rocket_Launcher/fire.mp3"></audio>
     <audio id="Nuke_Launcher_fire" src="sounds/guns/Nuke_Launcher/fire.mp3"></audio>
+    <audio id="9mm_Pistol_fire" src="sounds/guns/9mm_Pistol/fire.mp3"></audio>
     <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
@@ -398,6 +399,8 @@
     <audio id="Grenade_Launcher_reloadfull" src="sounds/guns/Grenade_Launcher/full.mp3"></audio>
     <audio id="Remington_Shotgun_reloadeasy" src="sounds/guns/Remington_Shotgun/easy.mp3"></audio>
     <audio id="Remington_Shotgun_reloadfull" src="sounds/guns/Remington_Shotgun/full.mp3"></audio>
+    <audio id="9mm_Pistol_reloadeasy" src="sounds/guns/9mm_Pistol/easy.mp3"></audio>
+    <audio id="9mm_Pistol_reloadfull" src="sounds/guns/9mm_Pistol/full.mp3"></audio>
     <div class="ui">
       <div class="scoreboard">
         <span class="player1">A - <span class="score">0</span></span>
@@ -804,7 +807,8 @@
         "Grenade_Launcher": document.getElementById("Grenade_Launcher_fire"),
         "Remington_Shotgun": document.getElementById("Remington_Shotgun_fire"),
         "Rocket_Launcher": document.getElementById("Rocket_Launcher_fire"),
-        "Nuke_Launcher": document.getElementById("Nuke_Launcher_fire")
+        "Nuke_Launcher": document.getElementById("Nuke_Launcher_fire"),
+        "9mm_Pistol": document.getElementById("9mm_Pistol_fire")
       };
       reloads = {
         "Assault_Rifle": {
@@ -838,6 +842,10 @@
         "Nuke_Launcher": {
           "easy": document.getElementById("Nuke_Launcher_reloadeasy"),
           "full": document.getElementById("Nuke_Launcher_reloadfull")
+        },
+        "9mm_Pistol": {
+          "easy": document.getElementById("9mm_Pistol_reloadeasy"),
+          "full": document.getElementById("9mm_Pistol_reloadfull")
         }
       };
       /* Start renderer setup */
@@ -911,7 +919,15 @@
       };
       weaponFireTimeouts = {
         "Assault_Rifle": 0,
-        "Desert_Eagle": 200
+        "Desert_Eagle": 200,
+        "9mm_Pistol": 50,
+        "Sniper_Rifle": 350,
+        "P90_SMG": 0,
+        "Rocket_Launcher": 200,
+        "Grenade_Launcher": 100,
+        "Remington_Shotgun": 150,
+        "Rail_Gun": 0,
+        "Nuke_Launcher": 0
       };
       didStart = false;
       let playerPositionSetter = setInterval(() => {
@@ -1148,6 +1164,7 @@
       gunIndexes["Remington_Shotgun"] = 8;
       gunIndexes["Rocket_Launcher"] = 9;
       gunIndexes["Nuke_Launcher"] = 10;
+      gunIndexes["9mm_Pistol"] = 11;
       let Loaders = {
         0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
           primaryWeapon.object = model.scene;
@@ -1256,6 +1273,15 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
           weapons["Nuke_Launcher"] = model;
+        }), 16: new THREE.GLTFLoader(loadingManager).load("models/weapons/9mm_Pistol.glb", (model) => {
+          animations[11]=(model.animations);
+          let mixer = new THREE.AnimationMixer(model.scene);
+          mixer.speed = 3;
+          let weaponIndex = gunIndexes["9mm_Pistol"];
+          mixers[11]=(mixer);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
+          mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
+          weapons["9mm_Pistol"] = model;
         })
       }
       /* End Model loaders */
@@ -1478,7 +1504,7 @@
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xe8c322),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
-            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"?5:(gun=="Grenade_Launcher"?5:(gun=="Remington_Shotgun"&&50))))));
+            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"?5:(gun=="Grenade_Launcher"?5:(gun=="Remington_Shotgun"?5:(gun=="9mm_Pistol"&&10)))))));
             gametime.run("hit", [gametime.user.position + "," + damage]);
           } else if (intersection != null && typeof scene.getObjectByName("Vehicle").getObjectByName(intersection.object.name) != "undefined") {
             vehicleClones.forEach((x) => {
@@ -1488,7 +1514,7 @@
           shake(camera, .5);
         }, timeout);
         fullAutoFiring ? canFire = true : canFire = false;
-        fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? loadout[0] : loadout[1]))]);
+        fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name))]);
       }
       function switchWeapon() {
         isZoomed && activate("i");
@@ -1653,6 +1679,14 @@
           currentWeapon.rounds = 1;
           currentWeapon.defaultRounds = 1;
         }
+        if (name == "9mm_Pistol") {
+          let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
+          currentWeapon.easyReloadTimeout = 2000;
+          currentWeapon.fullReloadTimeout = 2500;
+          currentWeapon.clips = 3;
+          currentWeapon.rounds = 8;
+          currentWeapon.defaultRounds = 8;
+        }
         let currentWeapon = "primary" == weaponPosition ? primaryWeapon : secondaryWeapon;
         mixers[gunIndexes[currentWeapon.name]].clipAction(animations[gunIndexes[currentWeapon.name]][1]).play();
         didIdle = false;
@@ -1788,6 +1822,9 @@
           whatStartedFiring = "click";
         }
         if (currentWeapon == "Desert_Eagle") {
+          fire(1);
+        }
+        if (currentWeapon == "9mm_Pistol") {
           fire(1);
         }
         if (currentWeapon == "Sniper_Rifle") {
@@ -1971,7 +2008,7 @@
           return;
         }
         if (e.key == "i" && !e.repeat) {
-          if (isReloading || /P90_SMG|Rocket_Launcher|Desert_Eagle|Grenade_Launcher/gi.test((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name))) return;
+          if (isReloading || /P90_SMG|Rocket_Launcher|Desert_Eagle|Grenade_Launcher|9mm_Pistol/gi.test((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name))) return;
           isZoomed ? (/Sniper_Rifle|Rail_Gun/gi.test((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)) && (document.querySelector("#" + ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)).toLowerCase().split("_")[0] + "scope").style.opacity = "0", scene.add((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)))) : (/Sniper_Rifle|Rail_Gun/gi.test(weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) && (scene.remove((weaponPosition == "primary" ? primaryWeapon.object : secondaryWeapon.object)), document.querySelector("#" + ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)).toLowerCase().split("_")[0] + "scope").style.opacity = (((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name)) == "Rail_Gun" ? ".5" : "1")));
           isZoomed ? (document.querySelector(".crosshair").style.visibility = "visible", (() => { for (let i = 0; i < 5; i++) zoomOutFunction(100) })(), isZoomed = false) : (document.querySelector(".crosshair").style.visibility = "hidden", (() => { for (let i = 0; i < 5; i++) zoomInFunction(100) })(), isZoomed = true);
         }
@@ -2015,6 +2052,9 @@
             whatStartedFiring = "click";
           }
           if (currentWeapon == "Desert_Eagle" && !e.repeat) {
+            fire(1);
+          }
+          if (currentWeapon == "9mm_Pistol") {
             fire(1);
           }
           if (currentWeapon == "Rail_Gun") {
