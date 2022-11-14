@@ -359,7 +359,7 @@
     <audio id="ricochet3" src="sounds/ricochet3.mp3"></audio>
     <audio id="explosion" src="sounds/explosion.mp3" volume="1"></audio>
     <audio id="walking" src="sounds/walking.mp3" loop volume=".5"></audio>
-    <audio id="ambience" src="sounds/ambience.mp3" autoplay loop volume="1"></audio>
+    <audio id="ambience" src="sounds/ambience.mp3" loop volume="1"></audio>
     <audio id="Desert_Eagle_fire" src="sounds/guns/Desert_Eagle/fire.mp3"></audio>
     <audio id="Assault_Rifle_fire" src="sounds/guns/Assault_Rifle/fire.mp3"></audio>
     <audio id="Sniper_Rifle_fire" src="sounds/guns/Sniper_Rifle/fire.mp3"></audio>
@@ -443,6 +443,7 @@
       players = 0;
       otherUsername = null;
       countdown = false;
+      hidetext = true;
       /* Gametime.js initialization */
       gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
       gametime.set("channel", new URLSearchParams(location.search).get("lobby"));
@@ -777,7 +778,7 @@
         document.querySelector("#status-text").style.display = "block";
       }
       function hideText() {
-        if (nukeActivated) return;
+        if (nukeActivated || !hidetext) return;
         document.querySelector("#status-text").textContent = "";
         document.querySelector("#status-text").style.display = "none";
       }
@@ -985,6 +986,8 @@
       otherIsInVehicle = false;
       otherVehicle = null;
       nukeActivated = false;
+      pausetabs = [];
+      pausetabs = pausetabs.concat(Object.values(document.querySelectorAll(".pause-tab")));
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -1096,15 +1099,15 @@
         otherFollower.rotation.copy(otherPlayer.rotation);
         follower.position.copy(camera.position);
         document.querySelector("#status").querySelector("#rounds").textContent = (weaponPosition == "primary" ? (primaryWeapon.rounds <= 0 ? 0 : primaryWeapon.rounds).toString() : (secondaryWeapon.rounds <= 0 ? 0 : secondaryWeapon.rounds).toString());
-        document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? primaryWeapon.clips.toString() : secondaryWeapon.clips.toString());
+        document.querySelector("#status").querySelector("#clips").textContent = (weaponPosition == "primary" ? (primaryWeapon.clips <= 0 ? 0 : primaryWeapon.clips).toString() : (secondaryWeapon.clips <= 0 ? 0 : secondaryWeapon.clips).toString());
         document.querySelector(".player1").querySelector(".score").textContent = score1;
         document.querySelector(".player2").querySelector(".score").textContent = score2;
         renderer.render(scene, camera);
       }
-      animate();
       (() => { let loader=new THREE.TextureLoader;loader.load("images/clouds.png",(function(e){var a=new THREE.SphereGeometry(500,60,40),o=new THREE.MeshBasicMaterial({map:e,side:THREE.DoubleSide});a.scale(-1,1,1);d=new THREE.Mesh(a,o);sky=d;sky.material.map.generateMipmaps=!1,sky.material.map.minFilter=THREE.LinearMipMapLinearFilter,sky.material.map.needsUpdate=!0,sky.rotation.y=-.2,scene.add(d),d.position.set(0,0,0)})); })();
       controls = new PointerLockControls(camera, renderer.domElement);
       gamepadControls = THREE.GamepadControls(camera);
+      gamepadControls.isLocked = true;
       controls.isLocked = false;
       /* Start Model loaders */
       loadingProgress = 0;
@@ -1129,7 +1132,7 @@
             }
           });
           camera.position.set(30,0,-30),camera.rotation.set(0,-Math.PI,0);
-          return document.querySelector(".loader").remove(), clearInterval(loadingVerbose);
+          return animate(), document.querySelector("#ambience").play(), document.querySelector(".loader").remove(), clearInterval(loadingVerbose);
         }
         document.querySelector("#progress").style.width = loadingProgress + "%";
         document.querySelector("#progress-status").textContent = loadingProgress;
@@ -1931,25 +1934,34 @@
       const getFov = () => Math.floor(2 * Math.atan(camera.getFilmHeight() / 2 / camera.getFocalLength()) * 180 / Math.PI);
       currentFocus = 0;
       focusMax = 2;
+      setInterval(() => {
+        focusMax = document.querySelectorAll(".pause-tab")[document.querySelectorAll(".pause-tab").length - 1].parentElement.querySelectorAll(".pause-tab").length - 1;
+        pausetabs = Object.values(document.querySelectorAll(".pause-tab")[document.querySelectorAll(".pause-tab").length - 1].parentElement.querySelectorAll(".pause-tab"));
+      }, 500);
       document.addEventListener("keydown", (e) => {
         if (!isPaused) return;
         if (e.key == "ArrowDown") {
           currentFocus >= focusMax ? currentFocus = 0 : currentFocus++;
-          for (let i = 0; i < document.querySelectorAll(".pause-tab").length; i++) {
-            document.querySelectorAll(".pause-tab")[i] == document.querySelectorAll(".pause-tab")[currentFocus] ? document.querySelectorAll(".pause-tab")[i].style.outline = "3px solid #ddd" : document.querySelectorAll(".pause-tab")[i].style.outline = "";
+          for (let i = 0; i < pausetabs.length; i++) {
+            pausetabs[i] == pausetabs[currentFocus] ? pausetabs[i].style.outline = "3px solid #ddd" : pausetabs[i].style.outline = "";
           }
         }
         if (e.key == "ArrowUp") {
           currentFocus <= 0 ? currentFocus = focusMax : currentFocus--;
-          for (let i = 0; i < document.querySelectorAll(".pause-tab").length; i++) {
-            document.querySelectorAll(".pause-tab")[i] == document.querySelectorAll(".pause-tab")[currentFocus] ? document.querySelectorAll(".pause-tab")[i].style.outline = "3px solid #ddd" : document.querySelectorAll(".pause-tab")[i].style.outline = "";
+          for (let i = 0; i < pausetabs.length; i++) {
+            pausetabs[i] == pausetabs[currentFocus] ? pausetabs[i].style.outline = "3px solid #ddd" : pausetabs[i].style.outline = "";
           }
         }
         if (e.key == "Enter") {
-          document.querySelectorAll(".pause-tab")[currentFocus].click();
+          pausetabs[currentFocus].click();
         }
       });
       document.addEventListener("keydown", (e) => {
+        if (e.key == "a" && gamepadfunc != null && !e.repeat) {
+          navigator.getGamepads = gamepadfunc;
+          gamepadControls.isLocked = true;
+          gamepadfunc = null;
+        }
         if (e.key == "b" && !isPunching && !e.repeat) {
           isPaused && pause();
         }
@@ -2122,8 +2134,17 @@
         }
         keyTicks = 0;
       });
+      gamepadfunc = null;
       document.addEventListener("mousemove", function(e) {
         if (!controls.isLocked) return;
+        if (typeof controller != "undefined") {
+          gamepadControls.isLocked = false;
+          hidetext = false;
+          gamepadfunc == null && showText("Gamepad disconnected. Press [A] to reconnect");
+          gamepadfunc != null || (gamepadfunc = navigator.getGamepads);
+          navigator.getGamepads = undefined;
+          setTimeout(() => hidetext = true, 2000);
+        }
         gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z]);
       });
       window.addEventListener("resize", function() { camera.aspect = window.innerWidth / window.innerHeight, camera.updateProjectionMatrix(), renderer.setSize(window.innerWidth, window.innerHeight) }, true);
@@ -2150,7 +2171,7 @@
       }
       gameControl.on("connect", (controller) => {
         window.controller = controller;
-        let d=false;dl=!1,setInterval((()=>{let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{!isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{!isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))})),controller.on('up0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('up0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('up0',()=>{}),controller.on('down0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('down0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('down0',()=>{}),controller.on('left1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('left1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('left1',()=>{}),controller.on('right1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('right1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('right1',()=>{}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:isPaused?"Enter":keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
+        let d=false;dl=!1,setInterval((()=>{if(!navigator.getGamepads){return}let e;-1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowLeft"})),dl=!0,e=setInterval((()=>{if(!navigator.getGamepads){return}if(-1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),dl=!1,clearInterval(e)})))})),dl=!1,setInterval((()=>{if(!navigator.getGamepads){return}let e;1==navigator.getGamepads()[0].axes[0]&&(dl&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowRight"})),dl=!0,e=setInterval((()=>{if(!navigator.getGamepads){return}if(1!=navigator.getGamepads()[0].axes[0])return document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowLeft"})),document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowRight"})),dl=!1,clearInterval(e)})))})),controller.on("right0",(()=>{!isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).before("right0",(()=>{isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown"}))})).after("right0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowDown"}))})),controller.on("left0",(()=>{!isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).before("left0",(()=>{isPaused&&document.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowUp"}))})).after("left0",(()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:"ArrowUp"}))})),controller.on("button16",(()=>{})).before("button16",()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.shoot}))}).after("button16",()=>{document.dispatchEvent(new KeyboardEvent("keyup",{key:keyControls.shoot}))}),controller.on("l1",(()=>{})).before("l1",(()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.switchWeapon}))})),controller.on('up0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('up0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('up0',()=>{}),controller.on('down0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('down0',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('down0',()=>{}),controller.on('left1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('left1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('left1',()=>{}),controller.on('right1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).before('right1',()=>{gametime.run("rotate", [gametime.user.position+","+camera.position.x+","+camera.position.y+","+camera.position.z+","+camera.rotation.x+","+camera.rotation.y+","+camera.rotation.z])}).after('right1',()=>{}),controller.on('button0',()=>{}).before('button0',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:isPaused?"Enter":keyControls.jump}))}).after('button0',()=>{}),controller.on('button1',()=>{}).before('button1',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.punch}))}).after('button1',()=>{}),controller.on('button14',()=>{}).before('button14',()=>{isZoomed?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomOut})):document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.zoomIn}))}).after('button14',()=>{}),controller.on('button7',()=>{}).before('button7',()=>{isTouchingOrdinance?document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.interact})):(!isReloading&&document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.reload})))}).after('button7',()=>{}),controller.on('button15',()=>{}).before('button15',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.throwGrenade}))}).after('button15',()=>{}),controller.on('button11',()=>{}).before('button11',()=>{document.dispatchEvent(new KeyboardEvent("keydown",{key:keyControls.pause}))}).after('button11',()=>{});
         controller.on("button11", () => {}).before("button11", () => {pause()});
       });
       setInterval(()=>{for(let i=0;i<document.querySelectorAll("a").length;i++){document.querySelectorAll("a")[i].addEventListener("mousedown",()=>{document.querySelector("#mousedownSound").play()}),document.querySelectorAll("a")[i].addEventListener("mouseup",()=>{document.querySelector("#mouseupSound").play()})}},1000);
@@ -2184,7 +2205,7 @@
           menu.appendChild(document.createElement("br"));
         });
       }
-      settingsmenu = new PauseMenu({ title:"Settings", buttons: { Sensitivity: function() { isPaused ? settingsmenu.close(false) : settingsmenu.close(); let range = document.createElement("div"); range.innerHTML = "<h2>Change mouse sensitivity</h2><input type='range' onchange='controls.pointerSpeed=this.value/50'><h2>Change gamepad sensitivity</h2><input type='range' onchange='controls.pointerSpeed=this.value/17'><h2>Change touch sensitivity</h2><input type='range'>"; swal({ content: range }).then(() => settingsmenu.open()) }, "Go back": function() { isPaused ? settingsmenu.close(true) : settingsmenu.close(false) }}});
+      settingsmenu = new PauseMenu({ title: "Settings", buttons: { Sensitivity: function() { isPaused ? settingsmenu.close(false) : settingsmenu.close(); let range = document.createElement("div"); range.innerHTML = "<h2>Change mouse sensitivity</h2><input type='range' onchange='controls.pointerSpeed=this.value/50'><h2>Change gamepad sensitivity</h2><input type='range' onchange='gamepadControls.speed=this.value/17'><h2>Change touch sensitivity</h2><input type='range'>"; swal({ content: range }).then(() => settingsmenu.open()) }, "Go back": function() { isPaused ? settingsmenu.close(true) : settingsmenu.close(false) }}});
       function settings() {
         settingsmenu.open();
       }
