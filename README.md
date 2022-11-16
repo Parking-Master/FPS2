@@ -279,6 +279,13 @@ The all-new Cargo Port map features physically lighting, realistic shadows, and 
 <img src="https://fps5.ml/images/maps/cargo.png" width="100%">
 </details>
 
+##### Vertex
+The map "Vertex" appeared several times in the first prototypes of FPS 1.
+
+This map has been redesigned to perfection in this amazing old-fashioned farm-like styled map.
+
+<img src="images/maps/vertex.png" width="100%">
+
 ### In-game photos
 ![image](https://user-images.githubusercontent.com/88283567/195461720-389c8954-3d40-4b9e-a297-5f9f0b9e71d0.png)
 
