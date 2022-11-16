@@ -522,7 +522,7 @@
         setTimeout(() => {
           swal.close();
           let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
-          let spawnPoint1 = { position: { x: 38, y: 0, z: 1 }, rotation: { x: 0, y: Math.PI / 2, z: 0 } };
+          let spawnPoint1 = { position: (currentMap == "CARGO" ? { x: 38, y: 0, z: 1 } : currentMap == "VERTEX" && { x: 20, y: 0, z: -10 }), rotation: { x: 0, y: Math.PI / 2, z: 0 } };
           respawn((distanceTo(otherFollower.position, spawnPoint.position) < distanceTo(otherFollower.position, spawnPoint1.position) ? spawnPoint1.position : spawnPoint.position), distanceTo(otherFollower.position, spawnPoint.position) < distanceTo(otherFollower.position, spawnPoint1.position) ? spawnPoint1.rotation : spawnPoint.rotation);
           document.querySelector(".swal-modal").style = "width:10%!important";
           controls.isLocked = true;
@@ -797,7 +797,7 @@
       gunMeleeRotationY = 0;
       fullAutoFiring = false;
       currentPerformance = (localStorage["performance"] || "100") - 0;
-      currentMap = (new URLSearchParams(location.search).get("map") || "haven").toUpperCase();
+      currentMap = (new URLSearchParams(location.search).get("map") || "CARGO").toUpperCase();
       gunsounds = {
         "Assault_Rifle": document.getElementById("Assault_Rifle_fire"),
         "Desert_Eagle": document.getElementById("Desert_Eagle_fire"),
@@ -1185,12 +1185,20 @@
           weapons[loadout[1]] = model;
         }), 2: new THREE.GLTFLoader(loadingManager).load("models/muzzle_flash.glb", (model) => {
           muzzleFlash = model.scene;
-        }), 3: new THREE.GLTFLoader(loadingManager).load("models/maps/CARGO/scene.gltf", (model) => {
+        }), 3: new THREE.GLTFLoader(loadingManager).load("models/maps/" + currentMap + "/scene.gltf", (model) => {
           map = model.scene;
           scene.add(map);
-          map.scale.set(1.6,1.6,1.6);
-          map.position.y = -300;
-          map.getObjectByProperty("type", "DirectionalLight").visible = false;
+          if (currentMap == "CARGO") {
+            map.scale.set(1.6,1.6,1.6);
+          } else if (currentMap == "VERTEX") {
+            map.scale.set(.5,.5,.5);
+          }
+          if (currentMap == "CARGO") {
+            map.position.y = -300;
+          } else if (currentMap == "VERTEX") {
+            map.position.y = -.75;
+          }
+          currentMap == "CARGO" && (map.getObjectByProperty("type", "DirectionalLight").visible = false);
         }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
           player = model.scene;
           otherPlayer = model.scene.clone();
