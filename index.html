@@ -87,7 +87,7 @@
         color: #38b6ff;
         font-size: 15px;
         transition: font-size .1s, padding .1s;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
       }
       button.button:hover {
         font-size: 20px;
@@ -150,6 +150,27 @@
       .tippy-arrow::before {
         border-top-color: #fff !important;
       }
+      .focusa {
+        outline: 3px solid #ddd !important;
+      }
+      .lobby {
+        font-family: Arial !important;
+      }
+      select {
+        background: #fff;
+        border: 2px solid #38b6ff;
+        border-radius: 0;
+        margin-bottom: 3px;
+      }
+      * {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+      }
+      .swal-text {
+        font-family: Arial !important;
+      }
+      [id^="NotiflixNotify-"] {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+      }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
@@ -170,18 +191,15 @@
       <br>
       <button class="button" onclick="help()">HELP</button>
     </div>
-    <p style="color:#38b6ff;font-family:Arial,Helvetica,sans-serif;font-weight:10;text-align:center;margin-top:0">&copy; 2021-2023 Parking Master</p>
+    <p style="color:#38b6ff;font-family:Arial,Helvetica,sans-serif;font-weight:10;text-align:center;margin-top:0">&copy; 2021-2023 <a href="https://github.com/Parking-Master" style="font-family:Arial,Helvetica,sans-serif!important">Parking Master</a></p>
     <div class="cover">
       <span id="close" style="color:#ff4444;font-size:25px" onclick="play()">&times;</span>
       <h1 style="font-family:'BigShouldersDisplayRegular';font-size:50px;color:#38b6ff">&bullet; PLAY &bullet;</h1>
       <br>
-      <a href="" onclick="event.preventDefault(); createLobby()">CREATE LOBBY</a>
+      <a href="" onclick="event.preventDefault(); playGame()">Quick play</a>
       <br>
-      <a href="" onclick="event.preventDefault(); findLobby()">FIND LOBBY</a>
       <br>
-      <a href="" onclick="event.preventDefault(); enterCode()">ENTER CODE</a>
-      <br>
-      <a href="" onclick="event.preventDefault(); autoSearch()">AUTO SEARCH</a>
+      <a href="" onclick="event.preventDefault(); swal({ title: 'Forge mode', text: 'Create, edit and view models and maps, and craft your own game modes!', button: 'Go to forge' }).then((e) => e && location.assign('./forge.html'))">Forge mode</a>
       <br>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
@@ -433,18 +451,39 @@
           if (name.length > 10) return swal("Lobby name should be under 10 characters.");
           let lobby = new Lobby();
           lobby.set("name", name);
+          lobby.set("map", document.querySelector("#selectmap").value.split(" ")[0].toUpperCase());
+          lobby.set("mode", document.querySelector("#selectmode").value);
           lobby.set("code", document.getElementsByName("code")[0].checked ? code() : "");
-          lobby.save().then(() => (console.log("Lobby \"" + name.toString() + "\" saved"), lobby.get("code").length > 0 ? location.assign("src.html?lobby=" + encodeURIComponent(name) + "&code=" + lobby.get("code")) : findLobby(name)));
+          lobby.save().then(() => (console.log("Lobby \"" + name.toString() + "\" saved"), lobby.get("code").length > 0 ? location.assign("src.html?lobby=" + encodeURIComponent(name) + "&code=" + lobby.get("code")) : findLobby(name, "*", "*")));
           createlobbytext = "";
         });
         setTimeout(() => { document.querySelector(".swal-content__input").addEventListener("keyup", () => { createlobbytext = document.querySelector(".swal-content__input").value }) }, 500);
         document.querySelector(".swal-content").innerHTML += `
         <br>
+        <div class="swal-title" style="font-size:20px!important">Other options</div>
+        <br>
+        <label for="selectmode">Mode:</label>
+        <select value="Slayer" id="selectmode">
+          <option value="Slayer">Slayer</option>
+          <option value="Snipers">Snipers</option>
+          <option value="Fiesta">Fiesta</option>
+          <option value="Oddball">Oddball</option>
+          <option value="Fistfight">Fistfight</option>
+        </select>
+        <br>
+        <label for="selectmap">Map:</label>
+        <select value="Cargo port" id="selectmap">
+          <option value="Cargo port">Cargo port</option>
+          <option value="Vertex">Vertex</option>
+          <option value="Ghost city">Ghost city</option>
+        </select>
+        <br>
+        <br>
         <input type="checkbox" name="code">
         <label for="code">Players have to enter a code</label>
         `;
       }
-      function findLobby(selected) {
+      function findLobby(selected, selectedMode, selectedMap) {
         (async() => {
           let e = !1;
           const t = Parse.Object.extend("Lobby");
@@ -453,17 +492,20 @@
           for (let t = 0; t < s.length; t++) {
             const n = Parse.Object.extend("Lobby");
             new Parse.Query(n).get(s[t].id).then((t => {
-              const n = { name: t.get("name"), time: t.get("createdAt"), code: t.get("code") };
+              const n = { name: t.get("name"), time: t.get("createdAt"), code: t.get("code"), mode: t.get("mode"), map: t.get("map") };
               if (e) {
-                document.querySelector(".swal-content").innerHTML += n.code.length > 0 ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby=' + encodeURIComponent(n.name) + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+                document.querySelector(".swal-content").innerHTML += (n.code.length > 0 || ((selectedMode == "*" ? false : n.mode != selectedMode) || (selectedMap == "*" ? false : n.map != selectedMap))) ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby=' + encodeURIComponent(n.name) + '&map=' + n.map + '&mode=' + n.mode + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + ", on <b>" + (n.map[0].toUpperCase() + n.map.toLowerCase().substr(1)) + "</b></div>";
               } else {
                 e = !0;
                 let content = document.createElement("div");
-                content.innerHTML = n.code.length > 0 ? "" : '<br><div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby='+encodeURIComponent(n.name)+'\')">' + n.name+'</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + "</div>";
+                content.innerHTML = (n.code.length > 0 || ((selectedMode == "*" ? false : n.mode != selectedMode) || (selectedMap == "*" ? false : n.map != selectedMap))) ? "" : '<br><div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby='+encodeURIComponent(n.name) + '&map=' + n.map + '&mode=' + n.mode + '\')">' + n.name+'</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + ", on <b>" + (n.map[0].toUpperCase() + n.map.toLowerCase().substr(1)) + "</b></div>";
                 swal({
-                  title: "FIND A LOBBY",
+                  title: "Find Lobby",
                   content: content
                 });
+                document.querySelector(".swal-content").innerHTML = `
+                <a href="" onclick="event.preventDefault(); findLobby(null, '*', '*'), this.remove()">Show all</a>
+                ` + document.querySelector(".swal-content").innerHTML;
               }
             }));
             setTimeout(() => {
@@ -474,13 +516,6 @@
             }, 1000);
           }
         })();
-        setTimeout(() => {
-          swal.getState().isOpen || swal({
-            icon: "error",
-            title: "Error",
-            text: "Sorry, it looks like our lobby servers are down. Try again later to check if the issue is resolved."
-          });
-        }, 5000);
       }
       function enterCode() {
         swal({
@@ -506,7 +541,7 @@
               let ot = t;
               const n = Parse.Object.extend("Lobby");
               new Parse.Query(n).get(s[t].id).then((t => {
-                const n = { name: t.get("name"), code: t.get("code") };
+                const n = { name: t.get("name"), code: t.get("code"), map: t.get("map"), mode: t.get("mode") };
                 if (e) {
                   codes[n.name] = (n.code);
                 } else {
@@ -514,7 +549,7 @@
                 }
                 console.log(n.code, code);
                 console.log(n.code == code);
-                if (!pause) (n.code == (code) ? (pause = true, swal({ title: "Lobby found", text: "Do you want to join the lobby \"" + n.name + "\"?", buttons: ["Yes", "No"] }).then((e) => !e && location.assign("./src.html?lobby=" + encodeURIComponent(n.name) + "&code=" + code))) : ot + 1 >= s.length && swal({ title: "Lobby not found", text: "This lobby does not exist." }));
+                if (!pause) (n.code == (code) ? (pause = true, swal({ title: "Lobby found", text: "Do you want to join the lobby \"" + n.name + "\"?", buttons: ["Yes", "No"] }).then((e) => !e && location.assign("./src.html?lobby=" + encodeURIComponent(n.name) + "&code=" + code + "&map=" + n.map + "&mode=" + n.mode))) : ot + 1 >= s.length && swal({ title: "Lobby not found", text: "This lobby does not exist." }));
               }));
             }
           })();
@@ -581,7 +616,8 @@
           text: "You will be notified when an active lobby is found.",
           closeOnClickOutside: false,
           closeOnEnterKey: false,
-          closeOnSpaceKey: false
+          closeOnSpaceKey: false,
+          button: "Cancel"
         }).then(() => {
           clearInterval(search);
         });
@@ -676,6 +712,69 @@
         controller.on("button12", () => {}).before("button12", () => {location.reload()});
       });
       document.querySelector("#chat").click();
+      currentMode = "Slayer";
+      currentMap = "CARGO";
+      function chooseMode() {
+        let options = document.createElement("div");
+        options.innerHTML = `
+        <a href="" onclick="event.preventDefault(); currentMode = this.textContent.split(' ')[0]; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')" class="focusa">Slayer [MODE]</a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMode = this.textContent.split(' ')[0]; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Snipers [MODE]</a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMode = this.textContent.split(' ')[0]; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Fiesta [MODE]</a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMode = this.textContent.split(' ')[0]; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Oddball [MODE]</a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMode = this.textContent.split(' ')[0]; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Fistfight [MODE]</a>
+        `;
+        swal({
+          title: "Choose game mode",
+          content: options,
+          buttons: ["Cancel", "Next"]
+        }).then((e) => e && chooseMap());
+      }
+      function chooseMap() {
+        let options = document.createElement("div");
+        options.innerHTML = `
+        <a href="" onclick="event.preventDefault(); currentMap = 'CARGO'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')" class="focusa">Cargo port [MAP]&ThickSpace;&ThickSpace;<img src="/images/maps/cargo.png" style="width:5%"></a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMap = 'VERTEX'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Vertex [MAP]&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<img src="/images/maps/vertex.png" style="width:5%"></a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMap = 'GHOST'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Ghost city [MAP]&ThickSpace;&ThickSpace;&ThickSpace;<img src="/images/maps/ghost.png" style="width:5%"></a>
+        `;
+        swal({
+          title: "Choose a map",
+          content: options,
+          buttons: ["Cancel", "Next"]
+        }).then((e) => {
+          e && swal({
+            title: "Next step",
+            text: "Good job! Now a list of lobbies will be shown based off of the options you chose. If you don't see one, try creating it!"
+          }).then(() => findLobby(null, currentMode, currentMap));
+        });
+      }
+      function playGame() {
+        let options = document.createElement("div");
+        options.innerHTML = `
+        <a href="" onclick="event.preventDefault(); chooseMode()">Start playing</a>
+        <br>
+        <i>or</i>
+        <br>
+        <a href="" onclick="event.preventDefault(); createLobby()">Create a lobby</a>
+        <br>
+        <br>
+        <div class="swal-text">Don't feel like waiting? Use <a href="" onclick="event.preventDefault(); autoSearch()" style="font-family:Arial!important">auto search</a></div>
+        <br>
+        <br>
+        <div class="swal-text"><a href="" onclick="event.preventDefault(); help()" style="font-family:Arial!important;display:inline-flex;align-items:center;justify-content:center;text-align:center;position:relative;width:15px!important;height:15px;border-radius:50%;border:1px solid currentColor;cursor:pointer;font-size:10px;font-weight:bold;justify-content:center;align-items:center;transform:scale(2)">?</a></div>
+        `;
+        swal({
+          title: "Quick Play",
+          text: "Choose a lobby, wait for players, and start playing now!",
+          content: options,
+          button: "Close"
+        });
+      }
     </script>
   </body>
 </html>
