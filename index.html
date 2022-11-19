@@ -750,7 +750,7 @@
           e && swal({
             title: "Next step",
             text: "Good job! Now a list of lobbies will be shown based off of the options you chose. If you don't see one, try creating it!"
-          }).then(() => findLobby(null, currentMode, currentMap));
+          }).then(() => (swal("Loading..."), findLobby(null, currentMode, currentMap)));
         });
       }
       function playGame() {

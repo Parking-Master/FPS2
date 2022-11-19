@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPS2 Multiplayer shooter</title>
+    <style>
+      html, body {
+        overflow: hidden !important;
+        cursor: url(./cursors/cursor0.cur), auto !important;
+        margin: 0;
+      }
+      body {
+        background: #fff;
+        background: linear-gradient(90deg, #fff 0%, #38b6ff 100%);
+      }
+      @font-face {
+        font-family: "BigShouldersDisplayBold";
+        src: url(./fonts/BigShouldersDisplay/BigShouldersDisplay-Bold.ttf);
+      }
+      @font-face {
+        font-family: "BigShouldersDisplayRegular";
+        src: url(./fonts/BigShouldersDisplay/BigShouldersDisplay-Light.ttf);
+      }
+      @font-face {
+        font-family: "AgrandirWideBlack";
+        src: url(./fonts/Agrandir/AgrandirWideBlack.ttf);
+      }
+      #heading0 {
+        position: relative;
+        left: 50%;
+        margin: 0;
+        width: 45%;
+        margin-left: -22.5%;
+      }
+      #heading1 {
+        color: #38b6ff;
+        font-family: "BigShouldersDisplayRegular";
+        font-size: 5.5vw;
+        text-align: center;
+      }
+      #background {
+        position: absolute;
+        width: 45%;
+        z-index: -1;
+        left: 50%;
+        margin-left: -22.5%;
+      }
+      #sidebar {
+        position: absolute;
+        top: 0;
+        height: 100vw !important;
+        margin: 0 !important;
+        width: 10%;
+        z-index: -1;
+        margin: 0;
+        left: 30px;
+      }
+      hr {
+        width: 70%;
+        padding: 0 !important;
+        background: #38b6ff;
+        outline: none !important;
+        border: none !important;
+        height: 2px;
+      }
+      img:not(.texture) {
+        pointer-events: none !important;
+      }
+      * {
+        user-select: none !important;
+        cursor: url(./cursors/cursor0.cur), auto !important;
+        color: #38b6ff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: thin;
+      }
+      button.button {
+        position: relative;
+        background: #fff;
+        width: 50%;
+        border: 5px solid #38b6ff;
+        text-align: center;
+        left: 50%;
+        margin-left: -25%;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+        padding: 15px;
+        font-family: "AgrandirWideBlack" !important;
+        color: #38b6ff;
+        font-size: 15px;
+        transition: font-size .1s, padding .1s;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+      }
+      button.button:hover {
+        font-size: 20px;
+        padding: 12px;
+      }
+      .cover {
+        position: fixed;
+        height: 50%;
+        width: 100%;
+        top: -100%;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        margin: 0;
+        background: #fff;
+        z-index: 9999;
+        margin-top: -10px;
+        border-bottom: 10px solid #38b6ff;
+        padding-top: 100px;
+        text-align: center;
+      }
+      a {
+        color: #38b6ff !important;
+        font-family: "AgrandirWideBlack";
+        border-bottom: 2px solid #38b6ff;
+        text-decoration: none !important;
+      }
+      .swal-modal {
+        border-radius: none !important;
+        background: #fff;
+      }
+      .swal-modal * {
+        color: #38b6ff;
+        font-family: "AgrandirWideBlack";
+      }
+      .swal-button {
+        background: #38b6ff;
+        color: #fff !important;
+      }
+      .simple-keyboard {
+        position: fixed;
+        margin: 0;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        z-index: 999999;
+        display: none;
+      }
+      #chatwin {
+        position: relative;
+        border: none;
+        margin: 0;
+      }
+      .tippy-box[data-theme~="fps"] {
+        background-color: #fff;
+        color: #38b6ff;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 3px solid #38b6ff;
+      }
+      .tippy-arrow::before {
+        border-top-color: #fff !important;
+      }
+      .focusa {
+        outline: 3px solid #ddd !important;
+      }
+      .lobby {
+        font-family: Arial !important;
+      }
+      select {
+        background: #fff;
+        border: 2px solid #38b6ff;
+        border-radius: 0;
+        margin-bottom: 3px;
+      }
+      * {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+      }
+      .swal-text {
+        font-family: Arial !important;
+      }
+      [id^="NotiflixNotify-"] {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+      }
+      canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 9999999;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        border: 10px solid red;
+        border-image: linear-gradient(to top, #38b6ff, #fff) 1 / 10px;
+      }
+      .sidebar {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        bottom: 10px;
+        width: 15%;
+        background: #fff;
+        z-index: 99999999;
+        text-align: center;
+      }
+      button {
+        width: 150px;
+        padding: 3px;
+        background: #fff;
+        border: 2px solid #38b6ff;
+        color: #38b6ff;
+        margin-bottom: 5px;
+      }
+      * {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+      }
+      .position, .rotation, .scale {
+        /* letter-spacing: 3px; */
+      }
+      #x:focus, #y:focus, #z:focus {
+        border: 1px solid #38b6ff;
+        outline: none !important;
+      }
+      .swal-overlay {
+        z-index: 999999999999999999;
+      }
+      .sample {
+        width: 15px;
+        outline: none;
+        border: 1px solid #38b6ff;
+      }
+      .texture {
+        position: relative;
+        width: 10%;
+        border: 3px solid #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        margin: 5px;
+      }
+      .texture-holder {
+        overflow-x: scroll !important;
+      }
+      .focused {
+        outline: 3px solid #ddd;
+      }
+    </style>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/notiflix/Notiflix@latest/dist/notiflix-aio-3.2.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/FPS-Tipper@main/tipper.js" defer async="false"></script>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <div class="simple-keyboard"></div>
+    <img src="favicon.ico" style="position:absolute;z-index:9999999999;right:20px;top:0;width:10%;filter:drop-shadow(3px 3px 3px rgba(0,0,0,.3));pointer-events:all!important" onclick="scene.children.length > 2 ? swal({buttons:['Yes','No'],text:'You have unsaved changes. Do you want to leave?'}).then(e => !e && location.assign('/')) : location.assign('/')">
+    <div class="sidebar">
+      <span style="font-size:20px;font-weight:bold">Edit:</span>
+      <br>
+      <br>
+      <button onclick="utils['add']()">Add object</button>
+      <br>
+      <button onclick="utils['edit']()">Edit object</button>
+      <br>
+      <button onclick="utils['remove']()">Remove object</button>
+      <hr>
+      <div class="position">
+        <span class="material-symbols-outlined" style="font-size:10px">open_with</span>&ThickSpace;<span id="x" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>',&ThickSpace;<span id="y" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>',&ThickSpace;<span id="z" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>'
+      </div>
+      <div class="rotation">
+        <span class="material-symbols-outlined" style="font-size:10px">sync</span>&ThickSpace;<span id="x">0</span>&deg;,&ThickSpace;<span id="y">0</span>&deg;,&ThickSpace;<span id="z">0</span>&deg;
+      </div>
+      <div class="scale">
+        <span class="material-symbols-outlined" style="font-size:10px">aspect_ratio</span>&ThickSpace;<span id="x">0</span>&deg;,&ThickSpace;<span id="y">0</span>&deg;,&ThickSpace;<span id="z">0</span>&deg;
+      </div>
+      <hr>
+      <span style="font-size:20px;font-weight:bold">File:</span>
+      <br>
+      <br>
+      <button>Import</button>
+      <br>
+      <button>Export</button>
+      <br>
+      <button>Clear</button>
+      <hr>
+      <p style="margin:20px">In the editor, add an object and drag your cursor to get started.<br><br>You can select its texture by uploading an image or selecting one from the list.<br><br>You can also import a .GLTF, .OBJ, or even a .MAP!</p>
+    </div>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      lights = [];
+      focusedObject = null;
+      textureDialog = document.createElement("div");
+      textureDialog.innerHTML = `
+      <p>Loaded textures:</p>
+      <div class="texture-holder">
+        <img src="forge/textures/Modern_Metal.png" class="texture focused" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Rusty_Metal.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Picket_Planks.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Unsanded_Wood.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Chunky_Tree.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Soft_Grass.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Hard_Grass.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/White_Grass.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Dirty_Dirt.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+        <img src="forge/textures/Light_Rocks.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+      </div>
+      <input type="file" onchange="chosenTexture = window.URL.createObjectURL(this.files[0])">
+      `;
+      ObjectShapeNames = {"Box": "Box", "Ball": "Sphere", "Pillar": "Cylinder", "Triangle": "Triangle"};
+      chosenTexture = "forge/textures/Modern_Metal.png";
+      boxHelper = null;
+      utils = {
+        "add": function add() {
+          let options = document.createElement("div");
+          options.innerHTML = `
+          <label for="objtype">Object type:</label>
+          <select value="Mesh" onchange="this.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'inline-block' : 'none', this.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'none' : 'inline-block'" id="objtype">
+            <option value="Mesh">Mesh</option>
+            <option value="Light">Light</option>
+          </select>
+          <br>
+          <br>
+          <div>
+            <label for="objshape">Object type:</label>
+            <select value="Box" id="objshape">
+              <option value="Box">Box</option>
+              <option value="Ball">Ball</option>
+              <option value="Pillar">Pillar</option>
+              <option value="Triangle">Triangle</option>
+            </select>
+          </div>
+          <div style="display:none">
+            <label for="lightintensity">Light intensity:</label>
+            <input id="lightintensity" value="1" class="sample">
+          </div>
+          <hr>
+          <div>
+            <label for="objmaterial">Object texture:</label>
+            <button id="objmaterial" value="1" onclick="swal({title:'Choose texture',text:'Choose a preloaded texture or upload file',content:textureDialog}).then(()=>utils['add']())">Choose...</button>
+          </div>
+          `;
+          swal({
+            title: "Add object",
+            content: options
+          }).then(() => {
+            let geo = document.querySelector("#objtype").value == "Light" ? new THREE.SphereGeometry() : new THREE[ObjectShapeNames[document.querySelector("#objshape").value] + "Geometry"];
+            let mat = document.querySelector("#objtype").value == "Light" ? new THREE.MeshToonMaterial() : new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load(chosenTexture) });
+            let obj = new THREE.Mesh(geo, mat);
+            let light = new THREE.PointLight(0xffffff, (document.querySelector("#lightintensity").value - 0 * 4));
+            light.castShadow = true;
+            lights.push(light);
+            document.querySelector("#objtype").value == "Light" || (obj.castShadow = true);
+            document.querySelector("#objtype").value == "Light" || (obj.receiveShadow = true);
+            obj.add(light);
+            obj.wasManuallyMade = true;
+            scene.add(obj);
+          });
+        }
+      };
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .2, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setPixelRatio(renderer.setPixelRatio(1+(devicePixelRatio/4)));
+      scene.add(camera);
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+      function isTouchDevice(){return!!window.matchMedia("(pointer: coarse)").matches}
+      isTouchDevice()?(()=>{const{Euler:e,EventDispatcher:t,Vector3:n}=THREE;var o;o=!1;var i=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent),c=document.body.clientWidth/2,r=(document.body.clientHeight,window.innerHeight),s=function(t,s){o=!!i,void 0===s&&(console.warn('THREE.PointerLockControls: The second parameter "domElement" is now mandatory.'),s=document.body),this.domElement=s,this.isLocked=!1;var m,u,d,a=this,h={type:"change"},v={type:"lock"},l={type:"unlock"},E=new e(0,0,0,"YXZ"),p=Math.PI/2,k=Math.PI/3.8,L=Math.PI/9,f=new n,y=0,M=0;function x(){}function P(e){u=e.touches[0].clientY,m=e.touches[0].clientX,y=m-c,M=u-(r-100),E.setFromQuaternion(t.quaternion),E.y=.005*y,E.x=.005*M,E.x=Math.max(-p,Math.min(L,E.x)),E.y=Math.max(-k,Math.min(k,E.y)),t.quaternion.setFromEuler(E),a.dispatchEvent(h),console.log(M)}function w(e){}function g(e){if(!1!==a.isLocked){var n=e.movementX||e.mozMovementX||e.webkitMovementX||0,o=e.movementY||e.mozMovementY||e.webkitMovementY||0;E.setFromQuaternion(t.quaternion),E.y-=.002*n,E.x-=.002*o,E.x=Math.max(-p,Math.min(p,E.x)),E.y=Math.max(-k,Math.min(k,E.y)),t.quaternion.setFromEuler(E),a.dispatchEvent(h)}}function b(){document.pointerLockElement===a.domElement?(a.dispatchEvent(v),a.isLocked=!0):(a.dispatchEvent(l),a.isLocked=!1)}function F(){console.error("THREE.PointerLockControls: Unable to use Pointer Lock API")}this.connect=function(){document.addEventListener("mousemove",g,!1),document.addEventListener("touchstart",x,!1),document.addEventListener("touchmove",P,!1),document.addEventListener("pointerlockchange",b,!1),document.addEventListener("pointerlockerror",F,!1)},this.disconnect=function(){document.removeEventListener("mousemove",g,!1),document.removeEventListener("touchend",w,!1),document.removeEventListener("touchmove",onTouchmove,!1),document.removeEventListener("pointerlockchange",b,!1),document.removeEventListener("pointerlockerror",F,!1)},this.dispose=function(){this.disconnect()},this.getObject=function(){return t},this.getDirection=(d=new n(0,0,-1),function(e){return e.copy(d).applyQuaternion(t.quaternion)}),this.moveForward=function(e){f.setFromMatrixColumn(t.matrix,0),f.crossVectors(t.up,f),t.position.addScaledVector(f,e)},this.moveRight=function(e){f.setFromMatrixColumn(t.matrix,0),t.position.addScaledVector(f,e)},this.lock=1==o?function(){a.isLocked=!0,this.connect()}:function(){this.domElement.requestPointerLock()},this.unlock=function(){document.exitPointerLock()},this.connect()};(s.prototype=Object.create(t.prototype)).constructor=s,window.PointerLockControls=s})():(()=>{const _euler=new THREE.Euler(0,0,0,"YXZ"),_vector=new THREE.Vector3,_changeEvent={type:"change"},_lockEvent={type:"lock"},_unlockEvent={type:"unlock"},_PI_2=Math.PI/2;class PointerLockControls extends THREE.EventDispatcher{constructor(e,t){super(),void 0===t&&(console.warn('THREE.PointerLockControls: The second parameter "domElement" is now mandatory.'),t=document.body),this.domElement=t,this.isLocked=!1,this.minPolarAngle=0,this.maxPolarAngle=Math.PI,this.pointerSpeed=1;const o=this;function n(t){if(!1===o.isLocked)return;const n=t.movementX||t.mozMovementX||t.webkitMovementX||0,r=t.movementY||t.mozMovementY||t.webkitMovementY||0;_euler.setFromQuaternion(e.quaternion),_euler.y-=.002*n*o.pointerSpeed,_euler.x-=.002*r*o.pointerSpeed,_euler.x=Math.max(_PI_2-o.maxPolarAngle,Math.min(_PI_2-o.minPolarAngle,_euler.x)),e.quaternion.setFromEuler(_euler),o.dispatchEvent(_changeEvent)}function r(){o.domElement.ownerDocument.pointerLockElement===o.domElement?(o.dispatchEvent(_lockEvent),o.isLocked=!0):(o.dispatchEvent(_unlockEvent),o.isLocked=!1)}function c(){console.error("THREE.PointerLockControls: Unable to use Pointer Lock API")}this.connect=function(){o.domElement.ownerDocument.addEventListener("mousemove",n),o.domElement.ownerDocument.addEventListener("pointerlockchange",r),o.domElement.ownerDocument.addEventListener("pointerlockerror",c)},this.disconnect=function(){o.domElement.ownerDocument.removeEventListener("mousemove",n),o.domElement.ownerDocument.removeEventListener("pointerlockchange",r),o.domElement.ownerDocument.removeEventListener("pointerlockerror",c)},this.dispose=function(){this.disconnect()},this.getObject=function(){return e},this.getDirection=function(){const t=new THREE.Vector3(0,0,-1);return function(o){return o.copy(t).applyQuaternion(e.quaternion)}}(),this.moveForward=function(t){_vector.setFromMatrixColumn(e.matrix,0),_vector.crossVectors(e.up,_vector),e.position.addScaledVector(_vector,t)},this.moveRight=function(t){_vector.setFromMatrixColumn(e.matrix,0),e.position.addScaledVector(_vector,t)},this.lock=function(){this.domElement.requestPointerLock()},this.unlock=function(){o.domElement.ownerDocument.exitPointerLock()},this.connect()}}window.PointerLockControls=PointerLockControls})();
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      camera.translateZ(10);
+      controls.isLocked = false;
+      const gridHelper = new THREE.GridHelper(10, 10, 0x38b6ff, 0x38b6ff);
+      scene.add(gridHelper);
+      camera.rotation.set(-Math.PI / 2, 0, 0);
+      camera.position.set(0, 10, 0);
+      renderer.setClearColor("#ddd");
+      function submitPos(event, element) {
+        event.preventDefault();
+        element.blur();
+        if (!focusedObject) return;
+        focusedObject.position[element.id] = element.textContent;
+      }
+      mouseMoved = false;
+      document.addEventListener("mousemove", () => {
+        mouseMoved = true;
+      });
+      objectTranslateNegativeZ = false;
+      objectTranslatePositiveZ = false;
+      objectTranslateNegativeX = false;
+      objectTranslatePositiveX = false;
+      objectTranslateNegativeY = false;
+      objectTranslatePositiveY = false;
+      setInterval(() => {
+        if (focusedObject != null) {
+          document.querySelector(".position").contains(document.activeElement) || (document.querySelector(".position").querySelector("#x").textContent = focusedObject.position.x.toFixed(1));
+          document.querySelector(".position").contains(document.activeElement) || (document.querySelector(".position").querySelector("#y").textContent = focusedObject.position.y.toFixed(1));
+          document.querySelector(".position").contains(document.activeElement) || (document.querySelector(".position").querySelector("#z").textContent = focusedObject.position.z.toFixed(1));
+          document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#x").textContent = focusedObject.rotation.x.toFixed(1));
+          document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#y").textContent = focusedObject.rotation.y.toFixed(1));
+          document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#z").textContent = focusedObject.rotation.z.toFixed(1));
+          boxHelper.update();
+        }
+        if (objectTranslateNegativeZ) {
+          focusedObject.translateZ(-.05);
+        }
+        if (objectTranslatePositiveZ) {
+          focusedObject.translateZ(.05);
+        }
+        if (objectTranslateNegativeX) {
+          focusedObject.translateX(-.05);
+        }
+        if (objectTranslatePositiveX) {
+          focusedObject.translateX(.05);
+        }
+        if (objectTranslateNegativeY) {
+          focusedObject.translateY(-.05);
+        }
+        if (objectTranslatePositiveY) {
+          focusedObject.translateY(.05);
+        }
+        if (objectTranslateNegativeZ || objectTranslatePositiveZ || objectTranslateNegativeX || objectTranslatePositiveX || objectTranslateNegativeY || objectTranslatePositiveY) {
+          boxHelper.position.copy(focusedObject.position);
+        }
+      });
+      window.addEventListener("resize", function() { camera.aspect = window.innerWidth / window.innerHeight, camera.updateProjectionMatrix(), renderer.setSize(window.innerWidth, window.innerHeight) }, true);
+      document.addEventListener("keydown", (e) => {
+        if (focusedObject) {
+          if (e.key == "ArrowUp") {
+            e.altKey ? objectTranslatePositiveY = true : objectTranslateNegativeZ = true;
+          }
+          if (e.key == "ArrowDown") {
+            e.altKey ? objectTranslateNegativeY = true : objectTranslatePositiveZ = true;
+          }
+          if (e.key == "ArrowLeft") {
+            objectTranslateNegativeX = true;
+          }
+          if (e.key == "ArrowRight") {
+            objectTranslatePositiveX = true;
+          }
+        }
+      });
+      document.addEventListener("keyup", (e) => {
+        if (focusedObject) {
+          if (e.key == "ArrowUp") {
+            objectTranslatePositiveY = false, objectTranslateNegativeZ = false;
+          }
+          if (e.key == "ArrowDown") {
+            objectTranslateNegativeY = false, objectTranslatePositiveZ = false;
+          }
+          if (e.key == "ArrowLeft") {
+            objectTranslateNegativeX = false;
+          }
+          if (e.key == "ArrowRight") {
+            objectTranslatePositiveX = false;
+          }
+        }
+      });
+      renderer.domElement.addEventListener("click", (e) => {
+        if (mouseMoved) {
+          return mouseMoved = false;
+        }
+        scene.traverse((x) => {
+          if (x.type == "GridHelper") {
+            return;
+          }
+          let raycaster = new THREE.Raycaster();
+          let mouse = new THREE.Vector2();
+          mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
+          raycaster.setFromCamera(mouse,camera);
+          let intersects = raycaster.intersectObjects([x]);
+          let intersection = null;
+          intersects[0] && (intersection = intersects[0]);
+          if (intersection != null && intersection.object.wasManuallyMade) {
+            if (intersection.object == focusedObject) return;
+            let object = intersection.object;
+            focusObject(object);
+          } else {
+            blurObject();
+          }
+        });
+      });
+      wasjustfocused = false;
+      function focusObject(obj) {
+        wasjustfocused = true;
+        setTimeout(() => wasjustfocused = false, 100);
+        focusedObject = obj;
+        boxHelper = new THREE.BoxHelper(obj, 0x38b6ff);
+        scene.add(boxHelper);
+      }
+      function blurObject(obj) {
+        if (wasjustfocused) return;
+        focusedObject = null;
+        scene.remove(boxHelper);
+        boxHelper = null;
+      }
+    //   renderer.shadowMap.enabled = true;
+    //   setInterval(() => {
+    //     scene.traverse((e) => {
+    //       if (e.isObject3D) {
+    //         e.castShadow = true;
+    //         e.receiveShadow = true;
+    //         e.material && e.material.map && (e.material.map.anisotropy = 16)
+    //       }
+    //       lights.forEach(light => {
+    //         light.castShadow = true;
+    //         light.shadow.mapSize.width = 1024 * 4;
+    //         light.shadow.mapSize.height = 1024 * 4;
+    //         light.shadow.bias = -.0001;
+    //         renderer.shadowMap.needsUpdate = true;
+    //       });
+    //     });
+    //   }, 2000);
+    //   renderer.physicallyCorrectLights = true;
+    //   renderer.shadowMap.autoUpdate = false;
+    //   renderer.shadowMap.needsUpdate = true;
+    </script>
+  </body>
+</html>
