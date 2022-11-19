@@ -233,19 +233,22 @@
       .focused {
         outline: 3px solid #ddd;
       }
+      #NotiflixNotifyWrap {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        z-index: 9999999999999999999 !important;
+      }
     </style>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+	  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
-  <body>
+  <body ondrop="drop(event)" ondragover="event.preventDefault()">
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/notiflix/Notiflix@latest/dist/notiflix-aio-3.2.5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/FPS-Tipper@main/tipper.js" defer async="false"></script>
     <script src="https://threejs.org/build/three.min.js"></script>
     <div class="simple-keyboard"></div>
     <img src="favicon.ico" style="position:absolute;z-index:9999999999;right:20px;top:0;width:10%;filter:drop-shadow(3px 3px 3px rgba(0,0,0,.3));pointer-events:all!important" onclick="scene.children.length > 2 ? swal({buttons:['Yes','No'],text:'You have unsaved changes. Do you want to leave?'}).then(e => !e && location.assign('/')) : location.assign('/')">
@@ -258,15 +261,17 @@
       <button onclick="utils['edit']()">Edit object</button>
       <br>
       <button onclick="utils['remove']()">Remove object</button>
+      <br>
+      <button onclick="utils['clone']()">Clone object</button>
       <hr>
       <div class="position">
         <span class="material-symbols-outlined" style="font-size:10px">open_with</span>&ThickSpace;<span id="x" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>',&ThickSpace;<span id="y" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>',&ThickSpace;<span id="z" contenteditable="true" onkeydown="event.key == 'Enter' && submitPos(event, this)">0</span>'
       </div>
       <div class="rotation">
-        <span class="material-symbols-outlined" style="font-size:10px">sync</span>&ThickSpace;<span id="x">0</span>&deg;,&ThickSpace;<span id="y">0</span>&deg;,&ThickSpace;<span id="z">0</span>&deg;
+        <span class="material-symbols-outlined" style="font-size:10px">sync</span>&ThickSpace;<span id="x" contenteditable="true" onkeydown="event.key == 'Enter' && submitRot(event, this)">0</span>&deg;,&ThickSpace;<span id="y" contenteditable="true" onkeydown="event.key == 'Enter' && submitRot(event, this)">0</span>&deg;,&ThickSpace;<span id="z" contenteditable="true" onkeydown="event.key == 'Enter' && submitRot(event, this)">0</span>&deg;
       </div>
       <div class="scale">
-        <span class="material-symbols-outlined" style="font-size:10px">aspect_ratio</span>&ThickSpace;<span id="x">0</span>&deg;,&ThickSpace;<span id="y">0</span>&deg;,&ThickSpace;<span id="z">0</span>&deg;
+        <span class="material-symbols-outlined" style="font-size:10px">aspect_ratio</span>&ThickSpace;<span id="x" contenteditable="true" onkeydown="event.key == 'Enter' && submitScl(event, this)">0</span>',&ThickSpace;<span id="y" contenteditable="true" onkeydown="event.key == 'Enter' && submitScl(event, this)">0</span>',&ThickSpace;<span id="z" contenteditable="true" onkeydown="event.key == 'Enter' && submitScl(event, this)">0</span>'
       </div>
       <hr>
       <span style="font-size:20px;font-weight:bold">File:</span>
@@ -281,7 +286,10 @@
       <p style="margin:20px">In the editor, add an object and drag your cursor to get started.<br><br>You can select its texture by uploading an image or selecting one from the list.<br><br>You can also import a .GLTF, .OBJ, or even a .MAP!</p>
     </div>
     <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/js/libs/fflate.min.js"></script>
     <script>
+      Notiflix.Notify.init({timeout:5000,position:"right-bottom",info:{background:"#fff",textColor:"#38b6ff",notiflixIconColor:"#38b6ff"}});
       lights = [];
       focusedObject = null;
       textureDialog = document.createElement("div");
@@ -299,15 +307,29 @@
         <img src="forge/textures/Dirty_Dirt.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
         <img src="forge/textures/Light_Rocks.png" class="texture" onclick="chosenTexture = this.src; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
       </div>
-      <input type="file" onchange="chosenTexture = window.URL.createObjectURL(this.files[0])">
+      <br>
+      <p>Custom textures:</p>
+      <br>
+      <label style="background:#fff;color:#38b6ff;border:2px solid #38b6ff;padding:5px;font-family:Arial!important" for="choosetexture">Select or Drag n' Drop</label><input id="choosetexture" type="file" onchange="chosenTexture = window.URL.createObjectURL(this.files[0])" hidden>
       `;
       ObjectShapeNames = {"Box": "Box", "Ball": "Sphere", "Pillar": "Cylinder", "Triangle": "Triangle"};
       chosenTexture = "forge/textures/Modern_Metal.png";
       boxHelper = null;
+      chosenProp = null;
       utils = {
         "add": function add() {
           let options = document.createElement("div");
           options.innerHTML = `
+          <p>Premade props:</p>
+          <div class="texture-holder">
+            <img src="forge/props/Rock.png" class="texture" onclick="chosenProp = this.src.split('.')[0] + '.glb'; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+            <img src="forge/props/Tree.png" class="texture" onclick="chosenProp = this.src.split('.')[0] + '.glb'; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+            <img src="forge/props/Water.gif" class="texture" onclick="chosenProp = this.src.split('.')[0] + '.glb'; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+            <img src="forge/props/Sky.png" class="texture" onclick="chosenProp = this.src.split('.')[0] + '.glb'; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+            <img src="forge/props/Cloud.png" class="texture" onclick="chosenProp = this.src.split('.')[0] + '.glb'; for (let i = 0; i < document.querySelectorAll('.texture').length; i++) { document.querySelectorAll('.texture')[i].classList.remove('focused') } this.classList.toggle('focused')">
+          </div>
+          <br>
+          <p>Create from scratch:</p>
           <label for="objtype">Object type:</label>
           <select value="Mesh" onchange="this.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'inline-block' : 'none', this.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'none' : 'inline-block'" id="objtype">
             <option value="Mesh">Mesh</option>
@@ -338,18 +360,147 @@
             title: "Add object",
             content: options
           }).then(() => {
-            let geo = document.querySelector("#objtype").value == "Light" ? new THREE.SphereGeometry() : new THREE[ObjectShapeNames[document.querySelector("#objshape").value] + "Geometry"];
-            let mat = document.querySelector("#objtype").value == "Light" ? new THREE.MeshToonMaterial() : new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load(chosenTexture) });
-            let obj = new THREE.Mesh(geo, mat);
-            let light = new THREE.PointLight(0xffffff, (document.querySelector("#lightintensity").value - 0 * 4));
-            light.castShadow = true;
-            lights.push(light);
-            document.querySelector("#objtype").value == "Light" || (obj.castShadow = true);
-            document.querySelector("#objtype").value == "Light" || (obj.receiveShadow = true);
-            obj.add(light);
-            obj.wasManuallyMade = true;
-            scene.add(obj);
+            if (chosenProp != null) {
+              new THREE.GLTFLoader().load(chosenProp, (obj) => {
+                obj = obj.scene;
+                let light = new THREE.PointLight(0xffffff, ((document.querySelector("#lightintensity").value - 0) * 10));
+                document.querySelector("#objtype").value == "Light" && lights.push(light);
+                document.querySelector("#objtype").value == "Light" && obj.add(light);
+                obj.traverse(x => x.wasManuallyMade = true);
+                scene.add(obj);
+                focusObject(obj);
+              });
+            } else {
+              let geo = document.querySelector("#objtype").value == "Light" ? new THREE.SphereGeometry() : new THREE[ObjectShapeNames[document.querySelector("#objshape").value] + "Geometry"];
+              let mat = document.querySelector("#objtype").value == "Light" ? new THREE.MeshToonMaterial() : new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load(chosenTexture) });
+              let obj = new THREE.Mesh(geo, mat);
+              let light = new THREE.PointLight(0xffffff, ((document.querySelector("#lightintensity").value - 0) * 10));
+              document.querySelector("#objtype").value == "Light" && lights.push(light);
+              document.querySelector("#objtype").value == "Light" && obj.add(light);
+              obj.wasManuallyMade = true;
+              scene.add(obj);
+              focusObject(obj);
+            }
+            chosenProp = null;
           });
+        },
+        "edit": function edit() {
+          function action() {
+            document.onclick = function() {
+              if (focusedObject) {
+                document.onclick = null;
+                let options = document.createElement("div");
+                options.innerHTML = `
+                <label for="objtype">Object type:</label>
+                <select value="Mesh" onchange="this.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'inline-block' : 'none', this.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.style.display = this.value == 'Mesh' ? 'none' : 'inline-block'" id="objtype">
+                  <option value="Mesh">Mesh</option>
+                  <option value="Light">Light</option>
+                </select>
+                <br>
+                <br>
+                <div>
+                  <label for="objshape">Object type:</label>
+                  <select value="${Object.keys(ObjectShapeNames)[Object.values(ObjectShapeNames).indexOf(focusedObject.geometry.type.split(/([A-Z])/g).reverse().splice(2).reverse().join(""))]}" id="objshape">
+                    <option value="Box" ${Object.keys(ObjectShapeNames)[Object.values(ObjectShapeNames).indexOf(focusedObject.geometry.type.split(/([A-Z])/g).reverse().splice(2).reverse().join(""))]=="Box"?"selected":""}>Box</option>
+                    <option value="Ball" ${Object.keys(ObjectShapeNames)[Object.values(ObjectShapeNames).indexOf(focusedObject.geometry.type.split(/([A-Z])/g).reverse().splice(2).reverse().join(""))]=="Ball"?"selected":""}>Ball</option>
+                    <option value="Pillar" ${Object.keys(ObjectShapeNames)[Object.values(ObjectShapeNames).indexOf(focusedObject.geometry.type.split(/([A-Z])/g).reverse().splice(2).reverse().join(""))]=="Pillar"?"selected":""}>Pillar</option>
+                    <option value="Triangle" ${Object.keys(ObjectShapeNames)[Object.values(ObjectShapeNames).indexOf(focusedObject.geometry.type.split(/([A-Z])/g).reverse().splice(2).reverse().join(""))]=="Triangle"?"selected":""}>Triangle</option>
+                  </select>
+                </div>
+                <div style="display:none">
+                  <label for="lightintensity">Light intensity:</label>
+                  <input id="lightintensity" value="1" class="sample">
+                </div>
+                <hr>
+                <div>
+                  <label for="objmaterial">Object texture:</label>
+                  <button id="objmaterial" value="1" onclick="swal({title:'Choose texture',text:'Choose a preloaded texture or upload file',content:textureDialog}).then(()=>utils['add']())">Choose...</button>
+                </div>
+                `;
+                swal({
+                  title: "Edit object",
+                  content: options
+                }).then(() => {
+                  scene.remove(focusedObject);
+                  let geo = document.querySelector("#objtype").value == "Light" ? new THREE.SphereGeometry() : new THREE[ObjectShapeNames[document.querySelector("#objshape").value] + "Geometry"];
+                  let mat = document.querySelector("#objtype").value == "Light" ? new THREE.MeshToonMaterial() : new THREE.MeshPhongMaterial({ map: new THREE.TextureLoader().load(chosenTexture) });
+                  let obj = new THREE.Mesh(geo, mat);
+                  let light = new THREE.PointLight(0xffffff, ((document.querySelector("#lightintensity").value - 0) * 10));
+                  document.querySelector("#objtype").value == "Light" && lights.push(light);
+                  document.querySelector("#objtype").value == "Light" && obj.add(light);
+                  obj.wasManuallyMade = true;
+                  obj.scale.copy(focusedObject.scale);
+                  obj.position.copy(focusedObject.position);
+                  obj.rotation.copy(focusedObject.rotation);
+                  obj.updateMatrix();
+                  scene.add(obj);
+                  focusObject(obj);
+                });
+              }
+            }
+          }
+          if (!focusedObject) {
+            swal({
+              title: "Select an object to edit",
+              text: "Use your cursor to click an object to focus it.",
+              buttons: ["Cancel", "Select"]
+            }).then((e) => {
+              if (e) {
+                Notiflix.Notify.info("You are selecting an object. Press [ESC] to exit");
+              }
+              action();
+            });
+          } else action();
+        },
+        "remove": function remove() {
+          function action() {
+            document.onclick = function() {
+              if (focusedObject) {
+                document.onclick = null;
+                blurObject();
+                scene.remove(focusedObject);
+              }
+            }
+          }
+          if (!focusedObject) {
+            swal({
+              title: "Select an object to remove",
+              text: "Use your cursor to click an object to focus it.",
+              buttons: ["Cancel", "Select"]
+            }).then((e) => {
+              if (e) {
+                Notiflix.Notify.info("You are selecting an object. Press [ESC] to exit");
+              }
+              action();
+            });
+          } else action();
+        },
+        "clone": function clone() {
+          function action() {
+            document.onclick = function() {
+              if (focusedObject) {
+                document.onclick = null;
+                let obj = focusedObject.clone();
+                obj.wasManuallyMade = true;
+                scene.add(obj);
+                obj.translateY(((focusedObject.scale.x+focusedObject.scale.y+focusedObject.scale.z)/3)+.2);
+                blurObject();
+                focusObject(obj);
+              }
+            }
+          }
+          if (!focusedObject) {
+            swal({
+              title: "Select an object to clone",
+              text: "Use your cursor to click an object to focus it.",
+              buttons: ["Cancel", "Select"]
+            }).then((e) => {
+              if (e) {
+                Notiflix.Notify.info("You are selecting an object. Press [ESC] to exit");
+              }
+              action();
+            });
+          } else action();
         }
       };
       const scene = new THREE.Scene();
@@ -380,6 +531,18 @@
         if (!focusedObject) return;
         focusedObject.position[element.id] = element.textContent;
       }
+      function submitRot(event, element) {
+        event.preventDefault();
+        element.blur();
+        if (!focusedObject) return;
+        focusedObject.rotation[element.id] = THREE.MathUtils.degToRad(element.textContent - 0);
+      }
+      function submitScl(event, element) {
+        event.preventDefault();
+        element.blur();
+        if (!focusedObject) return;
+        focusedObject.scale[element.id] = element.textContent;
+      }
       mouseMoved = false;
       document.addEventListener("mousemove", () => {
         mouseMoved = true;
@@ -398,6 +561,9 @@
           document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#x").textContent = focusedObject.rotation.x.toFixed(1));
           document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#y").textContent = focusedObject.rotation.y.toFixed(1));
           document.querySelector(".rotation").contains(document.activeElement) || (document.querySelector(".rotation").querySelector("#z").textContent = focusedObject.rotation.z.toFixed(1));
+          document.querySelector(".scale").contains(document.activeElement) || (document.querySelector(".scale").querySelector("#x").textContent = focusedObject.scale.x.toFixed(1));
+          document.querySelector(".scale").contains(document.activeElement) || (document.querySelector(".scale").querySelector("#y").textContent = focusedObject.scale.y.toFixed(1));
+          document.querySelector(".scale").contains(document.activeElement) || (document.querySelector(".scale").querySelector("#z").textContent = focusedObject.scale.z.toFixed(1));
           boxHelper.update();
         }
         if (objectTranslateNegativeZ) {
@@ -456,6 +622,10 @@
         }
       });
       renderer.domElement.addEventListener("click", (e) => {
+        if (e.detail > 2) {
+          return;
+        }
+        renderer.domElement.click();
         if (mouseMoved) {
           return mouseMoved = false;
         }
@@ -482,6 +652,7 @@
       });
       wasjustfocused = false;
       function focusObject(obj) {
+        blurObject();
         wasjustfocused = true;
         setTimeout(() => wasjustfocused = false, 100);
         focusedObject = obj;
@@ -494,26 +665,16 @@
         scene.remove(boxHelper);
         boxHelper = null;
       }
-    //   renderer.shadowMap.enabled = true;
-    //   setInterval(() => {
-    //     scene.traverse((e) => {
-    //       if (e.isObject3D) {
-    //         e.castShadow = true;
-    //         e.receiveShadow = true;
-    //         e.material && e.material.map && (e.material.map.anisotropy = 16)
-    //       }
-    //       lights.forEach(light => {
-    //         light.castShadow = true;
-    //         light.shadow.mapSize.width = 1024 * 4;
-    //         light.shadow.mapSize.height = 1024 * 4;
-    //         light.shadow.bias = -.0001;
-    //         renderer.shadowMap.needsUpdate = true;
-    //       });
-    //     });
-    //   }, 2000);
-    //   renderer.physicallyCorrectLights = true;
-    //   renderer.shadowMap.autoUpdate = false;
-    //   renderer.shadowMap.needsUpdate = true;
+      renderer.physicallyCorrectLights = true;
+      function drop(e) {
+        e.preventDefault();
+        [...e.dataTransfer.items].forEach((item, i) => {
+          if (item.kind === "file") {
+            const file = item.getAsFile();
+            chosenTexture = URL.createObjectURL(file);
+          }
+        });
+      }
     </script>
   </body>
 </html>
