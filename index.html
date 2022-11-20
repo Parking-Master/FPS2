@@ -171,6 +171,39 @@
       [id^="NotiflixNotify-"] {
         box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
       }
+      .highlight {
+        background: yellow;
+      }
+      .listitem {
+        position: relative;
+        left: 0;
+        right: 0;
+        text-align: left;
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+      summary {
+        border-bottom: 1px solid #38b6ff !important;
+      }
+      .listitem * {
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+      .swal-modal {
+        overflow-y: scroll !important;
+      }
+      iframe {
+        position: relative;
+        width: 100%;
+        margin: 0;
+        border: 0;
+        border-top: 1px solid #38b6ff !important;
+      }
+      * {
+        scrollbar-color: #fff #38b6ff !important;
+        scrollbar-width: thin !important;
+      }
+      ::-webkit-scrollbar-track {
+        border-radius: 0;
+      }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
@@ -435,6 +468,7 @@
       lockInput = null;
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
       Lobby = new Parse.Object.extend("Lobby");
+      HelpLikes = new Parse.Object.extend("HelpLikes");
       createlobbytext = "";
       function code(){let r="";for(let a=1;a<=6;a++)r+=a%2==0?String.fromCharCode(26*Math.random()+65):Math.ceil(9*Math.random());return r}
       function createLobby() {
@@ -762,11 +796,15 @@
         <br>
         <a href="" onclick="event.preventDefault(); createLobby()">Create a lobby</a>
         <br>
+        <i>or</i>
+        <br>
+        <a href="" onclick="event.preventDefault(); enterCode()">Enter a code</a>
+        <br>
         <br>
         <div class="swal-text">Don't feel like waiting? Use <a href="" onclick="event.preventDefault(); autoSearch()" style="font-family:Arial!important">auto search</a></div>
         <br>
         <br>
-        <div class="swal-text"><a href="" onclick="event.preventDefault(); help()" style="font-family:Arial!important;display:inline-flex;align-items:center;justify-content:center;text-align:center;position:relative;width:15px!important;height:15px;border-radius:50%;border:1px solid currentColor;cursor:pointer;font-size:10px;font-weight:bold;justify-content:center;align-items:center;transform:scale(2)">?</a></div>
+        <div class="swal-text"><a href="" onclick="event.preventDefault(); help(), help('game')" style="font-family:Arial!important;display:inline-flex;align-items:center;justify-content:center;text-align:center;position:relative;width:15px!important;height:15px;border-radius:50%;border:1px solid currentColor;cursor:pointer;font-size:10px;font-weight:bold;justify-content:center;align-items:center;transform:scale(2)">?</a></div>
         `;
         swal({
           title: "Quick Play",
@@ -774,6 +812,106 @@
           content: options,
           button: "Close"
         });
+      }
+      helpKeyUp = 0;
+      currentHelpResponse = null;
+      hasopen = [];
+      function help(text = null) {
+        if (text == null) {
+          let help = document.createElement("div");
+          help.innerHTML = `
+          <input type="text" style="position:relative;top:0;width:60%;font-family:Arial!important;background:#fff;color:#38b6ff;border:none!important;outline:none!important;border-radius:2px;box-shadow:0 1px 6px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.24)" id="helpsearch" placeholder="What do you need help with?" onkeyup="clearTimeout(helpKeyUp); event.preventDefault(); helpKeyUp = setTimeout(() => {this.value.trim() && help(this.value.trim()) }, 500)">
+          `;
+          swal({
+            icon: "icons/help.png",
+            title: "Help center",
+            content: help,
+            buttons: ["-", "-"]
+          }).then((e) => currentHelpResponse != null && !e && addHelpLikes());
+          document.querySelectorAll(".swal-button")[0].innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff"><path d="M5 22h-5v-12h5v12zm17.615-8.412c-.857-.115-.578-.734.031-.922.521-.16 1.354-.5 1.354-1.51 0-.672-.5-1.562-2.271-1.49-1.228.05-3.666-.198-4.979-.885.906-3.656.688-8.781-1.688-8.781-1.594 0-1.896 1.807-2.375 3.469-1.221 4.242-3.312 6.017-5.687 6.885v10.878c4.382.701 6.345 2.768 10.505 2.768 3.198 0 4.852-1.735 4.852-2.666 0-.335-.272-.573-.96-.626-.811-.062-.734-.812.031-.953 1.268-.234 1.826-.914 1.826-1.543 0-.529-.396-1.022-1.098-1.181-.837-.189-.664-.757.031-.812 1.133-.09 1.688-.764 1.688-1.41 0-.565-.424-1.109-1.26-1.221z"/></svg>`, document.querySelectorAll(".swal-button")[1].innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff"><path d="M5 14h-5v-12h5v12zm18.875-4.809c0-.646-.555-1.32-1.688-1.41-.695-.055-.868-.623-.031-.812.701-.159 1.098-.652 1.098-1.181 0-.629-.559-1.309-1.826-1.543-.766-.141-.842-.891-.031-.953.688-.053.96-.291.96-.626-.001-.931-1.654-2.666-4.852-2.666-4.16 0-6.123 2.067-10.505 2.768v10.878c2.375.869 4.466 2.644 5.688 6.886.478 1.661.781 3.468 2.374 3.468 2.375 0 2.594-5.125 1.688-8.781 1.312-.688 3.751-.936 4.979-.885 1.771.072 2.271-.818 2.271-1.49 0-1.011-.833-1.35-1.354-1.51-.609-.188-.889-.807-.031-.922.836-.112 1.26-.656 1.26-1.221z"/></svg>`;
+          document.querySelector(".swal-icon").style.width = "10%";
+        } else {
+          let origText = document.querySelector("#helpsearch").value;
+          document.querySelectorAll("details").forEach(x => x.remove());
+          document.querySelectorAll("#notfound").forEach(x => x.remove());
+          text = text.toString().toLowerCase().trim();
+          fetch("help/help_responses.json").then((res) => res.json()).then((e) => {
+            let responses = [];
+            let content = "";
+            for (let i = 0; i < Object.keys(e).length; i++) {
+              if (responses.length > 4) return;
+              window.getHelpLikes = function(currentHelpResponse) {
+                window.currentHelpResponse = currentHelpResponse;
+                return new Promise(function(resolve, reject) {
+                  (async() => {
+                    let e = !1;
+                    const t = Parse.Object.extend("HelpLikes");
+                    const n = new Parse.Query(t);
+                    const s = await n.find();
+                    for (let t = 0; t < s.length; t++) {
+                      const n = Parse.Object.extend("HelpLikes");
+                      new Parse.Query(n).get(s[t].id).then((t => {
+                        const n = { index: t.get("index") - 0, likes: t.get("likes") - 0 };
+                        if (e) {
+                          if (n.index == currentHelpResponse) {
+                            resolve(n.likes);
+                          }
+                        } else {
+                          if (n.index == currentHelpResponse) {
+                            resolve(n.likes);
+                          }
+                        }
+                      }));
+                    }
+                  })();
+                });
+              }
+              window.addHelpLikes = function() {
+                (async() => {
+                  let e = !1;
+                  const t = Parse.Object.extend("HelpLikes");
+                  const n = new Parse.Query(t);
+                  const s = await n.find();
+                  for (let t = 0; t < s.length; t++) {
+                    const n = Parse.Object.extend("HelpLikes");
+                    new Parse.Query(n).get(s[t].id).then((t => {
+                      const n = { index: t.get("index") - 0, likes: t.get("likes") - 0 };
+                      if (e) {
+                        if (n.index == currentHelpResponse) {
+                          t.set("likes", n.likes + 1);
+                          t.save();
+                        }
+                      } else {
+                        if (n.index == currentHelpResponse) {
+                          t.set("likes", n.likes + 1);
+                          t.save();
+                        }
+                      }
+                    }));
+                  }
+                })();
+              }
+              Object.keys(e)[i].toString().toLowerCase().trim().split(" ").forEach(x => {
+                text.split(" ").forEach(a => {
+                  if (x.includes(a.trim())) {
+                    (responses.push("<details class='listitem' onclick=\"currentHelpResponse == this.id.split('-')[1] - 0 ? (this.hasAttribute('open') && (currentHelpResponse = null)) : void(0); !this.hasAttribute('open') && getHelpLikes(this.id.split('-')[1] - 0).then((likes) => this.querySelector('#likes').textContent = likes)\" id=\"hr-" + responses.length + "\"><summary>" + Object.keys(e)[i].replace(new RegExp(text, "gi"), "<span class='highlight'>" + text + "</span>") + "</summary><iframe src='data:text/html," + encodeURIComponent(`<style>html,body,*{font-family:Arial,Helvetica,sans-serif!important;color:#38b6ff;text-shadow:1px 1px 3px rgba(0, 0, 0, 0.24)}</style>` + Object.values(e)[i]).replace(/'/g, "%27") + "'></iframe><p style=\"font-family:AgrandirWideBlack!important\"><span id=\"likes\" style=\"font-family:AgrandirWideBlack!important\">0</span> users found this helpful</p></details>"));
+                  }
+                });
+              });
+            }
+            if (responses.length < 1) {
+              responses = [];
+              responses.push("<i id='notfound'>No results found</i>");
+            }
+            responses.slice().sort(function(a,b){return a > b}).reduce(function(a,b){if (a.slice(-1)[0] !== b) a.push(b);return a;},[]);
+            responses.forEach((x) => {
+              content.includes(x) || (content += x);
+            });
+            document.querySelector(".swal-content").innerHTML += content;
+            document.querySelector("#helpsearch").value = origText;
+            document.querySelector("#helpsearch").focus();
+          });
+        }
       }
     </script>
   </body>
