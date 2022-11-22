@@ -353,6 +353,7 @@
       <div class="pause-tab" onclick="confirm('Are you sure? All player will be disconnected.') && (gametime.disconnect(), location.replace('/'))">Leave game</div><br>
       <div class="pause-tab" onclick="settings()">Settings</div><br>
     </div>
+    <audio id="killSound" src="sounds/kill.mp3"></audio>
     <audio id="punchSound" src="sounds/punch.mp3"></audio>
     <audio id="ricochet1" src="sounds/ricochet1.mp3"></audio>
     <audio id="ricochet2" src="sounds/ricochet2.mp3"></audio>
@@ -485,6 +486,7 @@
         setTimeout(() => { eliminated = false }, 1000);
         document.querySelector(".scoreboard").style.transform = "scale(1.2)";
         setTimeout(() => document.querySelector(".scoreboard").style.transform = "scale(1)", 3000);
+        document.querySelector("#killSound").cloneNode().play();
         if (player != gametime.user.position) {
           gametime.user.position == 1 ? setTimeout(() => (score1++), 1000) : setTimeout(() => (score2++), 1000);
           return otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
@@ -678,7 +680,9 @@
           data.split(",")[2] == "start" ? mixers[3].clipAction(animations[3][8]).play() : (data.split(",")[2] == "reload" ? (mixers[3].clipAction(animations[3][6]).reset(), mixers[3].clipAction(animations[3][6]).loop = THREE.LoopOnce, mixers[3].clipAction(animations[3][6]).play()) : (mixers[3].clipAction(animations[3][8]).stop(), mixers[3].clipAction(animations[3][8]).reset()));
         }
         if (data.split(",")[1] == "sound") {
-          gunsounds[data.split(",")[2]].cloneNode().play();
+          let y = gunsounds[data.split(",")[2]].cloneNode();
+          eliminated && (y.volume = .4);
+          y.play();
         }
       });
       gametime.on("countdown", function(user) {
@@ -1487,7 +1491,9 @@
           }
           i++;
           if (subtract) { weaponPosition == "primary" ? (primaryWeapon.rounds--, primaryWeapon.rounds <= 0 && reload()) : (secondaryWeapon.rounds--, secondaryWeapon.rounds <= 0 && reload()) }
-          gunsounds[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].cloneNode().play();
+          let y = gunsounds[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].cloneNode();
+          eliminated && (y.volume = .4);
+          y.play();
           gametime.run("add", [gametime.user.position+",sound"+","+(weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name))]);
           let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][2]);
           clip.setDuration(.1);
@@ -1849,7 +1855,9 @@
         if (currentWeapon == "Grenade_Launcher") {
           if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
           grenadesLeft++;
-          gunsounds["Grenade_Launcher"].cloneNode().play();
+          let y = gunsounds["Grenade_Launcher"].cloneNode();
+          eliminated && (y.volume = .4);
+          y.play();
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
           let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
           let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
@@ -2078,7 +2086,9 @@
           if (currentWeapon == "Grenade_Launcher") {
             if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
             grenadesLeft++;
-            gunsounds["Grenade_Launcher"].cloneNode().play();
+            let y = gunsounds["Grenade_Launcher"].cloneNode();
+            eliminated && (y.volume = .4);
+            y.play();
             (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
             let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
             let weaponIndex = currentWeapon == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name];
