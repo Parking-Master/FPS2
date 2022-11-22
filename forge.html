@@ -277,9 +277,9 @@
       <span style="font-size:20px;font-weight:bold">File:</span>
       <br>
       <br>
-      <button>Import</button>
+      <button onclick="utils['import'](scene)">Import</button>
       <br>
-      <button>Export</button>
+      <button onclick="utils['export'](scene)">Export</button>
       <br>
       <button>Clear</button>
       <hr>
@@ -287,7 +287,9 @@
     </div>
     <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
     <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/js/libs/fflate.min.js"></script>
+    <script src="https://threejs.org/examples/js/exporters/GLTFExporter.js"></script>
     <script>
       Notiflix.Notify.init({timeout:5000,position:"right-bottom",info:{background:"#fff",textColor:"#38b6ff",notiflixIconColor:"#38b6ff"}});
       lights = [];
@@ -501,6 +503,40 @@
               action();
             });
           } else action();
+        },
+        "import": function(scene) {
+          let buttonFile = document.createElement("button");
+          let file = document.createElement("input");
+          file.accept = "*.glb, *.obj, *.map, .glb, .obj, .map,";
+          file.type = "file";
+          file.click();
+          file.onchange = function(e) {
+            if (this.files && this.files[0]) {
+              const reader = new FileReader();
+              let res = e.target.files[0];
+              let url = URL.createObjectURL(res);
+              if (res.name.endsWith(".glb") || res.name.endsWith(".map")) {
+                new THREE.GLTFLoader().load(url, (e) => {
+                  e = e.scene;
+                  e.traverse(x => x.wasManuallyMade = true);
+                  scene.add(e);
+                });
+              } else {
+                new THREE.OBJLoader().load(url, (e) => {
+                  e.traverse(x => x.wasManuallyMade = true);
+                  scene.add(e);
+                });
+              }
+            }
+          }
+        },
+        "export": function(scene) {
+          swal({
+            title: "Enter file name",
+            text: "Spaces replaced with \"_\"",
+            content: "input"
+          }).then(filename=>{filename=(filename||"My Map").replace(/(\ )/gi,"_");(new THREE.GLTFExporter).parse(scene.children,(function(e){const n=JSON.stringify(e),t=new Blob([n],{type:"application/json"});let o=URL.createObjectURL(t),c=document.createElement("a");c.download=filename+".map",c.href=o,c.click()}),{binary:!0})});
+          document.querySelector(".swal-content__input").value = "My Map";
         }
       };
       const scene = new THREE.Scene();

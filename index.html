@@ -125,6 +125,7 @@
       }
       .swal-button {
         background: #38b6ff;
+        box-shadow: none !important;
         color: #fff !important;
       }
       .simple-keyboard {
@@ -204,10 +205,42 @@
       ::-webkit-scrollbar-track {
         border-radius: 0;
       }
+      .login, .signup {
+        right: 20px;
+        position: absolute;
+        background: transparent;
+        backdrop-filter: blur(2px);
+        border: 4px solid #fff;
+        border-radius: 4px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        padding: 10px;
+        color: #fff;
+        font-family: "BigShouldersDisplayBold";
+        display: inline-flex;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 60px;
+        transition: box-shadow 1s;
+      }
+      .login:hover, .signup:hover {
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
+      }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KDN09VRHPS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-KDN09VRHPS");
+    </script>
   </head>
   <body>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
@@ -215,6 +248,8 @@
     <img id="background" src="text-images/rifles.png">
     <img id="sidebar" src="text-images/sidebar.png">
     <img id="heading0" src="text-images/heading.png">
+    <div class="login" style="top:20px" onclick="login()">Log in</div>
+    <div class="signup" style="top:120px" onclick="signup()">Sign up</div>
     <hr>
     <h1 id="heading1">MULTIPLAYER SHOOTER</h1>
     <div class="buttons">
@@ -367,6 +402,7 @@
         });
         pubnub.disconnect();
       }
+      Notiflix.Loading.init({svgColor:"#38b6ff"});
       window.addEventListener("load", function() {
         window.gametime.connectedPlayers = 0;
         window.willBeAutoHost = false;
@@ -913,6 +949,60 @@
           });
         }
       }
+      currentSLFrame = null;
+      function login() {
+        Notiflix.Loading.pulse();
+        let e = document.createElement("iframe");
+        e.style = `
+        z-index: 999999999999;
+        opacity: 0;
+        position: fixed;
+        width: 75%;
+        height: 75%;
+        left: 50%;
+        margin-left: -37.5%;
+        border-radius: 6px;
+        border: 5px solid #38b6ff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: opacity 1s;
+        background: #fff;
+        top: 10%;
+        `;
+        e.src = "login.html";
+        e.onload = () => (e.style.opacity = 1);
+        document.body.appendChild(e);
+        currentSLFrame = e;
+        document.addEventListener("keydown", (e) => {
+          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.remove(), currentSLFrame = null);
+        });
+      }
+      function signup() {
+        Notiflix.Loading.pulse();
+        let e = document.createElement("iframe");
+        e.style = `
+        z-index: 999999999999;
+        opacity: 0;
+        position: fixed;
+        width: 75%;
+        height: 75%;
+        left: 50%;
+        margin-left: -37.5%;
+        border-radius: 6px;
+        border: 5px solid #38b6ff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: opacity 1s;
+        background: #fff;
+        top: 10%;
+        `;
+        e.src = "signup.html";
+        e.onload = () => (e.style.opacity = 1);
+        document.body.appendChild(e);
+        currentSLFrame = e;
+        document.addEventListener("keydown", (e) => {
+          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.remove(), currentSLFrame = null);
+        });
+      }
+      window.addEventListener("message", (e) => (e.data == "login" && document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }), setTimeout(() => login(), 500))));
     </script>
   </body>
 </html>

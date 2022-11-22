@@ -19,6 +19,8 @@
   </head>
   <script src="https://cdn.jsdelivr.net/gh/notiflix/Notiflix@latest/dist/notiflix-aio-3.2.5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/Chalarangelo/parse-md-js/parsemd.js"></script>
+  <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
+  <script src="chatengine.js"></script>
   <body>
     <form id="form" action="" style="top:0;display:inline-flex;align-items:center;justify-content:center;text-align:center">
       <span id="close" onclick="parent.postMessage('close', '*')">&times;</span>&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<div id="list" style="color:#38b6ff">There are <span id="users">0</span> user(s) online</div>&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<span style="color:#38b6ff">|</span>&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<span id="option" onclick="">&CirclePlus;</span>&ThickSpace;&ThickSpace;<span id="option" onclick="invite()">&circleddash;</span>
@@ -32,9 +34,7 @@
       fetch("words.json").then((e) => e.json()).then((e) => words = (e.words));
       gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
       gametime.set("channel", "world");
-
       gametime.make("message");
-
       function sendMessage(msg) {
         let i = msg;
         words.forEach((x)=>{i=i.replace(x.toString().toLowerCase(),((t)=>{let g="";t.forEach(()=>{g+="*"});return g})(x.toString().toLowerCase().split("")));msg=i});
@@ -43,28 +43,20 @@
         item.innerHTML = parseMarkdown(msg.replace(/\<\>/gi,"")).split("<p>")[1].split("</p>").reverse().splice(1).join("").split("(|-star-|)").join("*");
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
-        var chatHistory = localStorage["history"];
-        var noBug = chatHistory === "" ? "" : ",";
-        localStorage.setItem("history", (chatHistory + noBug + encodeURIComponent(msg)).split(",").toString());
+        chatHistory.add(msg);
       }
-
       gametime.on("message", sendMessage);
-      
       var messages = document.getElementById("messages");
       var form = document.getElementById("form");
       var input = document.getElementById("input");
-
-      if (!localStorage["history"]) {
-        localStorage.setItem("history", "");
-      } else {
-        for (var i = 0; i < localStorage["history"].split(",").length; i++) {
+      chatHistory.get((chatHistory) => {
+        for (var i = 0; i < chatHistory.split(",").length; i++) {
           var item = document.createElement("li");
-          item.innerHTML = item.innerHTML = parseMarkdown(decodeURIComponent(localStorage["history"].split(",")[i]).replace(/\<\>/gi,"")).split("<p>")[1].split("</p>").reverse().splice(1).join("");
+          item.innerHTML = item.innerHTML = parseMarkdown(decodeURIComponent(chatHistory.split(",")[i]).replace(/\<\>/gi,"")).split("<p>")[1].split("</p>").reverse().splice(1).join("");
           messages.appendChild(item);
           window.scrollTo(0, document.body.scrollHeight);
         }
-      }
-      
+      });
       document.querySelector(".send").onclick = function(event) {
         event.preventDefault();
         if (input.value) {
@@ -72,7 +64,6 @@
           input.value = "";
         }
       };
-
       gametime.connected = true;
       gametime.onconnect = () => document.querySelector("#users").textContent = gametime.connectedPlayers;
       document.querySelector(".disconnect").onclick = function(event) {

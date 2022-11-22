@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in to continue</title>
+    <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Parking-Master/Simple-Alert@latest/simplealert.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #fff;
+      }
+      input {
+        position: relative;
+        width: 50%;
+        height: 20px;
+        padding: 5px;
+        left: 50%;
+        margin-left: -25%;
+        margin-bottom: 50px;
+        outline: none !important;
+        border: 2px solid #38b6ff;
+        background: #fff;
+        color: #38b6ff;
+        border-radius: 3px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .swal-modal {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .swal-modal *, .swal-text {
+        color: #38b6ff !important;
+      }
+      .swal-button {
+        background: #38b6ff !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+      h1 {
+        text-align: center;
+        margin-top: 50px;
+      }
+      button#submit {
+        position: relative;
+        background: #fff;
+        height: 40px;
+        padding: 5px;
+        display: inline-flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        outline: none !important;
+        width: 50%;
+        left: 50%;
+        margin-left: -25%;
+        cursor: default;
+        transition: background 1s;
+        border: 3px solid #38b6ff;
+        border-radius: 3px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: box-shadow 1s;
+      }
+      button#submit:hover {
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
+      }
+      p {
+        margin-bottom: 100px;
+      }
+      a {
+        color: #25750a;
+      }
+      * {
+        color: #38b6ff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="position:relative;width:50%;display:inline-flex;align-items:center;text-align:center;justify-content:center;left:50%;margin-left:-25%;">Log in to&nbsp;<img src="favicon.ico" style="position:relative;width:4%;border-radius:100%;border:2px solid #38b6ff" /></h1>
+    <p style="text-align:center">Log in to chat, earn rewards and more</p>
+    <label for="username" style="position:relative;left:50%;margin-left:-25%;">Username</label>
+    <br>
+    <input id="username" minlength="3" type="text" placeholder="The username you signup up with..." />
+    <br>
+    <label for="password" style="position:relative;left:50%;margin-left:-25%;">Password</label>
+    <br>
+    <input id="password" minlength="8" type="password" placeholder="The password you signup up with..." />
+    <br>
+    <button onclick="logIn()" id="submit">Log in</button>
+    <script>
+      Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
+      errorCodes = {
+        101: "Information is wrong",
+        200: "Error parsing input",
+        201: "Values are missing"
+      };
+      function logIn() {
+        let user = Parse.User.logIn(document.getElementById("username").value, document.getElementById("password").value).then(function(user) {
+          swal("Logged in. Redirecting...");
+          localStorage.setItem("username", document.getElementById("username").value);
+          localStorage.setItem("password", document.getElementById("password").value);
+          localStorage.setItem("points", user.get("currentPoints"));
+          setTimeout(() => {
+            parent.document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+          }, 1000);
+        }).catch(function(error) {
+          console.log(error);
+          swal("Error: Failed to login. Check your password and try again.\n\nError Code: " + error.code + " (" + errorCodes[error.code] + ")");
+        });
+      }
+    </script>
+  </body>
+</html>
