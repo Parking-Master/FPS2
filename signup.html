@@ -78,6 +78,7 @@
     </style>
   </head>
   <body>
+    <script src="userman.js"></script>
     <h1 style="position:relative;width:50%;display:inline-flex;align-items:center;text-align:center;justify-content:center;left:50%;margin-left:-25%;">Sign up for&nbsp;<img src="favicon.ico" style="position:relative;width:4%;border-radius:100%;border:2px solid #38b6ff" /></h1>
     <p style="text-align:center">Sign up for an account (FPS2)</p>
     <label for="username" style="position:relative;left:50%;margin-left:-25%;">Username: (3-12 characters)</label>
@@ -88,50 +89,9 @@
     <br>
     <input id="password" minlength="8" type="password" placeholder="Enter a password..." />
     <br>
-    <button onclick="signup()" id="submit">Sign up</button>
+    <button onclick="userMan.signUp(document.getElementById('username').value, document.getElementById('password').value, swal, swal, 'login.html')" id="submit">Sign up</button>
     <script>
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
-      async function signup() {
-        if (!document.getElementById("username").value) {
-          return swal("Please enter a username.");
-        }
-        if (!document.getElementById("password").value) {
-          return swal("Please enter a password.");
-        }
-        if (document.getElementById("password").value.length < 8) {
-          return swal("Please enter a password longer than 7 characters.");
-        }
-        if (document.getElementById("password").value.length > 20) {
-          return swal("Please enter a password shorter than 20 characters.");
-        }
-        if (document.getElementById("username").value.length < 3) {
-          return swal("Please enter a username longer than 2 characters.");
-        }
-        if (document.getElementById("username").value.length > 12) {
-          return swal("Please enter a username shorter than 12 characters.");
-        }
-        if (/[\ \#\$\%\^\*\(\)\+\=\[\]\{\}\;\:\'\"\\\/\.\,]|[^\u0000-\u00ff]/.test(document.getElementById("password").value)) {
-          return swal("Password contains invalid characters!");
-        }
-        if (/[\#\%\*\(\)\+\=\[\]\{\}\;\:\'\"\\\/\,]|[^\u0000-\u00ff]/.test(document.getElementById("username").value)) {
-          return swal("Username contains invalid characters!");
-        }
-        let user = new Parse.User();
-        user.set("username", document.getElementById("username").value);
-        user.set("password", document.getElementById("password").value);
-        try {
-          user = await user.save();
-          if (user !== null) {
-            swal({
-              text: "Success! You will need to log in now.",
-              button: "Log in"
-            }).then(() => parent.postMessage("login", "*"));
-          }
-        } catch (error) {
-          error.code == 202 ? swal("Error: A user already exists with that username.") : swal(error.message);
-          console.log(error);
-        }
-      }
     </script>
   </body>
 </html>

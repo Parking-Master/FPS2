@@ -78,6 +78,7 @@
     </style>
   </head>
   <body>
+    <script src="userman.js"></script>
     <h1 style="position:relative;width:50%;display:inline-flex;align-items:center;text-align:center;justify-content:center;left:50%;margin-left:-25%;">Log in to&nbsp;<img src="favicon.ico" style="position:relative;width:4%;border-radius:100%;border:2px solid #38b6ff" /></h1>
     <p style="text-align:center">Log in to chat, earn rewards and more</p>
     <label for="username" style="position:relative;left:50%;margin-left:-25%;">Username</label>
@@ -88,28 +89,9 @@
     <br>
     <input id="password" minlength="8" type="password" placeholder="The password you signup up with..." />
     <br>
-    <button onclick="logIn()" id="submit">Log in</button>
+    <button onclick="userMan.logIn(document.getElementById('username').value, document.getElementById('password').value, swal, swal, ['points'])" id="submit">Log in</button>
     <script>
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
-      errorCodes = {
-        101: "Information is wrong",
-        200: "Error parsing input",
-        201: "Values are missing"
-      };
-      function logIn() {
-        let user = Parse.User.logIn(document.getElementById("username").value, document.getElementById("password").value).then(function(user) {
-          swal("Logged in. Redirecting...");
-          localStorage.setItem("username", document.getElementById("username").value);
-          localStorage.setItem("password", document.getElementById("password").value);
-          localStorage.setItem("points", user.get("currentPoints"));
-          setTimeout(() => {
-            parent.document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-          }, 1000);
-        }).catch(function(error) {
-          console.log(error);
-          swal("Error: Failed to login. Check your password and try again.\n\nError Code: " + error.code + " (" + errorCodes[error.code] + ")");
-        });
-      }
     </script>
   </body>
 </html>

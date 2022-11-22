@@ -478,6 +478,7 @@
         ordinances[data.split(",")[1]].position.y = -10000;
       });
       eliminated = false;
+      setScore = 10;
       gametime.on("eliminate", function(player) {
         if (eliminated) {
           return;
@@ -488,6 +489,9 @@
         setTimeout(() => document.querySelector(".scoreboard").style.transform = "scale(1)", 3000);
         document.querySelector("#killSound").cloneNode().play();
         if (player != gametime.user.position) {
+          currentPoints += 10;
+          otherIsInVehicle && (currentPoints += 5);
+          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (currentPoints += 15);
           gametime.user.position == 1 ? setTimeout(() => (score1++), 1000) : setTimeout(() => (score2++), 1000);
           return otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
             let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
@@ -498,7 +502,9 @@
             otherPlayer.rotation.set(rotation.x, rotation.y - 1.6, rotation.z);
             scene.add(otherPlayer);
           }, 5000);
+          GameOver();
         }
+        currentPoints += -5;
         gametime.user.position == 1 ? setTimeout(() => (score2++), 1000) : setTimeout(() => (score1++), 1000);
         swal({
           title: "You were eliminated",
@@ -532,6 +538,7 @@
           let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
           scene.add(gun);
         }, 5000);
+        GameOver();
       });
       gametime.on("hit", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
@@ -681,7 +688,7 @@
         }
         if (data.split(",")[1] == "sound") {
           let y = gunsounds[data.split(",")[2]].cloneNode();
-          eliminated && (y.volume = .4);
+          eliminated && (y.volume = .5);
           y.play();
         }
       });
@@ -1009,6 +1016,31 @@
       nukeActivated = false;
       pausetabs = [];
       pausetabs = pausetabs.concat(Object.values(document.querySelectorAll(".pause-tab")));
+      currentPoints = 0;
+      function GameOver() {
+        if ((gametime.user.position == 1 && score1 >= setScore) || (gametime.user.position == 2 && score2 >= setScore)) {
+          swal({
+            title: "Game over",
+            text: "You win! You earned" + currentPoints + " points",
+            button: "Quit"
+          }).then(() => location.replace("/"));
+          controls.isLocked = false;
+        } else if ((gametime.user.position == 1 && score2 >= setScore) || (gametime.user.position == 2 && score1 >= setScore)) {
+          swal({
+            title: "Game over",
+            text: "You lose... But you will still get 50 points",
+            button: "Quit"
+          }).then(() => location.replace("/"));
+          controls.isLocked = false;
+        } else if (score1 == score2 && (score1 >= setScore || score2 >= setScore)) {
+          swal({
+            title: "Game over",
+            text: "Tie game! You earned " + (currentPoints / 2) + " points",
+            button: "Quit"
+          }).then(() => location.replace("/"));
+          controls.isLocked = false;
+        }
+      }
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;
@@ -1492,7 +1524,7 @@
           i++;
           if (subtract) { weaponPosition == "primary" ? (primaryWeapon.rounds--, primaryWeapon.rounds <= 0 && reload()) : (secondaryWeapon.rounds--, secondaryWeapon.rounds <= 0 && reload()) }
           let y = gunsounds[weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name)].cloneNode();
-          eliminated && (y.volume = .4);
+          eliminated && (y.volume = .5);
           y.play();
           gametime.run("add", [gametime.user.position+",sound"+","+(weaponPosition == "primary" ? (primaryWeapon.name) : (secondaryWeapon.name))]);
           let clip = mixers[weaponIndex].clipAction(animations[weaponIndex][2]);
@@ -1856,7 +1888,7 @@
           if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
           grenadesLeft++;
           let y = gunsounds["Grenade_Launcher"].cloneNode();
-          eliminated && (y.volume = .4);
+          eliminated && (y.volume = .5);
           y.play();
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
           let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";
@@ -2087,7 +2119,7 @@
             if ((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds : secondaryWeapon.rounds) <= 0 || isReloading) return;
             grenadesLeft++;
             let y = gunsounds["Grenade_Launcher"].cloneNode();
-            eliminated && (y.volume = .4);
+            eliminated && (y.volume = .5);
             y.play();
             (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.rounds-- : secondaryWeapon.rounds--);
             let currentWeapon = scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary";

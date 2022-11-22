@@ -205,7 +205,7 @@
       ::-webkit-scrollbar-track {
         border-radius: 0;
       }
-      .login, .signup {
+      .login, .logout, .signup {
         right: 20px;
         position: absolute;
         background: transparent;
@@ -274,7 +274,8 @@
     <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
     <div class="simple-keyboard"></div>
     <script src="https://cdn.jsdelivr.net/gh/notiflix/Notiflix@latest/dist/notiflix-aio-3.2.5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/FPS-Tipper@main/tipper.js" defer async="false"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Parking-Master/FPS-Tipper@master/tipper.js" defer async="false"></script>
+    <script src="userman.js"></script>
     <script>
       /**
         * @license
@@ -1003,6 +1004,21 @@
         });
       }
       window.addEventListener("message", (e) => (e.data == "login" && document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }), setTimeout(() => login(), 500))));
+      window.addEventListener("message", (e) => (e.data == "reload" && setTimeout(() => location.reload(), 1000)));
+      if (userMan.isLoggedIn) {
+        document.querySelector(".login").textContent = "Log out";
+        document.querySelector(".login").onclick = userMan.logOut;
+        document.querySelector(".login").className = "logout";
+        document.querySelector(".signup").style.background = "#f9f9f9";
+        document.querySelector(".signup").style.width = "100px";
+        document.querySelector(".signup").style.display = "inline-block";
+        document.querySelector(".signup").innerHTML = `
+        User: ${userMan.get("username")}
+        <br>
+        <div style="display:inline-flex;align-items:center;text-align:center;justify-content:center;margin-top:10px"><img src="icons/point.png" style="display:inline-block;width:20px;height:20px">&ThickSpace;Points:&ThickSpace;${userMan.get("points")}</div>
+        `;
+        document.querySelector(".signup").onclick = null;
+      }
     </script>
   </body>
 </html>
