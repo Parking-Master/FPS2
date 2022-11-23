@@ -89,7 +89,7 @@
     <br>
     <input id="password" minlength="8" type="password" placeholder="The password you signup up with..." />
     <br>
-    <button onclick="userMan.logIn(document.getElementById('username').value, document.getElementById('password').value, swal, swal, ['points', 'didVisitForge'])" id="submit">Log in</button>
+    <button onclick="userMan.logIn(document.getElementById('username').value, document.getElementById('password').value, swal, swal, ['points', 'didVisitForge', 'items'], new URLSearchParams(location.search).get('return') || null)" id="submit">Log in</button>
     <script>
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
     </script>

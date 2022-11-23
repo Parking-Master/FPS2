@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange points - FPS2</title>
+    <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Parking-Master/Simple-Alert@latest/simplealert.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #fff;
+      }
+      html, body {
+        overflow-x: hidden !important;
+      }
+      input {
+        position: relative;
+        width: 50%;
+        height: 20px;
+        padding: 5px;
+        left: 50%;
+        margin-left: -25%;
+        margin-bottom: 50px;
+        outline: none !important;
+        border: 2px solid #38b6ff;
+        background: #fff;
+        color: #38b6ff;
+        border-radius: 3px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .swal-modal {
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .swal-modal *, .swal-text {
+        color: #38b6ff !important;
+      }
+      .swal-button {
+        background: #38b6ff !important;
+        color: #fff !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+      h1 {
+        text-align: center;
+        margin-top: 50px;
+      }
+      button#submit {
+        position: relative;
+        background: #fff;
+        height: 40px;
+        padding: 5px;
+        display: inline-flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        outline: none !important;
+        width: 50%;
+        left: 50%;
+        margin-left: -25%;
+        cursor: default;
+        transition: background 1s;
+        border: 3px solid #38b6ff;
+        border-radius: 3px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        transition: box-shadow 1s;
+      }
+      button#submit:hover {
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
+      }
+      p {
+        margin-bottom: 100px;
+      }
+      a {
+        color: #25750a;
+      }
+      * {
+        color: #38b6ff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+        cursor: url(./cursors/cursor0.cur), auto !important;
+        user-select: none !important;
+      }
+      #clearfix {
+        outline: none;
+        border: none;
+        background: #fff;
+        color: #333;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24) !important;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24) !important;
+        font-size: 18px;
+        padding: 6px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .card {
+        position: relative;
+        width: 200px;
+        height: 225px;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24) !important;
+        border-radius: 3px;
+        display: inline-flex;
+      }
+      .card img:not(#point) {
+        position: relative;
+        left: 50%;
+        top: 10px;
+        width: 180px;
+        height: 203px;
+        margin-left: -45%;
+        border-radius: 3px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24) !important;
+        transition: opacity .4s, filter .1s;
+      }
+      .card img#point {
+        position: relative;
+        border-radius: 100%;
+        border: 2px solid gold;
+      }
+      .title {
+        position: relative;
+        text-align: center !important;
+        margin-top: 15px !important;
+        margin-left: 25px !important;
+        color: gold !important;
+      }
+      .items {
+        position: absolute;
+        right: 0;
+        margin: 50px;
+        margin-top: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        position: absolute;
+        width: 100%;
+        left: 50%;
+        margin-left: -50%;
+      }
+      .title.owned {
+        color: #777 !important;
+      }
+      .card img#point.owned {
+        border-color: #777 !important;
+      }
+      .card:hover img:not(#point) {
+        opacity: .5;
+      }
+      .card:active img:not(#point) {
+        filter: blur(3px);
+      }
+    </style>
+  </head>
+  <body>
+    <script src="userman.js"></script>
+    <h1 style="position:relative;width:50%;display:inline-flex;align-items:center;text-align:center;justify-content:center;left:50%;margin-left:-25%;">Exchange points&nbsp;<img src="icons/point.png" style="position:relative;width:4%;border-radius:100%;border:2px solid gold" /></h1>
+    <p style="text-align:center">Exchange points for rewards</p>
+    <div class="items">
+      <div class="card" onclick="purchase(this)">
+        <img src="images/characters/Steve_Soldier.png">
+        <br>
+        <p class="title owned" data-item="Character.Steve_Soldier">Free <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%" class="owned"></p>
+      </div>
+      <div class="card" onclick="purchase(this)">
+        <img src="images/characters/Max_Soldier.png">
+        <br>
+        <p class="title" data-item="Character.Max_Soldier">930 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
+      </div>
+      <div class="card" onclick="purchase(this)">
+        <img src="images/characters/Kenny_Soldier.png">
+        <br>
+        <p class="title" data-item="Character.Kenny_Soldier">1300 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
+      </div>
+      <div class="card" onclick="purchase(this)">
+        <img src="images/loadouts/Assault_Eagle.png">
+        <br>
+        <p class="title owned" data-item="Loadout.Assault_Eagle">Free <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%" class="owned"></p>
+      </div>
+      <div class="card" onclick="purchase(this)">
+        <img src="images/loadouts/P90_Pistol.png">
+        <br>
+        <p class="title" data-item="Loadout.P90_Pistol">500 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
+      </div>
+    </div>
+    <div id="notloggedin" style="display:none;z-index:9999999999999999;position:fixed;left:0;top:0;bottom:0;right:0;width:100%;height:100%;padding:0;margin:0;background:rgba(0, 0, 0, 0.435)"><div style="z-index:9999999999999999;color:#fff;display:inline-block;font-size:35px;position:fixed;left:50%;width:60%;margin-left:-30%;top:50%;height:60%;margin-top:-10%;text-align:center;justify-content:center;align-items:center">You must be logged in to use the store.<br><br><button id="clearfix" onclick="location.replace('login.html?return=store.html')">Log in</button></div></div>
+    <script>
+      Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
+      userMan.isLoggedIn || (document.querySelector("#notloggedin").style.display = "block");
+      function purchase(item) {
+        if (Object.values(item.querySelector(".title").classList).indexOf("owned") > -1) {
+          return swal({
+            title: "Sell item",
+            text: "You already own this item. Do you want to sell it for 0 points?",
+            buttons: ["Yes", "No"]
+          }).then(e => {
+            e = !e;
+            if (e) {
+              userMan.set("items", userMan.get("items").replace(item.querySelector(".title").dataset.item, ""), () => {});
+              userMan.set("items", userMan.get("items").replace(",,", ","), () => {});
+              setTimeout(() => location.reload(), 500);
+            }
+          });
+        }
+        swal({
+          title: "Purchase item",
+          text: "Do you want to purchase this item for " + item.querySelector(".title").textContent.trim() + " points?",
+          buttons: ["Yes", "No"]
+        }).then(e => {
+          e = !e;
+          if (e) {
+            if (userMan.get("points") >= item.querySelector(".title").textContent.trim().replace("Free", "0") - 0) {
+              userMan.set("items", userMan.get("items") + "," + item.querySelector(".title").dataset.item, () => {});
+              userMan.set("points", (userMan.get("points") - 0) - (item.querySelector(".title").textContent.trim().replace("Free", "0") - 0), () => {});
+              setTimeout(() => location.reload(), 500);
+            } else {
+              swal({
+                text: "You don't have enough points to purchase this item."
+              });
+            }
+          }
+        });
+      }
+      document.querySelectorAll(".title").forEach(x => userMan.get("items").split(",").indexOf(x.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
+      document.querySelectorAll("img#point").forEach(x => userMan.get("items").split(",").indexOf(x.parentElement.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
+    </script>
+  </body>
+</html>

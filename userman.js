@@ -13,7 +13,7 @@ userMan.errorCodes = {
   200: "Error parsing input",
   201: "Values are missing"
 };
-userMan.logIn = function logIn(username, password, callback, err, additionalRows = null) {
+userMan.logIn = function logIn(username, password, callback, err, additionalRows = null, redirectTo = null) {
   callback("Hold on, we're working on it...");
   let user = Parse.User.logIn(username, password).then(function(user) {
     callback("Logged in. Redirecting...");
@@ -25,6 +25,7 @@ userMan.logIn = function logIn(username, password, callback, err, additionalRows
       });
     }
     setTimeout(() => {
+      if (redirectTo) return location.replace(redirectTo.toString());
       parent.postMessage("reload", "*");
       parent.document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     }, 1000);
