@@ -957,6 +957,17 @@
       function login() {
         Notiflix.Loading.pulse();
         let e = document.createElement("iframe");
+        let x = document.createElement("div");
+        x.style = `
+        position: fixed !important;
+        left: 20px !important;
+        top: 20px !important;
+        color: white !important;
+        z-index: 999999999999;
+        font-size: 25px;
+        `;
+        x.innerHTML = "&times;";
+        x.onclick = () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
         e.style = `
         z-index: 999999999999;
         opacity: 0;
@@ -975,14 +986,26 @@
         e.src = "login.html";
         e.onload = () => (e.style.opacity = 1);
         document.body.appendChild(e);
-        currentSLFrame = e;
+        document.body.appendChild(x);
+        currentSLFrame = [e, x];
         document.addEventListener("keydown", (e) => {
-          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.remove(), currentSLFrame = null);
+          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.forEach(x => x.remove()), currentSLFrame = null);
         });
       }
       function signup() {
         Notiflix.Loading.pulse();
         let e = document.createElement("iframe");
+        let x = document.createElement("div");
+        x.style = `
+        position: fixed !important;
+        left: 20px !important;
+        top: 20px !important;
+        color: white !important;
+        z-index: 999999999999;
+        font-size: 25px;
+        `;
+        x.innerHTML = "&times;";
+        x.onclick = () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
         e.style = `
         z-index: 999999999999;
         opacity: 0;
@@ -1001,15 +1024,27 @@
         e.src = "signup.html";
         e.onload = () => (e.style.opacity = 1);
         document.body.appendChild(e);
-        currentSLFrame = e;
+        document.body.appendChild(x);
+        currentSLFrame = [e, x];
         document.addEventListener("keydown", (e) => {
-          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.remove(), currentSLFrame = null);
+          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.forEach(x => x.remove()), currentSLFrame = null);
         });
       }
       function openStore() {
         play();
         Notiflix.Loading.pulse();
         let e = document.createElement("iframe");
+        let x = document.createElement("div");
+        x.style = `
+        position: fixed !important;
+        left: 20px !important;
+        top: 20px !important;
+        color: white !important;
+        z-index: 999999999999;
+        font-size: 25px;
+        `;
+        x.innerHTML = "&times;";
+        x.onclick = () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
         e.style = `
         z-index: 999999999999;
         opacity: 0;
@@ -1028,9 +1063,10 @@
         e.src = "store.html";
         e.onload = () => (e.style.opacity = 1);
         document.body.appendChild(e);
-        currentSLFrame = e;
+        document.body.appendChild(x);
+        currentSLFrame = [e, x];
         document.addEventListener("keydown", (e) => {
-          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.remove(), currentSLFrame = null, play());
+          e.key == "Escape" && currentSLFrame && (Notiflix.Loading.remove(), currentSLFrame.forEach(x => x.remove()), currentSLFrame = null, play());
         });
       }
       window.addEventListener("message", (e) => (e.data == "login" && document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }), setTimeout(() => login(), 500))));
