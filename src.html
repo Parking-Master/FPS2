@@ -502,7 +502,6 @@
             otherPlayer.rotation.set(rotation.x, rotation.y - 1.6, rotation.z);
             scene.add(otherPlayer);
           }, 5000);
-          GameOver();
         }
         currentPoints += -5;
         gametime.user.position == 1 ? setTimeout(() => (score2++), 1000) : setTimeout(() => (score1++), 1000);
@@ -538,7 +537,6 @@
           let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
           scene.add(gun);
         }, 5000);
-        GameOver();
       });
       gametime.on("hit", function(data) {
         if (data.split(",")[0] == gametime.user.position) {
@@ -1017,7 +1015,9 @@
       pausetabs = [];
       pausetabs = pausetabs.concat(Object.values(document.querySelectorAll(".pause-tab")));
       currentPoints = 0;
+      gameover = false;
       function GameOver() {
+        if (gameover) return;
         if ((gametime.user.position == 1 && score1 >= setScore) || (gametime.user.position == 2 && score2 >= setScore)) {
           swal({
             title: "Game over",
@@ -1025,6 +1025,9 @@
             button: "Quit"
           }).then(() => location.replace("/"));
           controls.isLocked = false;
+          localStorage["ptsToAdd"] = currentPoints;
+          document.querySelector(".swal-modal").style = "width:100%!important";
+          gameover = true;
         } else if ((gametime.user.position == 1 && score2 >= setScore) || (gametime.user.position == 2 && score1 >= setScore)) {
           swal({
             title: "Game over",
@@ -1032,6 +1035,9 @@
             button: "Quit"
           }).then(() => location.replace("/"));
           controls.isLocked = false;
+          localStorage["ptsToAdd"] = 50;
+          document.querySelector(".swal-modal").style = "width:100%!important";
+          gameover = true;
         } else if (score1 == score2 && (score1 >= setScore || score2 >= setScore)) {
           swal({
             title: "Game over",
@@ -1039,8 +1045,12 @@
             button: "Quit"
           }).then(() => location.replace("/"));
           controls.isLocked = false;
+          localStorage["ptsToAdd"] = currentPoints / 2;
+          document.querySelector(".swal-modal").style = "width:100%!important";
+          gameover = true;
         }
       }
+      setInterval(() => GameOver(), 500);
       /* End global variables */
       function animate() {
         health >= 100 ? health = 100 : health += .05;

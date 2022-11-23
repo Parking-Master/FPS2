@@ -33,10 +33,10 @@ userMan.logIn = function logIn(username, password, callback, err, additionalRows
     err("Error: Failed to login. Check your password and try again.\n\nError Code: " + error.code + " (" + userMan.errorCodes[error.code] + ")");
   });
 }
-userMan.logOut = function logOut() {
+userMan.logOut = function logOut(reload = true) {
   Object.keys(localStorage).forEach(x => x.startsWith("userman-") && localStorage.removeItem(x));
   sessionStorage.clear();
-  location.reload(true);
+  reload && location.reload(true);
 }
 userMan.signUp = async function signUp(username, password, callback, err, loginPath) {
   if (!username) {
@@ -81,4 +81,16 @@ userMan.signUp = async function signUp(username, password, callback, err, loginP
 }
 userMan.get = function(row) {
   return localStorage["userman-" + row.toLowerCase().trim().replace("user", "").replace("word", "")];
+}
+userMan.set = function(key, value, callback) {
+  if (key == "password") {
+    return;
+  }
+  let username = userMan.get("username");
+  let password = userMan.get("password");
+  let user = Parse.User.logIn(userMan.get("username"), userMan.get("password")).then(function(user) {
+    user.set(key.toString().trim(), value);
+    user.save();
+    Object.keys(localStorage).forEach(x => (x.startsWith("userman-") && x != "userman-pass" && callback(x, user.get(x.split("-")[1].replace(/\bpass\b/, "password").replace(/\bname\b/, "username")), localStorage.setItem(x, user.get(x.split("-")[1].replace(/\bname\b/, "username"))))));
+  });
 }

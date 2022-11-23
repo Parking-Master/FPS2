@@ -1015,9 +1015,19 @@
         document.querySelector(".signup").innerHTML = `
         User: ${userMan.get("username")}
         <br>
-        <div style="display:inline-flex;align-items:center;text-align:center;justify-content:center;margin-top:10px"><img src="icons/point.png" style="display:inline-block;width:20px;height:20px">&ThickSpace;Points:&ThickSpace;${userMan.get("points")}</div>
+        <div style="display:inline-flex;align-items:center;text-align:center;justify-content:center;margin-top:10px"><img src="icons/point.png" style="display:inline-block;width:20px;height:20px">&ThickSpace;Points:&ThickSpace;<span id="points">${userMan.get("points")}</span></div>
         `;
         document.querySelector(".signup").onclick = null;
+        document.querySelector("#points").style.fontSize = (((16 - ((userMan.get("points")).toString().length * 3)) * 2.25) > 16 ? 16 : ((16 - ((userMan.get("points")).toString().length * 3)) * 2.25)).toFixed(0) + "px";
+      }
+      if (localStorage["ptsToAdd"]) {
+        let i = localStorage["ptsToAdd"] - 0;
+        localStorage.removeItem("ptsToAdd");
+        if (userMan.isLoggedIn) {
+          userMan.set("points", (userMan.get("points") - 0) + i, (newKey, newValue) => {
+            document.querySelector("#points").textContent = newValue;
+          });
+        }
       }
     </script>
   </body>
