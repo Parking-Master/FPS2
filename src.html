@@ -403,7 +403,7 @@
     <audio id="9mm_Pistol_reloadeasy" src="sounds/guns/9mm_Pistol/easy.mp3"></audio>
     <audio id="9mm_Pistol_reloadfull" src="sounds/guns/9mm_Pistol/full.mp3"></audio>
     <div class="ui">
-      <img src="text-images/hamburger.png" style="position:absolute;z-index:999999;filter:invert(100%);top:20px;left:20px;width:50px;pointer-events:all!important" onclick="pause()">
+      <img src="text-images/hamburger.png" style="position:absolute;z-index:999999;filter:drop-shadow(0 0 3px rgba(255,255,255,.3)) invert(100%);top:20px;left:20px;width:50px;pointer-events:all!important" onclick="pause()">
       <div class="scoreboard">
         <span class="player1">A - <span class="score">0</span></span>
         <hr>
@@ -688,6 +688,21 @@
           let y = gunsounds[data.split(",")[2]].cloneNode();
           eliminated && (y.volume = .5);
           y.play();
+        }
+        if (data.split(",")[1] == "grenade") {
+          let x = data.split(",")[2] - 0;
+          let y = data.split(",")[3] - 0;
+          let z = data.split(",")[4] - 0;
+          let x1 = data.split(",")[5] - 0;
+          let y1 = data.split(",")[6] - 0;
+          let z1 = data.split(",")[7] - 0;
+          let pos = new THREE.Vector3(x, y, z);
+          let rot = new THREE.Vector3(x1, y1, z1);
+          let e = new THREE.Mesh();
+          e.position.set(pos.x, pos.y, pos.z);
+          e.rotation.set(rot.x, rot.y, rot.z);
+          grenadesLeft++;
+          throwGrenade(e, camera);
         }
       });
       gametime.on("countdown", function(user) {
@@ -1906,7 +1921,11 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
-          throwGrenade();
+          throwGrenade(camera, camera);
+          (() => {
+            let e = camera;
+            gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+          })();
         }
         if (currentWeapon == "P90_SMG") {
           fullAutoFiring = true;
@@ -2137,7 +2156,11 @@
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
-            throwGrenade();
+            throwGrenade(camera, camera);
+            (() => {
+              let e = camera;
+              gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+            })();
           }
           if (currentWeapon == "P90_SMG") {
             fullAutoFiring = true;
@@ -2174,13 +2197,17 @@
           switchWeapon();
         }
         if (e.key == "m" && !e.repeat) {
-          throwGrenade();
+          throwGrenade(camera, camera);
+          (() => {
+            let e = camera;
+            gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+          })();
         }
         if (e.key == "p" && !e.repeat) {
           pause();
         }
       });
-      function throwGrenade(){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.002,a.translateY(e),a.translateZ(e/2)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));let it=new THREE.PointLight(0xf88b00,3);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera.position);distanceTo(camera.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
+      function throwGrenade(camera,camera1){let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let b=0;"undefined"==typeof grenade||grenadesLeft<=0||!canThrowGrenade||(canThrowGrenade=!1,grenadesLeft--,grenade.position.copy(camera.position),grenade.rotation.copy(camera.rotation),grenade.scale.set(.2,.2,.2),(()=>{let e,a=grenade.clone();scene.add(a),a.updateMatrix(),a.translateZ(-.5);let t=setInterval((()=>{map.traverse((n=>{collision(a,n)&&n instanceof THREE.Mesh&&n!=gun&&n!=a&&n instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera1.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&((n.name.includes("Container")||n.name.includes("Warthog"))&&console.log(n),e=n,(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&(currentMap=="GHOST"?(!e.name.includes("scene")&&!e.name.includes("Scene")&&!e.name.includes("root")&&!e.name.includes("Root")&&!/Sketchfab_model|BLD_L_gedungA_part1_1|BLD_L_gedungA_part2_2|Object_6|Object_8|Object_62|BAKE_29/gi.test(e.name)):true)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera1.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&(console.log(e),(()=>{let e=.1,t=setInterval((()=>{map.traverse((e=>{collision(a,e)&&e instanceof THREE.Mesh&&e!=gun&&e!=a&&e instanceof THREE.Mesh&&(()=>{let g=document.querySelector("#ricochet"+(Math.floor(Math.random()*3)+1)).cloneNode();let u=(1-(distanceTo(a.position,camera1.position)/5));((u<=0&&(u=0)),(u>=1&&(u=1)));g.volume=u;g.play();return true})()&&clearInterval(t)})),e+=-.002,a.translateY(e),a.translateZ(e/2)}))})(),clearInterval(t))})),e+=-.001,a.translateY(e)}))})(),setTimeout((()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(2,30),new THREE.MeshPhongMaterial({color:16777215,map:(new THREE.TextureLoader).load("images/textures/explosion.png"),transparent:!0,shininess:1}));let it=new THREE.PointLight(0xf88b00,3);scene.add(it);it.position.copy(e.position);e.scale.set(.4,.4,.4);let g=document.querySelector("#explosion").cloneNode();let u=(1-(distanceTo(a.position,camera1.position)/5))+.2;((u<=0&&(u=.2)),(u>=1&&(u=1)));g.volume=u;g.play();scene.remove(a),e.position.copy(a.position),e.rotation.copy(a.rotation),a.updateMatrix(),e.translateY(2),(()=>{let e=new THREE.Mesh(new THREE.CircleGeometry(4,30),new THREE.MeshBasicMaterial({map:textures["smoke"],transparent:!0}));e.position.copy(a.position),e.rotation.copy(a.rotation),e.updateMatrix(),e.lookAt(camera1.position),e.translateY(1);let t=setInterval((()=>{e.translateY(.003),e.material.opacity<0||(e.material.opacity+=-.002)}));setTimeout((()=>clearInterval(t)),10000)})(),e.lookAt(camera1.position),scene.add(e);let t=setInterval((()=>{e.lookAt(camera1.position);distanceTo(camera1.position,e.position)<=3?(gametime.run("eliminate",[gametime.user.position])):(distanceTo(otherFollower.position,e.position)<=3&&gametime.run("eliminate",[gametime.user.position==1?2:1])),e.material.opacity<=0?(clearInterval(t),scene.remove(e),scene.remove(it)):(e.scale.set(e.scale.x+.2,e.scale.y+.15,e.scale.z+.2),e.material.opacity+=-.025)}))}),2e3),clearInterval(t))})),b+=.001,a.translateZ(-.1),a.translateY(-b)}))})(),setTimeout((()=>{canThrowGrenade=!0}),750))}grenadesLeft=setGrenades,canThrowGrenade=!0;(new THREE.GLTFLoader).load("models/weapons/grenades/frag.glb",(e)=>{grenade=e.scene});
       document.addEventListener("contextmenu", (e) => { return e.preventDefault() });
       document.addEventListener("keyup", (e) => {
         if (!controls.isLocked) {
