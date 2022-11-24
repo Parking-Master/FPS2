@@ -1524,7 +1524,7 @@
         e.translateY(.1);
         let h = setInterval(() => {
           map.traverse((x) => {
-            if (x.isObject3D && ((!x.name.includes("scene") && !x.name.includes("Scene")) || (currentMap == "CITY" && x.name.includes("Cube"))) && collision(e, x)) {
+            if (x.isObject3D && ((!x.name.includes("scene") && !x.name.includes("Scene")) && (currentMap == "CITY" ? x.name.includes("Cube") : true)) && collision(e, x)) {
               vehicleClones.forEach(i => {
                 typeof i.getObjectByName(x.name) != "undefined" && (x.health <= 0 ? destroyVehicle(x, x) : x.health--);
               });
