@@ -525,7 +525,7 @@
           if (name.length > 10) return swal("Lobby name should be under 10 characters.");
           let lobby = new Lobby();
           lobby.set("name", name);
-          lobby.set("map", document.querySelector("#selectmap").value.split(" ")[0].toUpperCase());
+          lobby.set("map", document.querySelector("#selectmap").value.split(" ")[0].toUpperCase().replace("ABANDONED", "CITY"));
           lobby.set("mode", document.querySelector("#selectmode").value);
           lobby.set("code", document.getElementsByName("code")[0].checked ? code() : "");
           lobby.save().then(() => (console.log("Lobby \"" + name.toString() + "\" saved"), lobby.get("code").length > 0 ? location.assign("src.html?lobby=" + encodeURIComponent(name) + "&code=" + lobby.get("code")) : findLobby(name, "*", "*")));
@@ -550,6 +550,7 @@
           <option value="Cargo port">Cargo port</option>
           <option value="Vertex">Vertex</option>
           <option value="Ghost city">Ghost city</option>
+          <option value="Abandoned city">Abandoned city</option>
         </select>
         <br>
         <br>
@@ -815,6 +816,8 @@
         <a href="" onclick="event.preventDefault(); currentMap = 'VERTEX'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Vertex [MAP]&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<img src="/images/maps/vertex.png" style="width:5%"></a>
         <br>
         <a href="" onclick="event.preventDefault(); currentMap = 'GHOST'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')">Ghost city [MAP]&ThickSpace;&ThickSpace;&ThickSpace;<img src="/images/maps/ghost.png" style="width:5%"></a>
+        <br>
+        <a href="" onclick="event.preventDefault(); currentMap = 'CITY'; for (let i = 0; i < document.querySelectorAll('.focusa').length; i++) { document.querySelectorAll('.focusa')[i].classList.toggle('focusa') } this.classList.add('focusa')" style="font-size:12px">Abandoned city [MAP]&ThickSpace;&ThickSpace;&ThickSpace;&ThickSpace;<img src="/images/maps/city.png" style="width:5%"></a>
         `;
         swal({
           title: "Choose a map",
@@ -860,7 +863,7 @@
         if (text == null) {
           let help = document.createElement("div");
           help.innerHTML = `
-          <input type="text" style="position:relative;top:0;width:60%;font-family:Arial!important;background:#fff;color:#38b6ff;border:none!important;outline:none!important;border-radius:2px;box-shadow:0 1px 6px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.24)" id="helpsearch" placeholder="What do you need help with?" onkeyup="clearTimeout(helpKeyUp); event.preventDefault(); helpKeyUp = setTimeout(() => {this.value.trim() && help(this.value.trim()) }, 500)">
+          <input type="text" style="padding:5px;font-size:20px;position:relative;top:0;width:60%;font-family:Arial!important;background:#fff;color:#38b6ff;border:none!important;outline:none!important;border-radius:2px;box-shadow:0 1px 6px rgba(0,0,0,0.1),0 1px 4px rgba(0,0,0,0.24)" id="helpsearch" placeholder="What do you need help with?" onkeyup="clearTimeout(helpKeyUp); event.preventDefault(); helpKeyUp = setTimeout(() => {this.value.trim() && help(this.value.trim()) }, 500)">
           `;
           swal({
             icon: "icons/help.png",
@@ -1072,6 +1075,7 @@
       window.addEventListener("message", (e) => (e.data == "login" && document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }), setTimeout(() => login(), 500))));
       window.addEventListener("message", (e) => (e.data == "reload" && setTimeout(() => location.reload(), 1000)));
       if (userMan.isLoggedIn) {
+        userMan.update();
         document.querySelector(".login").textContent = "Log out";
         document.querySelector(".login").onclick = userMan.logOut;
         document.querySelector(".login").className = "logout";

@@ -90,9 +90,21 @@ userMan.set = function(key, value, callback) {
   }
   let username = userMan.get("username");
   let password = userMan.get("password");
+  Parse.User.logOut();
   let user = Parse.User.logIn(userMan.get("username"), userMan.get("password")).then(function(user) {
     user.set(key.toString().trim(), value);
     user.save();
     Object.keys(localStorage).forEach(x => (x.startsWith("userman-") && x != "userman-pass" && callback(x, user.get(x.split("-")[1].replace(/\bpass\b/, "password").replace(/\bname\b/, "username")), localStorage.setItem(x, user.get(x.split("-")[1].replace(/\bname\b/, "username"))))));
+  });
+}
+userMan.update = function() {
+  let username = userMan.get("username");
+  let password = userMan.get("password");
+  Object.keys(localStorage).forEach(key => {
+    if (!key.startsWith("userman")) return;
+    Parse.User.logOut();
+    let user = Parse.User.logIn(username, password).then(function(user) {
+      localStorage[key] = key.includes("pass") ? password : user.get(key.split("-")[1].replace(/\bpass\b/, "password").replace(/\bname\b/, "username"));
+    });
   });
 }
