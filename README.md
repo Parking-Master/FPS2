@@ -260,6 +260,24 @@ This weapon is most commonly used in vehicle-operated warzones on the battlefiel
 </ul>
 </details>
 
+##### 9mm Glock
+The Glock-17 is a semi-auto pistol, that uses 9mm pistol rounds.
+
+The Glock is available in many situations during the game, which makes it the go-2 pistol/secondary weapon.
+
+<img src="images/guns/9mm_Pistol.png" width="20%">
+
+<details>
+<summary>Show details</summary>
+<ul>
+<li>Damage: 20/100</li>
+<li>Accuracy: 25/100</li>
+<li>Recoil: 15/100</li>
+<li>Fire delay: 50 ms</li>
+<li>Reload time: 1600 ms</li>
+</ul>
+</details>
+
 #### Vehicles
 ##### Army Humvee
 The Humvee Pickup is a reliable vehicle that takes 100+ damage without being destroyed, but watch out for those tight corners!
@@ -285,6 +303,20 @@ The map "Vertex" appeared several times in the first prototypes of FPS 1.
 This map has been redesigned to perfection in this amazing old-fashioned farm-like styled map.
 
 <img src="images/maps/vertex.png" width="100%">
+
+##### Ghost City
+The Ghost Map also appeared in FPS 1, but not until the very end of the game developement.
+
+The map is not very big in width, but lengthwise is a different story.
+
+<img src="images/maps/ghost.png" width="100%">
+
+##### Abandoned City
+The Abandoned City is like the ["Ghost" map](#ghost-city), but it's bigger and a little more realistic.
+
+The Abandoned City is futuristic because of it's unique in-game capabilities.
+
+<img src="images/maps/city.png" width="100%">
 
 ### In-game photos
 ![image](https://user-images.githubusercontent.com/88283567/195461720-389c8954-3d40-4b9e-a297-5f9f0b9e71d0.png)
