@@ -35,6 +35,7 @@ userMan.logIn = function logIn(username, password, callback, err, additionalRows
   });
 }
 userMan.logOut = function logOut(reload = true) {
+  Parse.User.logOut();
   Object.keys(localStorage).forEach(x => x.startsWith("userman-") && localStorage.removeItem(x));
   sessionStorage.clear();
   reload && location.reload(true);

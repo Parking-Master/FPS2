@@ -212,24 +212,24 @@
       <br>
       <br>
       <div class="card" onclick="purchase(this)">
-        <img src="images/colors/black.png">
+        <img src="images/colors/orange.png">
         <br>
         <p class="title" data-item="ArmorColor.Orange">100 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
       </div>
       <div class="card" onclick="purchase(this)">
-        <img src="images/colors/orange.png">
+        <img src="images/colors/brown.png">
         <br>
         <p class="title" data-item="ArmorColor.Brown">100 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
-      </div>
-      <div class="card" onclick="purchase(this)">
-        <img src="images/colors/gray.png">
-        <br>
-        <p class="title" data-item="ArmorColor.Gray">100 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
       </div>
       <div class="card" onclick="purchase(this)">
         <img src="images/colors/white.png">
         <br>
         <p class="title" data-item="ArmorColor.White">100 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
+      </div>
+      <div class="card" onclick="purchase(this)">
+        <img src="images/colors/gray.png">
+        <br>
+        <p class="title" data-item="ArmorColor.Gray">100 <img id="point" src="icons/point.png" style="display:inline-block;position:relative;width:7%"></p>
       </div>
       <div class="card" onclick="purchase(this)">
         <img src="images/colors/black.png">
@@ -245,20 +245,21 @@
         if (Object.values(item.querySelector(".title").classList).indexOf("owned") > -1) {
           return swal({
             title: "Sell item",
-            text: "You already own this item. Do you want to sell it for 0 points?",
+            text: "You already own this item. Do you want to sell it for " + item.querySelector(".title").textContent + " points?",
             buttons: ["Yes", "No"]
           }).then(e => {
             e = !e;
             if (e) {
-              userMan.set("items", userMan.get("items").replace(item.querySelector(".title").dataset.item, ""), () => {});
-              userMan.set("items", userMan.get("items").replace(",,", ","), () => {});
-              setTimeout(() => location.reload(), 500);
+              setTimeout(() => userMan.set("items", userMan.get("items").replace(item.querySelector(".title").dataset.item, ""), () => {}), 500);
+              setTimeout(() => userMan.set("items", userMan.get("items").replace(",,", ","), () => {}), 1000);
+              setTimeout(() => userMan.set("points", (userMan.get("points") - 0) + (item.querySelector(".title").textContent.trim().replace("Free", "0") - 0), () => {}), 1500);
+              swal({ text: "Selling item in progress...", button: false }), setTimeout(() => location.reload(), 2000);
             }
           });
         }
         swal({
           title: "Purchase item",
-          text: "Do you want to purchase this item for " + item.querySelector(".title").textContent.trim() + " points?",
+          text: "Do you want to purchase the item \"" + (item.querySelector(".title").dataset.item.split(".")[1].replace("_", " ") + " " + item.querySelector(".title").dataset.item.split(".")[0].replace("ArmorColor", "Armor Color")) +  "\" for " + item.querySelector(".title").textContent.trim() + " points?",
           buttons: ["Yes", "No"]
         }).then(e => {
           e = !e;
