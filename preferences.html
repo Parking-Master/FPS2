@@ -167,25 +167,10 @@
     <script src="userman.js"></script>
     <h1 style="position:relative;width:50%;display:inline-flex;align-items:center;text-align:center;justify-content:center;left:50%;margin-left:-25%;">Preferences</h1>
     <p style="text-align:center">Change your loadout, character, and style in preferences.</p>
-    <div class="items">
-      <div class="card" onclick="choose(this)">
-        <img src="images/characters/Steve_Soldier.png">
-        <br>
-        <p class="secondary-title equipped">Character</p>
-      </div>
-      <div class="card" onclick="choose(this)">
-        <img src="images/loadouts/Assault_Eagle.png">
-        <br>
-        <p class="secondary-title equipped">Loadout</p>
-      </div>
-      <div class="card" onclick="choose(this)">
-        <img src="images/colors/blue.png">
-        <br>
-        <p class="secondary-title equipped">Theme</p>
-      </div>
-    </div>
+    <div class="items"></div>
     <div id="notloggedin" style="display:none;z-index:9999999999999999;position:fixed;left:0;top:0;bottom:0;right:0;width:100%;height:100%;padding:0;margin:0;background:rgba(0, 0, 0, 0.435)"><div style="z-index:9999999999999999;color:#fff;display:inline-block;font-size:35px;position:fixed;left:50%;width:60%;margin-left:-30%;top:50%;height:60%;margin-top:-10%;text-align:center;justify-content:center;align-items:center">You must be logged in to use the store.<br><br><button id="clearfix" onclick="location.replace('login.html?return=store.html')">Log in</button></div></div>
     <script>
+      function isValidColor(o){var r=(new Option).style;return r.color=o,r.color==o.toLowerCase()}
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
       userMan.isLoggedIn || (document.querySelector("#notloggedin").style.display = "block");
       function choose(item) {
@@ -207,11 +192,11 @@
       document.querySelectorAll(".title").forEach(x => userMan.get("items").split(",").indexOf(x.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
       document.querySelectorAll("img#point").forEach(x => userMan.get("items").split(",").indexOf(x.parentElement.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
       let items = (() => { let items = []; [... new Set(userMan.get("items").split(","))].map((x) => { !x.trim() || items.push(x) }); return items })();
-      items.forEach(x => document.querySelector("items").innerHTML += `
+      items.forEach(x => document.querySelector(".items").innerHTML += `
       <div class="card" onclick="choose(this)">
-        <img src="images/colors/blue.png">
+        <img src="images/${x.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${x.split(".")[1].trim()}.png">
         <br>
-        <p class="secondary-title equipped"></p>
+        <p class="secondary-title equipped">${x.split(".")[0]}</p>
       </div>
       `);
     </script>

@@ -40,7 +40,7 @@ userMan.logOut = function logOut(reload = true) {
   sessionStorage.clear();
   reload && location.reload(true);
 }
-userMan.signUp = async function signUp(username, password, callback, err, loginPath) {
+userMan.signUp = async function signUp(username, password, extraRows, callback, err, loginPath) {
   if (!username) {
     return err("Please enter a username.");
   }
@@ -68,6 +68,9 @@ userMan.signUp = async function signUp(username, password, callback, err, loginP
   let user = new Parse.User();
   user.set("username", username);
   user.set("password", password);
+  Object.keys(extraRows).forEach(x => {
+    user.set(x.toString().trim(), extraRows[x]);
+  });
   try {
     user = await user.save();
     if (user !== null) {
