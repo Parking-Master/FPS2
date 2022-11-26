@@ -253,7 +253,8 @@
               setTimeout(() => userMan.set("items", userMan.get("items").replace(item.querySelector(".title").dataset.item, ""), () => {}), 500);
               setTimeout(() => userMan.set("items", userMan.get("items").replace(",,", ","), () => {}), 1000);
               setTimeout(() => userMan.set("points", (userMan.get("points") - 0) + (item.querySelector(".title").textContent.trim().replace("Free", "0") - 0), () => {}), 1500);
-              swal({ text: "Selling item in progress...", button: false }), setTimeout(() => location.reload(), 2000);
+              if (JSON.parse(atob(userMan.get("preferences"))).currentPageTheme == item.querySelector(".title").dataset.item.trim()) setTimeout(() => { let oldPreferences=JSON.parse(atob(userMan.get("preferences")));oldPreferences.currentPageTheme="Theme."+(userMan.get("items").split(",").filter((function(e){return"Theme"==e.split(".")[0]})).map((function(e){return e.split(".")[1]})).length>1?0==userMan.get("items").split(",").filter((function(e){return"Theme"==e.split(".")[0]})).map((function(e){return e.split(".")[1]})).indexOf(JSON.parse(atob(userMan.get("preferences"))).currentPageTheme)&&userMan.get("items").split(",").filter((function(e){return"Theme"==e.split(".")[0]})).map((function(e){return e.split(".")[1]}))[1]:"Blue");let newPreferences=btoa(JSON.stringify(oldPreferences));userMan.set("preferences",newPreferences,()=>{}) }, 2000);
+              swal({ text: "Selling item in progress...", button: false }), setTimeout(() => location.reload(), 2500);
             }
           });
         }

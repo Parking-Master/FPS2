@@ -189,6 +189,7 @@
         `));
         swal({
           title: "Choose item",
+          text: "These are the items you own",
           content: items,
           buttons: ["Choose", "Cancel"]
         }).then(e => {
@@ -197,8 +198,8 @@
             let oldPreferences = JSON.parse(atob(userMan.get("preferences")));
             oldPreferences[item.dataset.item.replace("Character", "currentArmorSet").replace("Loadout", "currentLoadoutSet").replace("Theme", "currentPageTheme")] = currentSelectedItem.split(".")[1];
             let newPreferences = btoa(JSON.stringify(oldPreferences));
-            userMan.set("preferences", newPreferences.toString(), () => location.reload());
-            swal({ text: "Changing preferences...", button: false }), setTimeout(() => location.reload(), 2000);
+            console.log(newPreferences, oldPreferences);
+            userMan.set("preferences", newPreferences.toString(), function() { setTimeout(() => location.reload(), 500) });
           }
         });
         Object.keys(JSON.parse(atob(userMan.get("preferences")))).forEach(x => {
@@ -212,7 +213,7 @@
         let data = x.replace("currentArmorSet", "Character").replace("currentLoadoutSet", "Loadout").replace("currentPageTheme", "Theme") + "." + preferences[x];
         document.querySelector(".items").innerHTML += `
         <div class="card" onclick="choose(this)" data-item="${data.split(".")[0]}">
-          <img src="images/${data.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${data.split(".")[1].trim()}.png">
+          <img src="images/${data.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${data.split(".")[0].replace("Theme", "color").toLowerCase().trim() == "color" ? data.split(".")[1].trim().toLowerCase() : data.split(".")[1].trim()}.png">
           <br>
           <p class="secondary-title equipped">${data.split(".")[0]}</p>
         </div>

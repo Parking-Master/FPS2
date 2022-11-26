@@ -21,7 +21,7 @@ userMan.logIn = function logIn(username, password, callback, err, additionalRows
     localStorage.setItem("userman-pass", password);
     if (additionalRows) {
       additionalRows.forEach(x => {
-        localStorage.setItem("userman-" + x.toLowerCase().trim(), user.get(x));
+        localStorage.setItem("userman-" + x.trim(), user.get(x));
       });
     }
     setTimeout(() => {
@@ -85,7 +85,7 @@ userMan.signUp = async function signUp(username, password, extraRows, callback, 
   }
 }
 userMan.get = function(row) {
-  return localStorage["userman-" + row.toLowerCase().trim().replace("user", "").replace("word", "")];
+  return localStorage["userman-" + row.trim().replace("user", "").replace("word", "")];
 }
 userMan.set = function(key, value, callback) {
   if (key == "password") {

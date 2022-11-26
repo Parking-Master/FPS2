@@ -246,8 +246,8 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <img id="background" src="text-images/rifles.png">
-    <img id="sidebar" src="text-images/sidebar.png">
-    <img id="heading0" src="text-images/heading.png">
+    <img id="sidebar" src="text-images/Blue/sidebar.png">
+    <img id="heading0" src="text-images/Blue/heading.png">
     <div class="login" style="top:20px" onclick="login()">Log in</div>
     <div class="signup" style="top:120px" onclick="signup()">Sign up</div>
     <hr>
@@ -1029,6 +1029,9 @@
         `;
         document.querySelector(".signup").onclick = () => {};
         document.querySelector("#points").style.fontSize = (((16 - ((userMan.get("points")).toString().length * 3)) * 2.25) > 16 ? 16 : ((16 - ((userMan.get("points")).toString().length * 3)) * 2.25)).toFixed(0) + "px";
+        document.documentElement.innerHTML = document.documentElement.innerHTML.replace(/(\#38b6ff)/gi, JSON.parse(atob(userMan.get("preferences"))).currentPageTheme.replace("Blue", "#38b6ff").replace("White", "#ddd").replace("Gray", "#a6a6a6").replace("Black", "#000").replace("Brown", "#a44f30").replace("Orange", "#ffa500").replace("Yellow", "#fdfb52").replace("Green", "#008000").replace("Red", "#ee2211").replace("Blue", "#38b6ff")).replace(/Blue/g, JSON.parse(atob(userMan.get("preferences"))).currentPageTheme);
+        document.querySelector(".logout").onclick = () => userMan.logOut(true);
+        document.querySelector(".logout").setAttribute("onclick", "userMan.logOut()");
       }
       if (localStorage["ptsToAdd"]) {
         let i = localStorage["ptsToAdd"] - 0;
