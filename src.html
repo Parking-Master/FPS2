@@ -156,13 +156,6 @@
       #visor {
         pointer-events: none !important;
       }
-      canvas:first {
-        position: absolute;
-        width: 62.5vw;
-        height: 100vw;
-        left: 50% !important;
-        margin-left: -31.25vw !important;
-      }
       .crosshair {
         position: absolute;
         width: 5px;
@@ -344,6 +337,7 @@
         height: 100%;
         transition: opacity 1.5s;
         z-index: 999999999999999999999999;
+        pointer-events: none !important;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
@@ -390,9 +384,7 @@
     <audio id="countdown_sound" src="sounds/countdown.mp3"></audio>
     <audio id="game-over" src="sounds/game_over.mp3"></audio>
     <audio id="time-warning" src="sounds/timewarning.mp3"></audio>
-    <audio id="warthog-sound" src="sounds/warthog.mp3" loop></audio>
     <audio id="punch" src="sounds/punch.mp3"></audio>
-    <audio id="slayer" src="sounds/slayer.mp3"></audio>
     <audio id="mouseupSound" src="sounds/mouseup.mp3"></audio>
     <audio id="mousedownSound" src="sounds/mousedown.mp3"></audio>
     <audio id="surge" src="sounds/surge.mp3"></audio>
@@ -839,6 +831,7 @@
       fullAutoFiring = false;
       currentPerformance = (localStorage["performance"] || "100") - 0;
       currentMap = (new URLSearchParams(location.search).get("map") || "CARGO").toUpperCase();
+      currentPlayer = (new URLSearchParams(location.search).get("player") || "steve").toUpperCase();
       gunsounds = {
         "Assault_Rifle": document.getElementById("Assault_Rifle_fire"),
         "Desert_Eagle": document.getElementById("Desert_Eagle_fire"),
@@ -1269,19 +1262,23 @@
           map.scale.set(1.6,1.6,1.6);
           map.position.y = -300;
           (map.getObjectByProperty("type", "DirectionalLight").visible = false);
-        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
+        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer + "/scene.gltf", (model) => {
           player = model.scene;
           otherPlayer = model.scene.clone();
           animations[2]=(model.animations);
           let mixer = new THREE.AnimationMixer(player);
           mixer.speed = 3.25;
           mixers[2]=(mixer);
-          scene.add(player),player.scale.set(.015,.015,.015);let localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body2").material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body2").material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),-1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[0].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[0].material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),0);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[1].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[1].material.clipShadows=!0,player.getObjectByName("ak47glb").visible=false,player.getObjectByName("Ch49_body1").children[0].visible=false;
+          scene.add(player),player.scale.set(.015,.015,.015);
+          if (currentPlayer == "STEVE") {
+            let localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body2").material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body2").material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),-1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[0].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[0].material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),0);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[1].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[1].material.clipShadows=!0;
+          }
+          player.getObjectByName("ak47glb").visible=false,player.getObjectByName("Ch49_body1").children[0].visible=false;
         }), 5: new THREE.GLTFLoader(loadingManager).load("models/bullet_shell.glb", (model) => {
           bulletShell = model.scene;
         }), 6: new THREE.GLTFLoader(loadingManager).load("models/gun_clip.glb", (model) => {
           gunClip = model.scene;
-        }), 7: new THREE.GLTFLoader(loadingManager).load("models/characters/player/scene.gltf", (model) => {
+        }), 7: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer + "/scene.gltf", (model) => {
           otherPlayer = model.scene;
           animations[3]=(model.animations);
           let mixer = new THREE.AnimationMixer(otherPlayer);
