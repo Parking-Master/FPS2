@@ -161,6 +161,9 @@
       .card:active img:not(#point) {
         filter: blur(3px);
       }
+      .selectedCard {
+        outline: 3px solid #ddd;
+      }
     </style>
   </head>
   <body>
@@ -173,8 +176,17 @@
       function isValidColor(o){var r=(new Option).style;return r.color=o,r.color==o.toLowerCase()}
       Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
       userMan.isLoggedIn || (document.querySelector("#notloggedin").style.display = "block");
+      currentSelectedItem = null;
       function choose(item) {
         let items = document.createElement("div");
+        let itemList = (() => { let items = []; [... new Set(userMan.get("items").split(","))].map((x) => { !x.trim() || items.push(x) }); return items })();
+        itemList.forEach(x => x.split(".")[0] == item.dataset.item && (items.innerHTML += `
+        <div class="card" data-item="${x.split(".")[1]}" data-full-item="${x}" onclick="document.querySelectorAll('.card').forEach(x => x.classList.remove('selectedCard')); this.classList.add('selectedCard'); currentSelectedItem = this.dataset.fullItem">
+          <img src="images/${x.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${x.split(".")[1].trim()}.png">
+          <br>
+          <p class="secondary-title equipped">${x.split(".")[0]}</p>
+        </div>
+        `));
         swal({
           title: "Choose item",
           content: items,
@@ -182,23 +194,30 @@
         }).then(e => {
           e = !e;
           if (e) {
-            setTimeout(() => userMan.set("items", userMan.get("items").replace(item.querySelector(".title").dataset.item, ""), () => {}), 500);
-            setTimeout(() => userMan.set("items", userMan.get("items").replace(",,", ","), () => {}), 1000);
-            setTimeout(() => userMan.set("points", (userMan.get("points") - 0) + (item.querySelector(".title").textContent.trim().replace("Free", "0") - 0), () => {}), 1500);
-            swal({ text: "Selling item in progress...", button: false }), setTimeout(() => location.reload(), 2000);
+            let oldPreferences = JSON.parse(atob(userMan.get("preferences")));
+            oldPreferences[item.dataset.item.replace("Character", "currentArmorSet").replace("Loadout", "currentLoadoutSet").replace("Theme", "currentPageTheme")] = currentSelectedItem.split(".")[1];
+            let newPreferences = btoa(JSON.stringify(oldPreferences));
+            userMan.set("preferences", newPreferences.toString(), () => location.reload());
+            swal({ text: "Changing preferences...", button: false }), setTimeout(() => location.reload(), 2000);
           }
         });
+        Object.keys(JSON.parse(atob(userMan.get("preferences")))).forEach(x => {
+          Object.values(items.children).forEach(i => {
+            i.dataset.item == JSON.parse(atob(userMan.get("preferences")))[x] && (i.classList.add("selectedCard"));
+          });
+        });
       }
-      document.querySelectorAll(".title").forEach(x => userMan.get("items").split(",").indexOf(x.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
-      document.querySelectorAll("img#point").forEach(x => userMan.get("items").split(",").indexOf(x.parentElement.dataset.item) > -1 ? x.classList.add("owned") : x.classList.remove("owned"));
-      let items = (() => { let items = []; [... new Set(userMan.get("items").split(","))].map((x) => { !x.trim() || items.push(x) }); return items })();
-      items.forEach(x => document.querySelector(".items").innerHTML += `
-      <div class="card" onclick="choose(this)">
-        <img src="images/${x.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${x.split(".")[1].trim()}.png">
-        <br>
-        <p class="secondary-title equipped">${x.split(".")[0]}</p>
-      </div>
-      `);
+      let preferences = JSON.parse(atob(userMan.get("preferences")));
+      Object.keys(preferences).forEach(x => {
+        let data = x.replace("currentArmorSet", "Character").replace("currentLoadoutSet", "Loadout").replace("currentPageTheme", "Theme") + "." + preferences[x];
+        document.querySelector(".items").innerHTML += `
+        <div class="card" onclick="choose(this)" data-item="${data.split(".")[0]}">
+          <img src="images/${data.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${data.split(".")[1].trim()}.png">
+          <br>
+          <p class="secondary-title equipped">${data.split(".")[0]}</p>
+        </div>
+        `;
+      });
     </script>
   </body>
 </html>
