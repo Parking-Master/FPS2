@@ -60,17 +60,17 @@ Obviously, new game can't be completely similar style-wise to the original game,
 A lot of responsiveness has also been added not only for screen size, but for touch support and element spacing.
 
 ### 3. Features & Misc
-In _FPS 2_, there are a LOT more features compared to FPS 1. All new/old features below
+In _FPS 2_, there are a LOT more features compared to FPS 1. All new/old features are below.
 
-_New features are marked with a "+", and old features are marked with a "-"_
+_Note: New features are marked with a "+", and old features are marked with a "-"_
 
-&nbsp;&nbsp;- Preferences
-&nbsp;&nbsp;+ The store
-&nbsp;&nbsp;- Fake currency
-&nbsp;&nbsp;+ New in-game maps
-&nbsp;&nbsp;+ New in-game weapons
-&nbsp;&nbsp;+ Change page theme
-&nbsp;&nbsp;+ Unlock prizes
+&nbsp;&nbsp;- Preferences<br>
+&nbsp;&nbsp;+ The store<br>
+&nbsp;&nbsp;- Fake currency<br>
+&nbsp;&nbsp;+ New in-game maps<br>
+&nbsp;&nbsp;+ New in-game weapons<br>
+&nbsp;&nbsp;+ Change page theme<br>
+&nbsp;&nbsp;+ Unlock prizes<br>
 &nbsp;&nbsp;+ New help/support menu
 
 ### Overall
