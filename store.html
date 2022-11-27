@@ -245,7 +245,7 @@
         if (Object.values(item.querySelector(".title").classList).indexOf("owned") > -1) {
           return swal({
             title: "Sell item",
-            text: "You already own this item. Do you want to sell it for " + item.querySelector(".title").textContent + " points?",
+            text: "You already own this item. Do you want to sell it for " + item.querySelector(".title").textContent.replace("Free", "0") + " points?",
             buttons: ["Yes", "No"]
           }).then(e => {
             e = !e;
@@ -260,7 +260,7 @@
         }
         swal({
           title: "Purchase item",
-          text: "Do you want to purchase the item \"" + (item.querySelector(".title").dataset.item.split(".")[1].replace("_", " ") + " " + item.querySelector(".title").dataset.item.split(".")[0]) +  "\" for " + item.querySelector(".title").textContent.trim() + " points?",
+          text: "Do you want to purchase the item \"" + (item.querySelector(".title").dataset.item.split(".")[1].replace("_", " ") + " " + item.querySelector(".title").dataset.item.split(".")[0]) +  "\" for " + item.querySelector(".title").textContent.trim().replace("Free", "0") + " points?",
           buttons: ["Yes", "No"]
         }).then(e => {
           e = !e;
