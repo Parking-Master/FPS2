@@ -182,7 +182,7 @@
         let itemList = (() => { let items = []; [... new Set(userMan.get("items").split(","))].map((x) => { !x.trim() || items.push(x) }); return items })();
         itemList.forEach(x => x.split(".")[0] == item.dataset.item && (items.innerHTML += `
         <div class="card" data-item="${x.split(".")[1]}" data-full-item="${x}" onclick="document.querySelectorAll('.card').forEach(x => x.classList.remove('selectedCard')); this.classList.add('selectedCard'); currentSelectedItem = this.dataset.fullItem">
-          <img src="images/${x.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${x.split(".")[1].includes("Theme") ? x.split(".")[1].trim() : x.split(".")[1].trim().toLowerCase()}.png">
+          <img src="images/${x.split(".")[0].replace("Theme", "color").toLowerCase().trim() + "s"}/${x.split(".")[0].includes("Theme") ? x.split(".")[1].trim().toLowerCase() : x.split(".")[1].trim()}.png">
           <br>
           <p class="secondary-title equipped">${x.split(".")[0]}</p>
         </div>
