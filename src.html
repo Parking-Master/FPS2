@@ -487,6 +487,22 @@
       });
       eliminated = false;
       setScore = 10;
+      activeMedals = 0;
+      /* Other imports */
+      import("./js/utils.js");
+      /* End other imports */
+      function medal(name, points) {
+        activeMedals++;
+        let md = document.createElement("div");
+        md.innerHTML = `
+        +${points}&ThickSpace;&ThickSpace;<img src="icons/medals/${name.toLowerCase().replace(/ /g, "_").trim()}.png" width="30px">&ThickSpace;&ThickSpace;
+        <span class="medal-description">${name.toLowerCase().eachUpperCase().trim()}</span>
+        `;
+        md.style = `transition:transform 1s ease-in;display:inline-flex;position:absolute;z-index:9999999;align-items:center;justify-content:center;text-align:center;color:#333;font-weight:bold;font-family:Arial,Helvetica,sans-serif!important;top:${(150 + ((activeMedals - 1) * 35))}px;left:200px;filter:invert(100%);transform:scale(1.5)`;
+        document.body.appendChild(md);
+        setTimeout(() => md.style.transform = "", 300);
+        setTimeout(() => (document.body.removeChild(md), activeMedals--), 2500);
+      }
       gametime.on("eliminate", function(player) {
         if (eliminated) {
           return;
@@ -498,8 +514,11 @@
         document.querySelector("#killSound").cloneNode().play();
         if (player != gametime.user.position) {
           currentPoints += 10;
-          otherIsInVehicle && (currentPoints += 5);
-          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (currentPoints += 15);
+          medal("kill", 10);
+          !otherIsInVehicle && (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).rounds <= 0 && (medal("last shot", 10), currentPoints += 10);
+          otherIsInVehicle && (medal("vehicle kill"), currentPoints += 5);
+          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (medal("rocket kill", 15), currentPoints += 15);
+          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Grenade_Launcher" && (medal("grenade kill", 10), currentPoints += 10);
           gametime.user.position == 1 ? setTimeout(() => (score1++), 1000) : setTimeout(() => (score2++), 1000);
           return otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
             let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
@@ -1581,7 +1600,7 @@
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xe8c322),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
-            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"?5:(gun=="Grenade_Launcher"?5:(gun=="Remington_Shotgun"?5:(gun=="9mm_Pistol"&&10)))))));
+            let damage=gun=="Assault_Rifle"?5:(gun=="Desert_Eagle"?15:(gun=="Sniper_Rifle"?100:(gun=="Rail_Gun"?200:(gun=="P90_SMG"?5:(gun=="Grenade_Launcher"?5:(gun=="Remington_Shotgun"?50:(gun=="9mm_Pistol"&&10)))))));
             gametime.run("hit", [gametime.user.position + "," + damage]);
           } else if (intersection != null && typeof scene.getObjectByName("Vehicle").getObjectByName(intersection.object.name) != "undefined") {
             vehicleClones.forEach((x) => {
@@ -1621,6 +1640,7 @@
         gunRotationX = 0;
         gunRotationY = 0;
       }
+      resetLoadout = [primaryWeapon, secondaryWeapon];
       function respawn(position, rotation) {
         primaryWeapon.object = weapons[loadout[0]].scene;
         secondaryWeapon.object = weapons[loadout[1]].scene;
@@ -1630,6 +1650,8 @@
         weaponPosition == "secondary" && switchWeapon();
         camera.position.set(position.x, position.y, position.z);
         camera.rotation.set(rotation.x, rotation.y, rotation.z);
+        primaryWeapon.defaultRounds = 36;
+        secondaryWeapon.defaultRounds = 10;
         primaryWeapon.rounds = primaryWeapon.defaultRounds;
         primaryWeapon.clips = primaryWeapon.defaultClips;
         secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
@@ -1911,7 +1933,7 @@
           fire(1);
         }
         if (currentWeapon == "Remington_Shotgun") {
-          fire(2, false, 0);
+          fire(1);
           weaponPosition == "primary" ? (primaryWeapon.rounds--) : (secondaryWeapon.rounds--);
         }
         if (currentWeapon == "Grenade_Launcher") {
@@ -1929,7 +1951,7 @@
           throwGrenade(camera, camera);
           (() => {
             let e = camera;
-            gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+            canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
           })();
         }
         if (currentWeapon == "P90_SMG") {
@@ -2164,7 +2186,7 @@
             throwGrenade(camera, camera);
             (() => {
               let e = camera;
-              gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+              canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
             })();
           }
           if (currentWeapon == "P90_SMG") {
@@ -2205,7 +2227,7 @@
           throwGrenade(camera, camera);
           (() => {
             let e = camera;
-            gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
+            canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
           })();
         }
         if (e.key == "p" && !e.repeat) {
