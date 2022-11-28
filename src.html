@@ -345,6 +345,7 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   </head>
   <body style="margin:0!important">
+    <script src="userman.js"></script>
     <div class="banner"></div>
     <div class="loader" style="width:100%!important">
       <img id="map" src="images/maps/cargo.png" style="position:absolute;width:25%;left:50%;margin-left:-12.5%;top:3%;border:5px solid #fff;box-shadow:0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)">
@@ -595,6 +596,7 @@
           otherVehicle.rotation.copy(rot);
           return;
         }
+        mixers[3].clipAction(animations[3][9]).play();
         mixers[3].clipAction(animations[3][0]).play();
         otherPlayer.rotation.order = "YXZ";
         otherPlayer.position.set(data.split(",")[1]-0, data.split(",")[2]-1.6, data.split(",")[3]-0);
@@ -623,7 +625,7 @@
         otherPlayer.rotateY(Math.PI);
         otherPlayer.getObjectByName("mixamorigNeck").rotation.x=(1.5-data.split(",")[4]-0)+(Math.PI/2);
         otherPlayer.getObjectByName("mixamorigNeck").rotation.x+=-Math.PI;
-        otherPlayer.getObjectByName("mixamorigRightShoulder").rotation.x=(1.5-data.split(",")[4]-0)+(Math.PI/2);
+        otherPlayer.getObjectByName("mixamorigRightShoulder").rotation.x=(1.6-data.split(",")[4]-0)+(Math.PI/2);
         otherPlayer.getObjectByName("mixamorigRightShoulder").rotation.x+=-Math.PI/2;
         otherPlayer.getObjectByName("mixamorigLeftShoulder").rotation.x=(1.5-data.split(",")[4]-0)+(Math.PI/2);
         otherPlayer.getObjectByName("mixamorigLeftShoulder").rotation.x+=-Math.PI/2;
@@ -632,6 +634,8 @@
         if (data.split(",")[0] == gametime.user.position) {
           return;
         }
+        mixers[3].clipAction(animations[3][9]).stop();
+        mixers[3].clipAction(animations[3][9]).reset();
         mixers[3].clipAction(animations[3][0]).stop();
         mixers[3].clipAction(animations[3][0]).reset();
         otherPlayer.rotation.order = "YXZ";
@@ -1226,7 +1230,7 @@
         if (loadingProgress >= 100) {
           searchingEngine = setInterval(() => {
             if (players >= 2) {
-              gametime.user.username=localStorage["username"]||generateName();
+              gametime.user.username = userMan.get("username") || generateName();
               gametime.run("data", [gametime.user.position+","+gametime.user.username]);
               gametime.run("data", [gametime.user.position+","+gametime.user.username]);
               setTimeout(() => {
