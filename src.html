@@ -1281,7 +1281,7 @@
           map.scale.set(1.6,1.6,1.6);
           map.position.y = -300;
           (map.getObjectByProperty("type", "DirectionalLight").visible = false);
-        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer + "/scene.gltf", (model) => {
+        }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer.toLowerCase() + "/scene.gltf", (model) => {
           player = model.scene;
           otherPlayer = model.scene.clone();
           animations[2]=(model.animations);
@@ -1297,7 +1297,7 @@
           bulletShell = model.scene;
         }), 6: new THREE.GLTFLoader(loadingManager).load("models/gun_clip.glb", (model) => {
           gunClip = model.scene;
-        }), 7: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer + "/scene.gltf", (model) => {
+        }), 7: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer.toLowerCase() + "/scene.gltf", (model) => {
           otherPlayer = model.scene;
           animations[3]=(model.animations);
           let mixer = new THREE.AnimationMixer(otherPlayer);
