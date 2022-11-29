@@ -263,7 +263,7 @@
         width: 1%;
         height: 100%;
         background: #79c9ff;
-        transition: width 5s ease-out;
+        transition: width 2s ease-out;
       }
       #status-text {
         position: absolute;
@@ -459,7 +459,7 @@
       countdown = false;
       hidetext = true;
       /* Gametime.js initialization */
-      gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
+      gametime.set("key", "pub-c-1ed2f84f-762b-4211-84f9-617b19be2b23", "sub-c-1521e0cc-f132-41e5-9d46-6b06a7d09f90");
       gametime.set("channel", new URLSearchParams(location.search).get("lobby"));
       gametime.make("connect");
       gametime.make("countdown");
@@ -713,7 +713,7 @@
           setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 10);
         }
         if (data.split(",")[1] == "animate") {
-          data.split(",")[2] == "start" ? mixers[3].clipAction(animations[3][8]).play() : (data.split(",")[2] == "reload" ? (mixers[3].clipAction(animations[3][6]).reset(), mixers[3].clipAction(animations[3][6]).loop = THREE.LoopOnce, mixers[3].clipAction(animations[3][6]).play()) : (mixers[3].clipAction(animations[3][8]).stop(), mixers[3].clipAction(animations[3][8]).reset()));
+          data.split(",")[2] == "start" ? mixers[3].clipAction(animations[3][8]).play() : (data.split(",")[2] == "reload" ? ((()=>{const e=new THREE.AudioListener;camera.add(e);const o=new THREE.PositionalAudio(e);(new THREE.AudioLoader).load(reloads.Assault_Rifle.full.src,(function(e){o.setBuffer(e),o.setRefDistance(10),o.setVolume(2),o.play()})),otherFollower.add(o)})(), mixers[3].clipAction(animations[3][6]).setDuration(7.5), mixers[3].clipAction(animations[3][6]).reset(), mixers[3].clipAction(animations[3][6]).loop = THREE.LoopOnce, mixers[3].clipAction(animations[3][6]).play()) : (mixers[3].clipAction(animations[3][8]).stop(), mixers[3].clipAction(animations[3][8]).reset()));
         }
         if (data.split(",")[1] == "sound") {
           let y = gunsounds[data.split(",")[2]].cloneNode();
@@ -1881,6 +1881,7 @@
       }
       function punch() {
         isZoomed && activate("i");
+        setTimeout(() => shake(camera, 1), 250);
         mixers[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]].clipAction(animations[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]][1]).stop();
         document.querySelector("#punchSound").cloneNode().play();
         isPunching = true;
@@ -1953,11 +1954,11 @@
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
           mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
-          throwGrenade(camera, camera);
           (() => {
             let e = camera;
             canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
           })();
+          throwGrenade(camera, camera);
         }
         if (currentWeapon == "P90_SMG") {
           fullAutoFiring = true;
@@ -2188,11 +2189,11 @@
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).loop = THREE.LoopOnce;
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).reset();
             mixers[weaponIndex].clipAction(animations[weaponIndex][2]).play();
-            throwGrenade(camera, camera);
             (() => {
               let e = camera;
               canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
             })();
+            throwGrenade(camera, camera);
           }
           if (currentWeapon == "P90_SMG") {
             fullAutoFiring = true;
@@ -2229,11 +2230,11 @@
           switchWeapon();
         }
         if (e.key == "m" && !e.repeat) {
-          throwGrenade(camera, camera);
           (() => {
             let e = camera;
             canThrowGrenade && grenadesLeft > 0 && gametime.run("add", [gametime.user.position+",grenade"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]);
           })();
+          throwGrenade(camera, camera);
         }
         if (e.key == "p" && !e.repeat) {
           pause();
