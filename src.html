@@ -1296,8 +1296,9 @@
           scene.add(player),player.scale.set(.015,.015,.015);
           if (currentPlayer == "STEVE") {
             let localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body2").material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body2").material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-2,0),-1);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[0].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[0].material.clipShadows=!0,localPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),0);renderer.localClippingEnabled=!0,player.getObjectByName("Ch49_body1").children[1].material.clippingPlanes=[localPlane],player.getObjectByName("Ch49_body1").children[1].material.clipShadows=!0;
+            player.getObjectByName("Ch49_body1").children[0].visible=false;
           }
-          player.getObjectByName("ak47glb").visible=false,player.getObjectByName("Ch49_body1").children[0].visible=false;
+          player.getObjectByName("ak47glb").visible=false;
         }), 5: new THREE.GLTFLoader(loadingManager).load("models/bullet_shell.glb", (model) => {
           bulletShell = model.scene;
         }), 6: new THREE.GLTFLoader(loadingManager).load("models/gun_clip.glb", (model) => {
