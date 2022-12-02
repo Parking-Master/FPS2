@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  	<title>Users associated with FPS</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+	<style>
+      @font-face {
+        font-family: "Roboto";
+        src: url(/fonts/Roboto/Roboto-Light.ttf);
+      }
+	  .row {
+        display: block;
+        position: relative;
+        margin: 0;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        width: 80%;
+        left: 50%;
+        margin-left: -40%;
+        height: 100px;
+        text-align: center;
+        padding-top: 10px;
+        margin-bottom: 20px;
+        border-bottom: 3px solid #38b6ff;
+        transition: transform .5s;
+      }
+      * {
+        font-family: "Roboto", Roboto, Arial;
+        color: #38b6ff;
+      }
+      #picture {
+        position: relative;
+        width: 100px;
+        position: absolute;
+        border-radius: 100%;
+        left: 50%;
+        margin-left: -50px;
+      }
+      .linesep {
+        position: relative;
+        top: 15% !important;
+        margin-left: 60px !important;
+        margin-right: 10px !important;
+        display: inline-block;
+        width: 30%;
+        background: #38b6ff;
+        height: 1px;
+        border: none !important;
+        outline: none !important;
+      }
+      #picture + span {
+        position: relative;
+        font-size: 10px;
+        top: 10%;
+      }
+      h1, h2 {
+        color: #fff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.24);
+        margin-bottom: 100px;
+        text-align: center !important;
+        top: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      h1 {
+        font-size: 10em;
+      }
+      h2 {
+        font-size: 2em;
+        margin-bottom: 50px !important;
+      }
+      h2 span#underscore {
+        color: #fff;
+        border-bottom: 3px solid #38b6ff;
+      }
+      .row, .row * {
+        cursor: pointer !important;
+      }
+      .row:hover {
+        transform: scale(1.05);
+      }
+      .readonly {
+        position: relative;
+        left: 50%;
+        margin-left: -125px;
+        width: 250px;
+        height: 100px !important;
+        border: 2px solid #38b6ff;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        padding: 5px;
+      }
+	</style>
+  </head>
+  <body>
+    <h1>FPS2</h1>
+    <h2><span id="underscore">U</span>ser "<span id="username"></span>"</h2>
+    <hr style="width:25%">
+    <h2><span id="underscore">S</span>tats</h2>
+    <section class="ftco-section">
+      <div class="container" id="stats"></div>
+    </section>
+    <hr style="width:25%;margin-top:5%">
+    <h2><span id="underscore">A</span>bout</h2>
+    <section class="ftco-section">
+      <div class="container" id="about"></div>
+    </section>
+    <script>
+      function getMonthFromString(t){return new Date(Date.parse(t+" 1, 2012")).getMonth()+1}
+      function suffix(i) {
+        let j = i % 10;
+        let k = i % 100;
+        if (j == 1 && k != 11) {
+          return i + "st";
+        }
+        if (j == 2 && k != 12) {
+          return i + "nd";
+        }
+        if (j == 3 && k != 13) {
+          return i + "rd";
+        }
+        return i + "th";
+      }
+      Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
+      ids = 0;
+      function createTable(user) {
+        if (user.get("username") == new URLSearchParams(location.search).get("q")) {
+          let points = (user.get("points") - 0);
+          let tier = points >= -1 && points <= 200 ? 1 : (points >= 200 && points <= 600 ? 2 : points >= 600 && points <= 1500 ? 3 : points >= 1500 && points <= 2500 ? 4 : points >= 2500 && points <= 5000 ? 5 : points >= 5000 && points <= 10000 ? 6 : points >= 10000 && points <= 20000 ? 7 : points >= 20000 && points <= 50000 ? 8 : points >= 50000 && points <= 75000 ? 9 : points >= 75000 && 10000);
+          document.querySelector("#username").textContent = user.get("username");
+          document.querySelector(".container#stats").innerHTML = `
+          <img id="picture" src="/icons/tiers/${tier}.png">
+          <br style="margin-top:10%">
+          <p style="text-align:center">This user has <span style="font-size:20px">${points.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",").replace(/\b0\b/gi, "no")}</span> points.</p>
+          `;
+          document.querySelector(".container#about").innerHTML = `
+          <div class="readonly">${user.get("about") || "<i style='color:#666'>No information available.</i>"}</div>
+          <br>
+          <p style="text-align:center">This user was created on ${user.get("createdAt").toString().split(" ").reverse().splice(7).reverse()[0] + ", " + user.get("createdAt").toString().split(" ").reverse().splice(7).reverse()[1] + " " + suffix((user.get("createdAt").toString().split(" ")[2] - 0).toFixed(0)) + " " + user.get("createdAt").toString().split(" ")[3]}.</p>
+          <br>
+          <img id="picture" src="${user.get("picture") || "https://cdn.jsdelivr.net/gh/Parking-Master/Parking-Master@latest/img/profile-picture.png"}" id="picture">
+          `;
+        }
+      }
+      new Parse.Query(Parse.Object.extend("User")).find("objectId").then((e=>{for(let t=0;t<e.length;t++){let r=new Parse.User;r.set("objectId",e[t].id),createTable(r)}}));
+    </script>
+  </body>
+</html>
+

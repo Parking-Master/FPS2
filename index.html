@@ -227,6 +227,20 @@
       .login:hover, .signup:hover {
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.1);
       }
+      .banner {
+        opacity: 1;
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        backdrop-filter: blur(15px);
+        width: 100%;
+        height: 100%;
+        transition: opacity 1.5s;
+        z-index: 999999999999999999999999;
+      }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
     <script type="text/javascript" src="https://npmcdn.com/parse@3.4.4/dist/parse.min.js"></script>
@@ -243,6 +257,7 @@
     </script>
   </head>
   <body>
+    <div class="banner"></div>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <img id="background" src="text-images/rifles.png">
@@ -1043,6 +1058,17 @@
         }
       }
       document.querySelector("#chat").click(), document.querySelector("#chat").click();
+      window.addEventListener("load", () => {
+        let e = 15;
+        let transition = setInterval(() => {
+          if (e <= 0) {
+            document.querySelector(".banner").remove();
+            return clearInterval(transition);
+          }
+          e += -.2;
+          document.querySelector(".banner").style = "backdrop-filter:blur(" + e + "px)!important";
+        });
+      })
     </script>
   </body>
 </html>

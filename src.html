@@ -351,6 +351,16 @@
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js@latest/js/username-generator.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KDN09VRHPS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-KDN09VRHPS");
+    </script>
   </head>
   <body style="margin:0!important">
     <script src="userman.js"></script>
@@ -1279,8 +1289,8 @@
         document.querySelector("#progress-est").textContent = currentMap;
       }, 200);
       gunIndexes = {};
-      gunIndexes[loadout[0]] = 0;
-      gunIndexes[loadout[1]] = 1;
+      gunIndexes["Assault_Rifle"] = 0;
+      gunIndexes["Desert_Eagle"] = 1;
       gunIndexes["Sniper_Rifle"] = 4;
       gunIndexes["Rail_Gun"] = 5;
       gunIndexes["P90_SMG"] = 6;
@@ -1290,23 +1300,21 @@
       gunIndexes["Nuke_Launcher"] = 10;
       gunIndexes["9mm_Pistol"] = 11;
       let Loaders = {
-        0: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[0] + ".glb", (model) => {
-          primaryWeapon.object = model.scene;
+        0: new THREE.GLTFLoader(loadingManager).load("models/weapons/Assault_Rifle.glb", (model) => {
           animations[0]=(model.animations);
-          let mixer = new THREE.AnimationMixer(primaryWeapon.object);
+          let mixer = new THREE.AnimationMixer(model.scene);
           mixer.speed = 0;
           mixers[0]=(mixer);
-          weapons[loadout[0]] = model;
-        }), 1: new THREE.GLTFLoader(loadingManager).load("models/weapons/" + loadout[1] + ".glb", (model) => {
-          secondaryWeapon.object = model.scene;
+          weapons["Assault_Rifle"] = model;
+        }), 1: new THREE.GLTFLoader(loadingManager).load("models/weapons/Desert_Eagle.glb", (model) => {
           animations[1]=(model.animations);
-          let mixer = new THREE.AnimationMixer(secondaryWeapon.object);
+          let mixer = new THREE.AnimationMixer(model.scene);
           let weaponIndex = gunIndexes[loadout[1]];
           mixer.speed = 2.5;
           mixers[1]=(mixer);
           mixers[weaponIndex].clipAction(animations[weaponIndex][3]).setDuration(1);
           mixers[weaponIndex].clipAction(animations[weaponIndex][4]).setDuration(1.5);
-          weapons[loadout[1]] = model;
+          weapons["Desert_Eagle"] = model;
         }), 2: new THREE.GLTFLoader(loadingManager).load("models/muzzle_flash.glb", (model) => {
           muzzleFlash = model.scene;
         }), 3: new THREE.GLTFLoader(loadingManager).load("models/maps/" + currentMap + "/scene.gltf", (model) => {
@@ -1413,6 +1421,157 @@
           weapons["9mm_Pistol"] = model;
         })
       }
+      let loadingChecker = setInterval(() => {
+        if (document.querySelector(".loader") == null) {
+          /* User preferences setup */
+          preferences = JSON.parse(atob(userMan.get("preferences")));
+          userPrefs = {};
+          userPrefs.loadout = (() => { let d = []; Object.keys(weapons).forEach(x => x.startsWith(preferences.currentLoadoutSet.split("_")[0]) ? (d[0] = (x)) : (x.split("_")[1].includes(preferences.currentLoadoutSet.split("_")[1]) && (d[1] = (x)))); return d })();
+          userPrefs.primaryWeapon = userPrefs.loadout[0];
+          userPrefs.secondaryWeapon = userPrefs.loadout[1];
+          userPrefs.character = preferences.currentArmorSet.split("_")[0].toLowerCase();
+          loadout = userPrefs.loadout;
+          if (primaryWeapon.name == "Assault_Rifle") {
+            primaryWeapon.easyReloadTimeout = 4500;
+            primaryWeapon.fullReloadTimeout = 6500;
+            primaryWeapon.clips = 3;
+            primaryWeapon.rounds = 36;
+            primaryWeapon.defaultRounds = 36;
+          }
+          if (primaryWeapon.name == "Desert_Eagle") {
+            primaryWeapon.easyReloadTimeout = 2000;
+            primaryWeapon.fullReloadTimeout = 3000;
+            primaryWeapon.clips = 4;
+            primaryWeapon.rounds = 10;
+            primaryWeapon.defaultRounds = 10;
+          }
+          if (primaryWeapon.name == "Sniper_Rifle") {
+            primaryWeapon.easyReloadTimeout = 2000;
+            primaryWeapon.fullReloadTimeout = 3000;
+            primaryWeapon.clips = 2;
+            primaryWeapon.rounds = 6;
+            primaryWeapon.defaultRounds = 6;
+          }
+          if (primaryWeapon.name == "Rail_Gun") {
+            primaryWeapon.easyReloadTimeout = 2000;
+            primaryWeapon.fullReloadTimeout = 2000;
+            primaryWeapon.clips = 4;
+            primaryWeapon.rounds = 1;
+            primaryWeapon.defaultRounds = 1;
+          }
+          if (primaryWeapon.name == "P90_SMG") {
+            primaryWeapon.easyReloadTimeout = 2000;
+            primaryWeapon.fullReloadTimeout = 2200;
+            primaryWeapon.clips = 3;
+            primaryWeapon.rounds = 48;
+            primaryWeapon.defaultRounds = 48;
+          }
+          if (primaryWeapon.name == "Grenade_Launcher") {
+            primaryWeapon.easyReloadTimeout = 3000;
+            primaryWeapon.fullReloadTimeout = 3500;
+            primaryWeapon.clips = 0;
+            primaryWeapon.rounds = 6;
+            primaryWeapon.defaultRounds = 6;
+          }
+          if (primaryWeapon.name == "Remington_Shotgun") {
+            primaryWeapon.easyReloadTimeout = 3000;
+            primaryWeapon.fullReloadTimeout = 3500;
+            primaryWeapon.clips = 0;
+            primaryWeapon.rounds = 8;
+            primaryWeapon.defaultRounds = 8;
+          }
+          if (primaryWeapon.name == "Rocket_Launcher") {
+            primaryWeapon.easyReloadTimeout = 4000;
+            primaryWeapon.fullReloadTimeout = 4000;
+            primaryWeapon.clips = 0;
+            primaryWeapon.rounds = 2;
+            primaryWeapon.defaultRounds = 2;
+          }
+          if (primaryWeapon.name == "Nuke_Launcher") {
+            primaryWeapon.easyReloadTimeout = 10000;
+            primaryWeapon.fullReloadTimeout = 10000;
+            primaryWeapon.clips = 0;
+            primaryWeapon.rounds = 1;
+            primaryWeapon.defaultRounds = 1;
+          }
+          if (primaryWeapon.name == "9mm_Pistol") {
+            primaryWeapon.easyReloadTimeout = 2000;
+            primaryWeapon.fullReloadTimeout = 2500;
+            primaryWeapon.clips = 3;
+            primaryWeapon.rounds = 8;
+            primaryWeapon.defaultRounds = 8;
+          }
+          if (secondaryWeapon.name == "Desert_Eagle") {
+            secondaryWeapon.easyReloadTimeout = 2000;
+            secondaryWeapon.fullReloadTimeout = 3000;
+            secondaryWeapon.clips = 4;
+            secondaryWeapon.rounds = 10;
+            secondaryWeapon.defaultRounds = 10;
+          }
+          if (secondaryWeapon.name == "Sniper_Rifle") {
+            secondaryWeapon.easyReloadTimeout = 2000;
+            secondaryWeapon.fullReloadTimeout = 3000;
+            secondaryWeapon.clips = 2;
+            secondaryWeapon.rounds = 6;
+            secondaryWeapon.defaultRounds = 6;
+          }
+          if (secondaryWeapon.name == "Rail_Gun") {
+            secondaryWeapon.easyReloadTimeout = 2000;
+            secondaryWeapon.fullReloadTimeout = 2000;
+            secondaryWeapon.clips = 4;
+            secondaryWeapon.rounds = 1;
+            secondaryWeapon.defaultRounds = 1;
+          }
+          if (secondaryWeapon.name == "P90_SMG") {
+            secondaryWeapon.easyReloadTimeout = 2000;
+            secondaryWeapon.fullReloadTimeout = 2200;
+            secondaryWeapon.clips = 3;
+            secondaryWeapon.rounds = 48;
+            secondaryWeapon.defaultRounds = 48;
+          }
+          if (secondaryWeapon.name == "Grenade_Launcher") {
+            secondaryWeapon.easyReloadTimeout = 3000;
+            secondaryWeapon.fullReloadTimeout = 3500;
+            secondaryWeapon.clips = 0;
+            secondaryWeapon.rounds = 6;
+            secondaryWeapon.defaultRounds = 6;
+          }
+          if (secondaryWeapon.name == "Remington_Shotgun") {
+            secondaryWeapon.easyReloadTimeout = 3000;
+            secondaryWeapon.fullReloadTimeout = 3500;
+            secondaryWeapon.clips = 0;
+            secondaryWeapon.rounds = 8;
+            secondaryWeapon.defaultRounds = 8;
+          }
+          if (secondaryWeapon.name == "Rocket_Launcher") {
+            secondaryWeapon.easyReloadTimeout = 4000;
+            secondaryWeapon.fullReloadTimeout = 4000;
+            secondaryWeapon.clips = 0;
+            secondaryWeapon.rounds = 2;
+            secondaryWeapon.defaultRounds = 2;
+          }
+          if (secondaryWeapon.name == "Nuke_Launcher") {
+            secondaryWeapon.easyReloadTimeout = 10000;
+            secondaryWeapon.fullReloadTimeout = 10000;
+            secondaryWeapon.clips = 0;
+            secondaryWeapon.rounds = 1;
+            secondaryWeapon.defaultRounds = 1;
+          }
+          if (secondaryWeapon.name == "9mm_Pistol") {
+            secondaryWeapon.easyReloadTimeout = 2000;
+            secondaryWeapon.fullReloadTimeout = 2500;
+            secondaryWeapon.clips = 3;
+            secondaryWeapon.rounds = 8;
+            secondaryWeapon.defaultRounds = 8;
+          }
+          /* End user preferences setup */
+          primaryWeapon.name = Object.keys(weapons)[Object.keys(weapons).indexOf(loadout[0])];
+          primaryWeapon.object = Object.values(weapons)[Object.keys(weapons).indexOf(loadout[0])].scene;
+          secondaryWeapon.name = Object.keys(weapons)[Object.keys(weapons).indexOf(loadout[1])];
+          secondaryWeapon.object = Object.values(weapons)[Object.keys(weapons).indexOf(loadout[1])].scene;
+          clearInterval(loadingChecker);
+        }
+      });
       /* End Model loaders */
       /* Start game scripts */
       function collision(e,B){return firstBB=(new THREE.Box3).setFromObject(e),secondBB=(new THREE.Box3).setFromObject(B),firstBB.intersectsBox(secondBB)}
