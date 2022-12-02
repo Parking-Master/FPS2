@@ -473,6 +473,51 @@
         didStart = true;
         mixers[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]].clipAction(animations[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]][1]).play();
       }
+      function startBot() {
+        start(generateName());
+        countdown = true;
+        scene.add(otherPlayer);
+        let list = [];
+        let botCanFire = true;
+        map.traverse(x => x.name.includes("Container") && list.push(x));
+        let bot = new Bot(otherPlayer, 10, (type, info) => type == "attack" && (() => {
+          if (!botCanFire) return;
+          botCanFire = false;
+          setTimeout(() => botCanFire = true, 120);
+          let flash = muzzleFlash.clone();
+          flash.position.copy(otherPlayer.position);
+          flash.scale.set(.3, .3, .3);
+          flash.rotation.copy(otherPlayer.rotation);
+          flash.updateMatrix();
+          flash.translateZ(-1.35);
+          flash.translateX(.1);
+          flash.translateY(-.08);
+          flash.rotateY(.5);
+          scene.add(flash);
+          let muzzleLight = new THREE.PointLight(0xf99c00, 2);
+          scene.add(muzzleLight);
+          muzzleLight.position.copy(flash.position);
+          setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 50);
+          Math.floor(Math.random() * (19 - difficulty)) == 0 && gametime.run("hit", [(gametime.user.position == 1 ? 2 : 1) + "," + 5]);
+          let e = new THREE.Mesh(new THREE.CircleGeometry(.125, 20));
+          e.position.copy(otherPlayer.position);
+          e.rotation.copy(otherPlayer.rotation);
+          e.updateMatrix();
+          e.translateY(.1);
+          let h = setInterval(() => {
+            map.traverse((x) => {
+              if (x.isObject3D && ((!x.name.includes("scene") && !x.name.includes("Scene")) && (/GHOST|VERTEX|CITY/gi.test(currentMap) ? x.name.includes("Cube") : true)) && collision(e, x)) {
+                vehicleClones.forEach(i => {
+                  typeof i.getObjectByName(x.name) != "undefined" && (x.health <= 0 ? destroyVehicle(x, x) : x.health--);
+                });
+                return scene.add(e), gametime.run("add", [gametime.user.position+",hole"+","+e.position.x+","+e.position.y+","+e.position.z+","+e.rotation.x+","+e.rotation.y+","+e.rotation.z+","]), e.receiveShadow = true, e.castShadow = true, e.material = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide }), renderer.shadowMap.needsUpdate = true, clearInterval(h);
+              }
+              e.translateZ(-.01);
+            });
+          }, 10);
+        })(), list);
+        scene.add(bot.object);
+      }
       players = 0;
       otherUsername = null;
       countdown = false;
@@ -511,6 +556,54 @@
       activeMedals = 0;
       /* Other imports */
       import("./js/utils.js");
+      import("./js/bot.js");
+      function Bot(object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1)), difficulty = 10, callback = function(type, func) {}, collisionList = []) {
+        function collision(e, B) {
+          let firstBB = new THREE.Box3().setFromObject(e);
+          let secondBB = new THREE.Box3().setFromObject(B);
+          return firstBB.intersectsBox(secondBB);
+        }
+        return { object: object, runner: setInterval(() => {
+          collisionList.forEach(x => {
+            if (collision(x, object)) {
+              let r0 = object.clone();
+              r0.rotateY(.5);
+              let r1 = object.clone();
+              r1.rotateY(-.5);
+              let r2 = object.clone();
+              r2.rotateY(1);
+              let r3 = object.clone();
+              r3.rotateY(-1);
+              if (collision(r0, x)) {
+                object.rotateY(.5);
+              }
+              if (collision(r1, x)) {
+                object.rotateY(-.5);
+              }
+              if (collision(r2, x)) {
+                object.rotateY(1);
+              }
+              if (collision(r3, x)) {
+                object.rotateY(-1);
+              }
+            }
+          });
+          if (object.position.distanceTo(camera.position) <= 15) {
+            if (Math.floor(Math.random() * (difficulty * 2)) == 0) {
+              for (let i = 0; i < object.position.distanceTo(camera.position) / 20 * Math.floor(Math.random() * 2); i++) {
+                callback("attack", Math.floor(Math.random() * 5) + difficulty);
+              }
+            }
+          }
+          if (object.position.distanceTo(camera.position) <= 10) {
+            setTimeout(() => object.lookAt(camera.position), 250);
+          }
+          if (Math.floor(Math.random() * 10) == 0) {
+            object.translateZ(Math.floor(Math.random() * 3) == 0 ? -(Math.floor(Math.random() * 2) / (difficulty <= 5 ? 10 : difficulty <= 10 ? 5 : 3)) : (Math.floor(Math.random() * 2) / (difficulty <= 5 ? 10 : difficulty <= 10 ? 5 : 3)));
+            Math.floor(Math.random() * 25) == 0 && object.translateX(Math.floor(Math.random() * 2) == 0 ? -(Math.floor(Math.random() * 2) / 15) : Math.floor(Math.random()*  2) / 20);
+          }
+        }) }
+      }
       /* End other imports */
       function medal(name, points) {
         activeMedals++;
@@ -1325,7 +1418,6 @@
           (map.getObjectByProperty("type", "DirectionalLight").visible = false);
         }), 4: new THREE.GLTFLoader(loadingManager).load("models/characters/" + currentPlayer.toLowerCase() + "/scene.gltf", (model) => {
           player = model.scene;
-          otherPlayer = model.scene.clone();
           animations[2]=(model.animations);
           let mixer = new THREE.AnimationMixer(player);
           mixer.speed = 3.25;
