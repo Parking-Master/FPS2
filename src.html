@@ -476,22 +476,28 @@
       function freePlay() {
         if (currentMode == "FIESTA") {
           loadout = [(() => { let e = Object.keys(weapons); e.splice(e.indexOf("Nuke_Launcher"), 1); return e[Math.floor(Math.random() * e.length)] })(), (() => { let e = Object.keys(weapons); e.splice(e.indexOf("Nuke_Launcher"), 1); return e[Math.floor(Math.random() * e.length)] })()];
+          primaryWeapon.name = loadout[0];
+          secondaryWeapon.name = loadout[1];
+          primaryWeapon.defaultRounds = 12;
+          secondaryWeapon.defaultRounds = 12;
+          primaryWeapon.rounds = primaryWeapon.defaultRounds;
+          primaryWeapon.clips = primaryWeapon.defaultClips;
+          secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
+          secondaryWeapon.clips = secondaryWeapon.defaultClips;
         }
         if (currentMode == "SNIPERS") {
           loadout = ["Sniper_Rifle", "Sniper_Rifle"];
+          primaryWeapon.name = loadout[0];
+          secondaryWeapon.name = loadout[1];
+          primaryWeapon.defaultRounds = 6;
+          secondaryWeapon.defaultRounds = 6;
+          primaryWeapon.rounds = primaryWeapon.defaultRounds;
+          primaryWeapon.clips = primaryWeapon.defaultClips;
+          secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
+          secondaryWeapon.clips = secondaryWeapon.defaultClips;
         }
         primaryWeapon.object = weapons[loadout[0]].scene;
         secondaryWeapon.object = weapons[loadout[1]].scene;
-        primaryWeapon.name = loadout[0];
-        secondaryWeapon.name = loadout[1];
-        primaryWeapon.defaultRounds = 6;
-        secondaryWeapon.defaultRounds = 6;
-        primaryWeapon.rounds = primaryWeapon.defaultRounds;
-        primaryWeapon.clips = primaryWeapon.defaultClips;
-        secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
-        secondaryWeapon.clips = secondaryWeapon.defaultClips;
-        scene.add(primaryWeapon.object);
-        controls.isLocked = true;
         swal(),setTimeout(()=>swal.close(),10);
         gametime.set = () => {};
         gametime.make = () => {};
@@ -532,7 +538,7 @@
           }
         });
         let bot = new Bot(otherPlayer, 16, (type, info) => type == "interact" ? Object.values(ordinances).forEach(x => otherPlayer.position.distanceTo(x.position) <= 2.5 && Math.floor(Math.random() * 3) == 0 ? (scene.remove(x), x.position.y = -1000) : void(0)) : type == "attack" ? (() => {
-          if (!botCanFire || botRounds <= 0 || eliminated) return botRounds <= 0 && !botReloading && (botReloading = true, gametime.run("add", [(gametime.user.position == 1 ? 2 : 1)+",animate,reload"]), setTimeout(() => (botRounds = 36, botReloading = false), 6000));
+          if (!botCanFire || botRounds <= 0 || eliminated || gameover) return botRounds <= 0 && !botReloading && (botReloading = true, gametime.run("add", [(gametime.user.position == 1 ? 2 : 1)+",animate,reload"]), setTimeout(() => (botRounds = 36, botReloading = false), 6000));
           if (health <= 0) {
             if (backupHealth <= 0) {
               if (eliminated) return;
@@ -698,11 +704,11 @@
               }
             }
           });
-          if (object.position.distanceTo(camera.position) <= 15) {
+          if (object.position.distanceTo(camera.position) <= 12) {
             callback("attack", Math.floor(Math.random() * 5) + difficulty);
           }
           callback("interact", Math.floor(Math.random() * 2) == 0);
-          if (object.position.distanceTo(camera.position) <= 10) {
+          if (object.position.distanceTo(camera.position) <= 12) {
             setTimeout(() => { object.lookAt(camera.position), object.rotation.set(0, object.rotation.y, 0); }, 250);
           }
           if (Math.floor(Math.random() * 10) == 0) {
@@ -1004,20 +1010,30 @@
       function start(username) {
         if (currentMode == "FIESTA") {
           loadout = [(() => { let e = Object.keys(weapons); e.splice(e.indexOf("Nuke_Launcher"), 1); return e[Math.floor(Math.random() * e.length)] })(), (() => { let e = Object.keys(weapons); e.splice(e.indexOf("Nuke_Launcher"), 1); return e[Math.floor(Math.random() * e.length)] })()];
+          primaryWeapon.object = weapons[loadout[0]].scene;
+          secondaryWeapon.object = weapons[loadout[1]].scene;
+          primaryWeapon.name = loadout[0];
+          secondaryWeapon.name = loadout[1];
+          primaryWeapon.defaultRounds = 12;
+          secondaryWeapon.defaultRounds = 12;
+          primaryWeapon.rounds = primaryWeapon.defaultRounds;
+          primaryWeapon.clips = primaryWeapon.defaultClips;
+          secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
+          secondaryWeapon.clips = secondaryWeapon.defaultClips;
         }
         if (currentMode == "SNIPERS") {
           loadout = ["Sniper_Rifle", "Sniper_Rifle"];
+          primaryWeapon.object = weapons[loadout[0]].scene;
+          secondaryWeapon.object = weapons[loadout[1]].scene;
+          primaryWeapon.name = loadout[0];
+          secondaryWeapon.name = loadout[1];
+          primaryWeapon.defaultRounds = 6;
+          secondaryWeapon.defaultRounds = 6;
+          primaryWeapon.rounds = primaryWeapon.defaultRounds;
+          primaryWeapon.clips = primaryWeapon.defaultClips;
+          secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
+          secondaryWeapon.clips = secondaryWeapon.defaultClips;
         }
-        primaryWeapon.object = weapons[loadout[0]].scene;
-        secondaryWeapon.object = weapons[loadout[1]].scene;
-        primaryWeapon.name = loadout[0];
-        secondaryWeapon.name = loadout[1];
-        primaryWeapon.defaultRounds = 6;
-        secondaryWeapon.defaultRounds = 6;
-        primaryWeapon.rounds = primaryWeapon.defaultRounds;
-        primaryWeapon.clips = primaryWeapon.defaultClips;
-        secondaryWeapon.rounds = secondaryWeapon.defaultRounds;
-        secondaryWeapon.clips = secondaryWeapon.defaultClips;
         swal({
           title: "Player(s) found",
           text: "\"" + username + "\" Joined the game",
@@ -1050,6 +1066,7 @@
               seconds--;
               if (seconds <= 4) {
                 if (seconds < 0) {
+                  renderer.domElement.onclick = () => { renderer.domElement.requestPointerLock = (renderer.domElement.requestPointerLock || renderer.domElement.mozRequestPointerLock); renderer.domElement.requestPointerLock() };
                   let weaponIndex = gunIndexes[loadout[0]];
                   mixers[weaponIndex].clipAction(animations[weaponIndex][0]).loop = THREE.LoopOnce;
                   mixers[weaponIndex].clipAction(animations[weaponIndex][0]).play();
@@ -1058,6 +1075,7 @@
                   (swal.close(), controls.isLocked = true, (()=>{(renderer.shadowMap.enabled=!0,scene.traverse((a=>{typeof primaryWeapon.object.getObjectByName(a.name)=="undefined"&&a.isObject3D&&(a.receiveShadow=!0,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),map.traverse((a=>{a.isObject3D&&(a.receiveShadow=!0,a.castShadow=!1,a.material&&a.material.map&&(a.material.map.anisotropy=16))})),light.shadow.bias=-1e-5,light.shadow.mapSize.width=1024*4,light.shadow.mapSize.height=1024*4,light.castShadow=true,light.shadow.radius=2.5,renderer.shadowMap.autoUpdate=false,renderer.shadowMap.needsUpdate=true)})(), clearInterval(counting));
                   didStart = true;
                   mixers[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]].clipAction(animations[(scene.children.indexOf(primaryWeapon.object) > -1 ? "primary" : "secondary") == "primary" ? gunIndexes[primaryWeapon.name] : gunIndexes[secondaryWeapon.name]][1]).play();
+                  renderer.domElement.click();
                 }
                 document.querySelector("#countdown_sound").play();
               }
@@ -1341,6 +1359,8 @@
           controls.isLocked = false;
           localStorage["ptsToAdd"] = currentPoints;
           document.querySelector(".swal-modal").style = "width:100%!important";
+          document.exitPointerLock();
+          renderer.domElement.onclick = null;
           gameover = true;
         } else if ((gametime.user.position == 1 && score2 >= setScore) || (gametime.user.position == 2 && score1 >= setScore)) {
           swal({
@@ -1351,6 +1371,8 @@
           controls.isLocked = false;
           localStorage["ptsToAdd"] = 50;
           document.querySelector(".swal-modal").style = "width:100%!important";
+          document.exitPointerLock();
+          renderer.domElement.onclick = null;
           gameover = true;
         } else if (score1 == score2 && (score1 >= setScore || score2 >= setScore)) {
           swal({
@@ -1361,6 +1383,8 @@
           controls.isLocked = false;
           localStorage["ptsToAdd"] = currentPoints / 2;
           document.querySelector(".swal-modal").style = "width:100%!important";
+          document.exitPointerLock();
+          renderer.domElement.onclick = null;
           gameover = true;
         }
       }
