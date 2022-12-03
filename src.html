@@ -471,12 +471,15 @@
       }
       function startBot() {
         start(generateName());
-        countdown = true;
+        setTimeout(() => gametime.run("countdown", [gametime.user.position == 1 ? 2 : 1]), 3000);
         let list = [];
         let botCanFire = true;
         let botRoundsLeft;
         let botHealth = 100;
+        let botRounds = 36;
+        let botReloading = false;
         gametime.on("hit", function(data) {
+          console.log(botHealth)
           if (data.split(",")[0] == gametime.user.position) {
             botHealth += -(data.split(",")[1]-0);
             if (botHealth <= 0) gametime.run("eliminate", [gametime.user.position == 1 ? 2 : 1]);
@@ -496,12 +499,12 @@
             return backupHealth += -50;
           }
         });
-        map.traverse(x => x.name.includes("Container") && list.push(x));
-        let bot = new Bot(otherPlayer, 10, (type, info) => type == "attack" ? (() => {
-          if (!botCanFire || botRoundsLeft <= 0) return botRoundsLeft <= 0 && gametime.run("add", [gametime.user.position+",animate,reload"]);
+        let bot = new Bot(otherPlayer, 16, (type, info) => type == "attack" ? (() => {
+          if (!botCanFire || botRounds <= 0) return botRounds <= 0 && !botReloading && (botReloading = true, gametime.run("add", [(gametime.user.position == 1 ? 2 : 1)+",animate,reload"]), setTimeout(() => (botRounds = 36, botReloading = false), 6000));
           botRounds--;
           botCanFire = false;
           setTimeout(() => botCanFire = true, 120);
+          gunsounds["Assault_Rifle"].cloneNode().play();
           let flash = muzzleFlash.clone();
           flash.position.copy(otherPlayer.position);
           flash.scale.set(.3, .3, .3);
@@ -516,7 +519,7 @@
           scene.add(muzzleLight);
           muzzleLight.position.copy(flash.position);
           setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 50);
-          Math.floor(Math.random() * ((otherPlayer.position.distanceTo(camera.position).toFixed(0) - 0) + 4)) == 0 && gametime.run("hit", [(gametime.user.position == 1 ? 2 : 1) + "," + 5]);
+          gametime.run("hit", [(gametime.user.position == 1 ? 2 : 1) + "," + 5]);
           let e = new THREE.Mesh(new THREE.CircleGeometry(.125, 20));
           e.position.copy(otherPlayer.position);
           e.rotation.copy(otherPlayer.rotation);
@@ -533,8 +536,8 @@
               e.translateZ(-.01);
             });
           }, 10);
-        })() : type == "walk" ? mixers[3].clipAction(animations[3][0]).play() : type == "stop_walk" (mixers[3].clipAction(animations[3][0]).stop(), mixers[3].clipAction(animations[3][0]).reset()), list);
-        scene.add(bot.object);
+        })() : type == "walk" ? mixers[3].clipAction(animations[3][0]).play() : type == "stop_walk" && (mixers[3].clipAction(animations[3][0]).stop(), mixers[3].clipAction(animations[3][0]).reset()), list);
+        otherPlayer.rotation.order = "YXZ";
       }
       players = 0;
       otherUsername = null;
@@ -607,11 +610,7 @@
             }
           });
           if (object.position.distanceTo(camera.position) <= 15) {
-            if (Math.floor(Math.random() * (difficulty * 2)) == 0) {
-              for (let i = 0; i < object.position.distanceTo(camera.position) / 20 * Math.floor(Math.random() * 2); i++) {
-                callback("attack", Math.floor(Math.random() * 5) + difficulty);
-              }
-            }
+            callback("attack", Math.floor(Math.random() * 5) + difficulty);
           }
           if (object.position.distanceTo(camera.position) <= 10) {
             setTimeout(() => { object.lookAt(camera.position), object.rotation.set(0, object.rotation.y, 0); }, 250);
@@ -964,7 +963,7 @@
           closeOnSpaceKey: false,
           closeOnClickOutside: false
         }).then((e) => {
-          !e ? swal({ title: "Select a free play", buttons: ["free play (bots)", "free play (plain)"] }).then((e) => { !e ? startBot() : freePlay() }) : (gametime.disconnect(), location.replace("/"));
+          !e ? (swal({ title: "Select a free play", buttons: ["free play (bots)", "free play (plain)"] }).then((e) => { !e ? startBot() : freePlay() }),document.querySelector(".swal-button-container").insertAfter(document.createElement("br"))) : (gametime.disconnect(), location.replace("/"));
         });
       }
       startDialog();
