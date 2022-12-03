@@ -123,6 +123,15 @@
         color: #38b6ff;
         font-family: "AgrandirWideBlack";
       }
+      .swal-error * {
+        color: #ff4444;
+        font-family: "AgrandirWideBlack";
+      }
+      .swal-error .swal-button {
+        background: #ff4444;
+        box-shadow: none !important;
+        color: #fff !important;
+      }
       .swal-button {
         background: #38b6ff;
         box-shadow: none !important;
@@ -1029,6 +1038,7 @@
       }
       window.addEventListener("message", (e) => (e.data == "login" && document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }), setTimeout(() => login(), 500))));
       window.addEventListener("message", (e) => (e.data == "reload" && setTimeout(() => location.reload(), 1000)));
+      window.addEventListener("message", (e) => (e.data.startsWith("help-") && help(e.data.split("-")[1])));
       if (userMan.isLoggedIn) {
         userMan.update();
         document.querySelector(".login").textContent = "Log out";
@@ -1042,7 +1052,10 @@
         <br>
         <div style="display:inline-flex;align-items:center;text-align:center;justify-content:center;margin-top:10px"><img src="icons/point.png" style="display:inline-block;width:20px;height:20px">&ThickSpace;Points:&nbsp;<span id="points">${userMan.get("points")}</span></div>
         `;
-        document.querySelector(".signup").onclick = () => {};
+        document.querySelector(".signup").onclick = () => {
+          openWindow("/users/");
+        };
+        document.querySelector(".signup").setAttribute("onclick", "openWindow('/users/')");
         document.querySelector("#points").style.fontSize = (((16 - ((userMan.get("points")).toString().length * 3)) * 2.25) > 16 ? 16 : ((16 - ((userMan.get("points")).toString().length * 3)) * 2.25)).toFixed(0) + "px";
         document.documentElement.innerHTML = document.documentElement.innerHTML.replace(/(\#38b6ff)/gi, JSON.parse(atob(userMan.get("preferences"))).currentPageTheme.replace("Blue", "#38b6ff").replace("White", "#ddd").replace("Gray", "#a6a6a6").replace("Black", "#000").replace("Brown", "#a44f30").replace("Orange", "#ffa500").replace("Yellow", "#fdfb52").replace("Green", "#008000").replace("Red", "#ee2211").replace("Blue", "#38b6ff")).replace(/Blue/g, JSON.parse(atob(userMan.get("preferences"))).currentPageTheme);
         document.querySelector(".logout").onclick = () => userMan.logOut(true);
@@ -1068,7 +1081,25 @@
           e += -.2;
           document.querySelector(".banner").style = "backdrop-filter:blur(" + e + "px)!important";
         });
-      })
+      });
+    </script>
+    <script>
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          if (document.querySelector(".banner") != null) {
+            swal({
+              icon: "error",
+              title: "Error",
+              className: "swal-error",
+              text: "An error occurred and stopped the page from loading.",
+              button: "Try again"
+            }).then(() => {
+              sessionStorage.clear();
+              userMan.logOut(true);
+            });
+          }
+        })
+      });
     </script>
   </body>
 </html>
