@@ -424,10 +424,6 @@
     <audio id="Rail_Gun_reloadfull" src="sounds/guns/Rail_Gun/full.mp3"></audio>
     <audio id="P90_SMG_reloadeasy" src="sounds/guns/P90_SMG/easy.mp3"></audio>
     <audio id="P90_SMG_reloadfull" src="sounds/guns/P90_SMG/full.mp3"></audio>
-    <audio id="Grenade_Launcher_reloadeasy" src="sounds/guns/Grenade_Launcher/easy.mp3"></audio>
-    <audio id="Grenade_Launcher_reloadfull" src="sounds/guns/Grenade_Launcher/full.mp3"></audio>
-    <audio id="Remington_Shotgun_reloadeasy" src="sounds/guns/Remington_Shotgun/easy.mp3"></audio>
-    <audio id="Remington_Shotgun_reloadfull" src="sounds/guns/Remington_Shotgun/full.mp3"></audio>
     <audio id="9mm_Pistol_reloadeasy" src="sounds/guns/9mm_Pistol/easy.mp3"></audio>
     <audio id="9mm_Pistol_reloadfull" src="sounds/guns/9mm_Pistol/full.mp3"></audio>
     <div class="ui">
@@ -476,12 +472,34 @@
       function startBot() {
         start(generateName());
         countdown = true;
-        scene.add(otherPlayer);
         let list = [];
         let botCanFire = true;
+        let botRoundsLeft;
+        let botHealth = 100;
+        gametime.on("hit", function(data) {
+          if (data.split(",")[0] == gametime.user.position) {
+            botHealth += -(data.split(",")[1]-0);
+            if (botHealth <= 0) gametime.run("eliminate", [gametime.user.position == 1 ? 2 : 1]);
+            return;
+          }
+          health += -(data.split(",")[1]-0);
+          if (data.split(",")[1] >= 200) {
+            health = 0;
+            backupHealth = 0;
+            return gametime.run("eliminate", [gametime.user.position]);
+          }
+          if (health <= 0) {
+            health = 0;
+            if (backupHealth <= 0) {
+              return gametime.run("eliminate", [gametime.user.position]);
+            }
+            return backupHealth += -50;
+          }
+        });
         map.traverse(x => x.name.includes("Container") && list.push(x));
-        let bot = new Bot(otherPlayer, 10, (type, info) => type == "attack" && (() => {
-          if (!botCanFire) return;
+        let bot = new Bot(otherPlayer, 10, (type, info) => type == "attack" ? (() => {
+          if (!botCanFire || botRoundsLeft <= 0) return botRoundsLeft <= 0 && gametime.run("add", [gametime.user.position+",animate,reload"]);
+          botRounds--;
           botCanFire = false;
           setTimeout(() => botCanFire = true, 120);
           let flash = muzzleFlash.clone();
@@ -498,7 +516,7 @@
           scene.add(muzzleLight);
           muzzleLight.position.copy(flash.position);
           setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 50);
-          Math.floor(Math.random() * (19 - difficulty)) == 0 && gametime.run("hit", [(gametime.user.position == 1 ? 2 : 1) + "," + 5]);
+          Math.floor(Math.random() * ((otherPlayer.position.distanceTo(camera.position).toFixed(0) - 0) + 4)) == 0 && gametime.run("hit", [(gametime.user.position == 1 ? 2 : 1) + "," + 5]);
           let e = new THREE.Mesh(new THREE.CircleGeometry(.125, 20));
           e.position.copy(otherPlayer.position);
           e.rotation.copy(otherPlayer.rotation);
@@ -515,7 +533,7 @@
               e.translateZ(-.01);
             });
           }, 10);
-        })(), list);
+        })() : type == "walk" ? mixers[3].clipAction(animations[3][0]).play() : type == "stop_walk" (mixers[3].clipAction(animations[3][0]).stop(), mixers[3].clipAction(animations[3][0]).reset()), list);
         scene.add(bot.object);
       }
       players = 0;
@@ -596,11 +614,12 @@
             }
           }
           if (object.position.distanceTo(camera.position) <= 10) {
-            setTimeout(() => object.lookAt(camera.position), 250);
+            setTimeout(() => { object.lookAt(camera.position), object.rotation.set(0, object.rotation.y, 0); }, 250);
           }
           if (Math.floor(Math.random() * 10) == 0) {
-            object.translateZ(Math.floor(Math.random() * 3) == 0 ? -(Math.floor(Math.random() * 2) / (difficulty <= 5 ? 10 : difficulty <= 10 ? 5 : 3)) : (Math.floor(Math.random() * 2) / (difficulty <= 5 ? 10 : difficulty <= 10 ? 5 : 3)));
-            Math.floor(Math.random() * 25) == 0 && object.translateX(Math.floor(Math.random() * 2) == 0 ? -(Math.floor(Math.random() * 2) / 15) : Math.floor(Math.random()*  2) / 20);
+            object.translateZ(Math.floor(Math.random() * 3) == 0 ? -(Math.floor(Math.random() * 2) / (difficulty <= 5 ? 20 : difficulty <= 10 ? 10 : 5)) : (Math.floor(Math.random() * 2) / (difficulty <= 5 ? 20 : difficulty <= 10 ? 10 : 5)));
+            callback("walk", null);
+            Math.floor(Math.random() * 25) == 0 && (setTimeout(() => callback("stop_walk", null), 500), object.translateX(Math.floor(Math.random() * 2) == 0 ? -(Math.floor(Math.random() * 2) / 15) : Math.floor(Math.random()*  2) / 20));
           }
         }) }
       }
@@ -936,16 +955,19 @@
           }
         });
       }
-      swal({
-        title: "Searching for players...",
-        buttons: ["free play", "cancel search"],
-        closeOnEsc: false,
-        closeOnEnterKey: false,
-        closeOnSpaceKey: false,
-        closeOnClickOutside: false
-      }).then((e) => {
-        !e ? freePlay() : (gametime.disconnect(), location.replace("/"));
-      });
+      function startDialog() {
+        swal({
+          title: "Searching for players...",
+          buttons: ["free play", "cancel search"],
+          closeOnEsc: false,
+          closeOnEnterKey: false,
+          closeOnSpaceKey: false,
+          closeOnClickOutside: false
+        }).then((e) => {
+          !e ? swal({ title: "Select a free play", buttons: ["free play (bots)", "free play (plain)"] }).then((e) => { !e ? startBot() : freePlay() }) : (gametime.disconnect(), location.replace("/"));
+        });
+      }
+      startDialog();
       HTMLElement.prototype.insertAfter=function(){this.parentNode.insertBefore(arguments[0],this.nextSibling)};
       document.querySelector(".swal-button").blur();
       document.querySelector(".swal-button-container").insertAfter(document.createElement("br"));
@@ -1020,14 +1042,14 @@
           "easy": document.getElementById("P90_SMG_reloadeasy"),
           "full": document.getElementById("P90_SMG_reloadfull")
         },
-        "Grenade_Launcher": {
-          "easy": document.getElementById("Grenade_Launcher_reloadeasy"),
-          "full": document.getElementById("Grenade_Launcher_reloadfull")
-        },
-        "Remington_Shotgun": {
-          "easy": document.getElementById("Remington_Shotgun_reloadeasy"),
-          "full": document.getElementById("Remington_Shotgun_reloadfull")
-        },
+        // "Grenade_Launcher": {
+        //   "easy": document.getElementById("Grenade_Launcher_reloadeasy"),
+        //   "full": document.getElementById("Grenade_Launcher_reloadfull")
+        // },
+        // "Remington_Shotgun": {
+        //   "easy": document.getElementById("Remington_Shotgun_reloadeasy"),
+        //   "full": document.getElementById("Remington_Shotgun_reloadfull")
+        // },
         "Nuke_Launcher": {
           "easy": document.getElementById("Nuke_Launcher_reloadeasy"),
           "full": document.getElementById("Nuke_Launcher_reloadfull")
