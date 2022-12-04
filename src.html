@@ -567,6 +567,8 @@
                 closeOnSpaceKey: false,
                 closeOnClickOutside: false
               });
+              confetti(camera, [0xff0000, 0xee2222, 0xdd5511]);
+              controls.isLocked = false;
               currentMode != "ODDBALL" && incrementScore(gametime.user.position);
               document.querySelector(".scoreboard").style.transform = "scale(1.2)";
               setTimeout(() => document.querySelector(".scoreboard").style.transform = "scale(1)", 3000);
@@ -760,6 +762,11 @@
       function medal(name, points) {
         activeMedals++;
         let md = document.createElement("div");
+        let d = [];
+        document.querySelectorAll(".medal-description").forEach(x => {
+          d.push(x.textContent.toLowerCase().trim());
+        });
+        if (d.indexOf(name.toLowerCase.trim) > -1) return;
         md.innerHTML = `
         +${points}&ThickSpace;&ThickSpace;<img src="icons/medals/${name.toLowerCase().replace(/ /g, "_").trim()}.png" width="30px">&ThickSpace;&ThickSpace;
         <span class="medal-description">${name.toLowerCase().eachUpperCase().trim()}</span>
@@ -769,27 +776,28 @@
         setTimeout(() => md.style.transform = "", 300);
         setTimeout(() => (document.body.removeChild(md), activeMedals--), 2500);
       }
-      function confetti(obj) {
-        (()=>{var confetti=new ExplosionConfetti({rate:3,amount:150,radius:350,areaWidth:10,areaHeight:1,fallingHeight:1,fallingSpeed:.5,colors:[16777215,3716863,255]});confetti.object.position.copy(obj.position),scene.add(confetti.object),confetti.object.scale.set(.045,.045,.045);let h=setInterval(()=>(confetti.object.traverse((x)=>(x.material&&(x.material.opacity+=-.02))),confetti.update()));setTimeout((()=>(confetti.dispose(),clearInterval(h))),1500)})();
+      function confetti(obj, colors = [16777215,3716863,255]) {
+        (()=>{var confetti=new ExplosionConfetti({rate:3,amount:150,radius:350,areaWidth:10,areaHeight:1,fallingHeight:1,fallingSpeed:.5,colors:colors});confetti.object.position.copy(obj.position),scene.add(confetti.object),confetti.object.scale.set(.045,.045,.045);let h=setInterval(()=>(confetti.object.traverse((x)=>(x.material&&(x.material.opacity+=-.02))),confetti.update()));setTimeout((()=>(confetti.dispose(),clearInterval(h))),1500)})();
       }
       gametime.on("eliminate", function(player) {
-        if (eliminated) {
+        if (eliminated || isPlayingBot) {
           return;
         }
         eliminated = true;
         setTimeout(() => { eliminated = false }, 1000);
         document.querySelector(".scoreboard").style.transform = "scale(1.2)";
         setTimeout(() => document.querySelector(".scoreboard").style.transform = "scale(1)", 3000);
-        document.querySelector("#killSound").cloneNode().play();
         if (player != gametime.user.position) {
           currentPoints += 10;
           medal("kill", 10);
+          document.querySelector("#killSound").cloneNode().play();
           otherIsHoldingBall && dropBall(otherPlayer);
           otherIsHoldingBall = false;
           !otherIsInVehicle && (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).rounds <= 0 && (medal("last shot", 10), currentPoints += 10);
           otherIsInVehicle && (medal("vehicle kill"), currentPoints += 5);
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (medal("rocket kill", 15), currentPoints += 15);
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Grenade_Launcher" && (medal("grenade kill", 10), currentPoints += 10);
+          (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Sniper_Rifle" && !isZoomed && (medal("no scope", 20), currentPoints += 20);
           currentMode != "ODDBALL" && setTimeout(() => incrementScore(gametime.user.position, true), 1000);
           return confetti(otherPlayer), otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
             let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
@@ -813,6 +821,7 @@
           closeOnSpaceKey: false,
           closeOnClickOutside: false
         });
+        confetti(camera, [0xff0000, 0xee2222, 0xdd5511]);
         controls.isLocked = false;
         let gun = "primary" == weaponPosition ? primaryWeapon.object : secondaryWeapon.object;
         scene.remove(gun);
@@ -2175,6 +2184,7 @@
           muzzleLight.position.copy(flash.position);
           setTimeout(() => (scene.remove(flash), scene.remove(muzzleLight)), 10);
           gametime.run("add", [gametime.user.position+",flash,"+flash.position.x+","+flash.position.y+","+flash.position.z+","+flash.rotation.x+","+flash.rotation.y+","+flash.rotation.z]);
+          shake(camera, .5);
           (()=>{let gun="primary"==weaponPosition?primaryWeapon.object:secondaryWeapon.object;let t=0;let e=bulletShell.clone();e.scale.set(.05,.05,.05),e.position.copy(gun.position),e.rotateY(Math.PI/2),e.rotation.copy(gun.rotation),e.updateMatrix(),scene.add(e),e.getObjectByName("Object_2").material.color.setHex(0xe8c322),e.translateZ(-1.4),e.translateX(.8),e.translateY(.6);let h=setInterval(()=>{t+=.002;e.translateX(t),e.position.y+=-(t/2.5)});setTimeout(()=>{scene.remove(e),clearInterval(h)},1500)})();
           if (intersection != null && intersection.object == otherFollower) {
             let gun="primary"==weaponPosition?primaryWeapon.name:secondaryWeapon.name;
@@ -2192,13 +2202,15 @@
             if (botHealth <= 0) {
               currentPoints += 10;
               medal("kill", 10);
+              document.querySelector("#killSound").cloneNode().play();
               otherIsHoldingBall && dropBall(otherPlayer);
               otherIsHoldingBall = false;
               !otherIsInVehicle && (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).rounds <= 0 && (medal("last shot", 10), currentPoints += 10);
               otherIsInVehicle && (medal("vehicle kill"), currentPoints += 5);
               (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (medal("rocket kill", 15), currentPoints += 15);
               (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Grenade_Launcher" && (medal("grenade kill", 10), currentPoints += 10);
-              currentMode != "ODDBALL" && setTimeout(() => incrementScore(gametime.user.position), 1000);
+              (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Sniper_Rifle" && !isZoomed && (medal("no scope", 20), currentPoints += 20);
+              currentMode != "ODDBALL" && setTimeout(() => incrementScore(gametime.user.position, true), 1000);
               return confetti(otherPlayer), otherPlayer.position.y = -1000, scene.remove(otherPlayer), setTimeout(() => {
                 let spawnPoint = { position: { x: 30, y: 0, z: -30 }, rotation: { x: 0, y: -Math.PI, z: 0 } };
                 let spawnPoint1 = { position: { x: 38, y: 0, z: 1 }, rotation: { x: 0, y: Math.PI / 2, z: 0 } };
@@ -2211,7 +2223,6 @@
               }, 5000);
             }
           }
-          shake(camera, .5);
         }, timeout);
         fullAutoFiring ? canFire = true : canFire = false;
         fullAutoFiring ? void(0) : setTimeout(() => { canFire = true }, weaponFireTimeouts[((scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon.name : secondaryWeapon.name))]);
