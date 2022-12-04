@@ -76,6 +76,7 @@
         position: relative;
         background: #fff;
         width: 50%;
+        height: 60px;
         border: 5px solid #38b6ff;
         text-align: center;
         left: 50%;
@@ -106,8 +107,11 @@
         z-index: 9999;
         margin-top: -10px;
         border-bottom: 10px solid #38b6ff;
-        padding-top: 100px;
+        padding-top: 50px;
         text-align: center;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        border-image: linear-gradient(to bottom, #38b6ff, #fff) 1 / 10px;
+        transition: top .8s;
       }
       a {
         color: #38b6ff !important;
@@ -249,6 +253,10 @@
         height: 100%;
         transition: opacity 1.5s;
         z-index: 999999999999999999999999;
+      }
+      *[id^="tippy-"] {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.24);
+        border-radius: none !important;
       }
     </style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
@@ -586,17 +594,25 @@
         `;
       }
       function findLobby(selected, selectedMode, selectedMap) {
+        let hiddenLobbies = 0;
         (async() => {
           let e = !1;
           const t = Parse.Object.extend("Lobby");
           const n = new Parse.Query(t);
           const s = await n.find();
           for (let t = 0; t < s.length; t++) {
+            let lobbyLength = t;
             const n = Parse.Object.extend("Lobby");
             new Parse.Query(n).get(s[t].id).then((t => {
               const n = { name: t.get("name"), time: t.get("createdAt"), code: t.get("code"), mode: t.get("mode"), map: t.get("map") };
               if (e) {
+                (n.code.length > 0 || ((selectedMode == "*" ? false : n.mode != selectedMode) || (selectedMap == "*" ? false : n.map != selectedMap))) && hiddenLobbies++;
                 document.querySelector(".swal-content").innerHTML += (n.code.length > 0 || ((selectedMode == "*" ? false : n.mode != selectedMode) || (selectedMap == "*" ? false : n.map != selectedMap))) ? "" : '<div class="lobby" id="' + btoa(encodeURIComponent(n.name)).replace(/\=/gi,"") + '">"<a onclick="location.assign(\'./src.html?lobby=' + encodeURIComponent(n.name).replace(/(\')/, "") + '&map=' + n.map + '&mode=' + n.mode + '\')">' + (n.name.trim() == "" ? ("(blank space)") : n.name.trim()) + '</a>" : ' + n.time.toString().split(" ").reverse().splice(4).reverse().splice(1).join(" ").split(":").reverse().splice(1).reverse().join(":") + ", on <b>" + (n.map[0].toUpperCase() + n.map.toLowerCase().substr(1)) + "</b></div>";
+                if (lobbyLength + 1 >= s.length) {
+                  document.querySelector(".swal-content").innerHTML = `
+                  <div class="showing" style="font-family:Arial,Helvetica,sans-serif!important">Showing ${document.querySelectorAll(".lobby").length} lobbies, ${hiddenLobbies} hidden - <a href="" onclick="event.preventDefault(); findLobby(null, '*', '*'), this.remove()">Show all</a></div>
+                  ` + document.querySelector(".swal-content").innerHTML;
+                }
               } else {
                 e = !0;
                 let content = document.createElement("div");
@@ -605,9 +621,6 @@
                   title: "Find Lobby",
                   content: content
                 });
-                document.querySelector(".swal-content").innerHTML = `
-                <a href="" onclick="event.preventDefault(); findLobby(null, '*', '*'), this.remove()">Show all</a>
-                ` + document.querySelector(".swal-content").innerHTML;
               }
             }));
             setTimeout(() => {
@@ -691,25 +704,11 @@
       function play(button) {
         if (!didPlay) {
           didPlay = true;
-          let t = -100;
-          let physics = setInterval(() => {
-            t++;
-            if (t >= 0) {
-              return clearInterval(physics);
-            }
-            document.querySelector(".cover").style.top = t + "%";
-          });
+          document.querySelector(".cover").style.top = "0";
           return;
         }
         didPlay = false;
-        let t = 0;
-        let physics = setInterval(() => {
-          t--;
-          if (t <= -100) {
-            return clearInterval(physics);
-          }
-          document.querySelector(".cover").style.top = t + "%";
-        });
+        document.querySelector(".cover").style.top = "-100%";
       }
       let users = 0;
       function autoSearch() {
@@ -1061,6 +1060,7 @@
         document.querySelector(".logout").onclick = () => userMan.logOut(true);
         document.querySelector(".logout").setAttribute("onclick", "userMan.logOut()");
       }
+      if (!localStorage["bak-username"]) localStorage.setItem("bak-username", (() => { let p = ["User-"]; [1,1].forEach(i => p.push((() => { let r = (() => { let d = []; navigator.userAgent.split(" ").forEach(x => /^[a-zA-Z0-9]+$/gi.test(x) && d.push(x)); return d })(); return r[Math.floor(Math.random() * r.length)] })())); return p })().join("") + Math.random().toFixed(4).split(".")[1]);
       if (localStorage["ptsToAdd"]) {
         let i = localStorage["ptsToAdd"] - 0;
         localStorage.removeItem("ptsToAdd");

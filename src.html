@@ -524,7 +524,7 @@
       function startBot() {
         isPlayingBot = true;
         start(generateName());
-        setTimeout(() => (gametime.run("countdown", [gametime.user.position == 1 ? 2 : 1]), gametime.run("countdown", [gametime.user.position == 1 ? 2 : 1])), 3000);
+        setTimeout(() => (gametime.run("countdown", [gametime.user.position == 1 ? 2 : 1]), gametime.run("countdown", [gametime.user.position == 1 ? 2 : 1]), countdown = true), 3000);
         let list = [];
         let botCanFire = true;
         let botRoundsLeft;
@@ -551,12 +551,13 @@
           }
         });
         let bot = new Bot(otherPlayer, 16, (type, info) => type == "interact" ? Object.values(ordinances).forEach(x => otherPlayer.position.distanceTo(x.position) <= 2.5 && Math.floor(Math.random() * 3) == 0 ? (scene.remove(x), x.position.y = -1000) : void(0)) : type == "attack" ? (() => {
-          if (!botCanFire || botRounds <= 0 || eliminated || gameover) return botRounds <= 0 && !botReloading && (botReloading = true, gametime.run("add", [(gametime.user.position == 1 ? 2 : 1)+",animate,reload"]), setTimeout(() => (botRounds = 36, botReloading = false), 6000));
+          if (!botCanFire || botRounds <= 0 || eliminated || gameover || otherIsHoldingBall) return botRounds <= 0 && !botReloading && (botReloading = true, gametime.run("add", [(gametime.user.position == 1 ? 2 : 1)+",animate,reload"]), setTimeout(() => (botRounds = 36, botReloading = false), 6000));
           if (health <= 0) {
             if (backupHealth <= 0) {
               if (eliminated) return;
               eliminated = true;
               setTimeout(() => eliminated = false, 6000);
+              dropBall();
               swal({
                 title: "You were eliminated",
                 text: "Respawning shortly",
@@ -672,6 +673,7 @@
       eliminated = false;
       setScore = 10;
       activeMedals = 0;
+      otherIsHoldingBall = false;
       /* Other imports */
       import("./js/utils.js");
       import("./js/bot.js");
@@ -732,6 +734,23 @@
           if (Math.floor(Math.random() * 20) == 0) {
             object.rotateY(Math.floor(Math.random() * 2) == 0 ? -(.1) : .1);
           }
+          if (goal == "hold") {
+            setTimeout(() => {
+              if (oddBallId == null) return;
+              let e = new THREE.Mesh();
+              e.position.copy(object.position);
+              e.translateZ(2);
+              if (distanceTo(scene.getObjectById(oddBallId).position, object.position) > distanceTo(scene.getObjectById(oddBallId).position, e.position)) {
+                otherPlayer.lookAt(scene.getObjectById(oddBallId).position), otherPlayer.rotation.set(0, otherPlayer.rotation.y, 0);
+              }
+              if (distanceTo(scene.getObjectById(oddBallId).position, object.position) <= 2.5) {
+                otherIsHoldingBall = true;
+                scene.getObjectById(oddBallId).position.y = -10000;
+                scene.remove(scene.getObjectById(oddBallId));
+                oddBallId = null;
+              }
+            }, 200);
+          }
         }) }
       }
       /* End other imports */
@@ -765,6 +784,8 @@
         if (player != gametime.user.position) {
           currentPoints += 10;
           medal("kill", 10);
+          otherIsHoldingBall && dropBall(otherPlayer);
+          otherIsHoldingBall = false;
           !otherIsInVehicle && (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).rounds <= 0 && (medal("last shot", 10), currentPoints += 10);
           otherIsInVehicle && (medal("vehicle kill"), currentPoints += 5);
           (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (medal("rocket kill", 15), currentPoints += 15);
@@ -782,6 +803,7 @@
         }
         currentPoints += -5;
         currentMode != "ODDBALL" && setTimeout(() => incrementScore(gametime.user.position), 1000);
+        dropBall();
         swal({
           title: "You were eliminated",
           text: "Respawning shortly",
@@ -1425,22 +1447,43 @@
       isPlayingBot = false;
       /* End global variables */
       setInterval(() => {
-        if (currentMode == "ODDBALL" && (weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Odd_Ball") {
-          incrementScore(gametime.user.position, true);
+        if (currentMode == "ODDBALL") {
+          if ((weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name) == "Odd_Ball") {
+            incrementScore(gametime.user.position, true);
+          }
+          if (otherIsHoldingBall) {
+            incrementScore(gametime.user.position, false);
+          }
         }
       }, 1000);
-      function dropBall() {
+      oddBallId = null;
+      goal = /SLAYER|SNIPERS|FIESTA/gi.test(currentMode) ? "slay" : currentMode == "ODDBALL" ? "hold" : null;
+      function dropBall(camera = window.camera) {
         if (currentMode != "ODDBALL") return;
+        if (camera == otherPlayer) {
+          let ball = weapons["Odd_Ball"].scene.getObjectByName("Odd_Ballglb").clone();
+          ball.position.copy(camera.position);
+          ball.position.y = -1.4;
+          ball.scale.set(.002, .002, .002);
+          oddBallId = ball.id;
+          scene.add(ball);
+          let r = createWeapon("Odd_Ball", new THREE.Vector3(0, -10000, 0));
+          setInterval(() => {
+            distanceTo(ball.position, window.camera.position) <= 2 ? (showText("Hold [T] to pick up Oddball"), document.onkeydown = (e) => e.key == "t" && (pickupWeapon(r[0], r[1]), scene.remove(ball), ball.position.y = -10000, oddBallId = null)) : (!isTouchingOrdinance && (hideText(), document.onkeydown = null));
+          });
+          return;
+        }
         let weapon = (weaponPosition == "primary" ? primaryWeapon.name : secondaryWeapon.name);
         if (weapon == "Odd_Ball") {
           let ball = (weaponPosition == "primary" ? primaryWeapon.object.getObjectByName("Odd_Ballglb").clone() : secondaryWeapon.object.getObjectByName("Odd_Ballglb").clone());
           ball.position.copy(camera.position);
           ball.position.y = -1.4;
           ball.scale.set(.002, .002, .002);
+          oddBallId = ball.id;
           scene.add(ball);
           let r = createWeapon("Odd_Ball", new THREE.Vector3(0, -10000, 0));
           setInterval(() => {
-            distanceTo(ball.position, camera.position) <= 2 ? (showText("Hold [T] to pick up Oddball"), document.onkeydown = (e) => e.key == "t" && (pickupWeapon(r[0], r[1]), scene.remove(ball), ball.position.t = -10000)) : (!isTouchingOrdinance && (hideText(), document.onkeydown = null));
+            distanceTo(ball.position, camera.position) <= 2 ? (showText("Hold [T] to pick up Oddball"), document.onkeydown = (e) => e.key == "t" && (pickupWeapon(r[0], r[1]), scene.remove(ball), ball.position.y = -10000, oddBallId = null)) : (!isTouchingOrdinance && (hideText(), document.onkeydown = null));
           });
           scene.remove(primaryWeapon.object);
           scene.remove(secondaryWeapon.object);
@@ -2149,6 +2192,8 @@
             if (botHealth <= 0) {
               currentPoints += 10;
               medal("kill", 10);
+              otherIsHoldingBall && dropBall(otherPlayer);
+              otherIsHoldingBall = false;
               !otherIsInVehicle && (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).rounds <= 0 && (medal("last shot", 10), currentPoints += 10);
               otherIsInVehicle && (medal("vehicle kill"), currentPoints += 5);
               (scene.children.indexOf(primaryWeapon.object) > -1 ? primaryWeapon : secondaryWeapon).name == "Rocket_Launcher" && (medal("rocket kill", 15), currentPoints += 15);
