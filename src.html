@@ -425,8 +425,8 @@
     <audio id="surge" src="sounds/surge.mp3"></audio>
     <script src="https://threejs.org/build/three.min.js"></script>
     <script src="/js/GamepadControls.min.js"></script>
-    <script src="https://fps3.ml/js/GLTFLoader.min.js"></script>
-    <script src="https://fps3.ml/js/fflate.min.js"></script>
+    <script src="https://fps3.serveo.net/js/GLTFLoader.min.js"></script>
+    <script src="https://fps3.serveo.net/js/fflate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alvaromontoro/gamecontroller.js@latest/dist/gamecontroller.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/Parking-Master/Gametime.js-2.0@latest/gametime.js"></script>
     <script src="https://mrgoonie.github.io/three.confetti.explosion.js/js/helper.js"></script>
@@ -645,7 +645,7 @@
       hidetext = true;
       function ExplosionConfetti(o){var t={amount:10,rate:2,radius:600,areaWidth:500,areaHeight:500,fallingHeight:500,fallingSpeed:1,colors:[16777215,16711680,16776960]};o&&(t=o);var e=this;e.options=t,e.particles=[],e.booms=[],e.options.rate=e.options.rate/100,e.options.rate>.2&&(e.options.rate=.2),this.object=new THREE.Object3D;var a=new THREE.PlaneGeometry(1,1);new THREE.MeshBasicMaterial({color:16777215,side:THREE.DoubleSide});return this.init=function(){},this.explode=function(){var o=new THREE.Object3D;o.life=DMath.randomFromTo(500,500),o.position.x=-e.options.areaWidth/2+e.options.areaWidth*Math.random(),o.position.y=e.options.fallingHeight+DMath.randomPlusMinus(100),o.position.z=-e.options.areaWidth/2+e.options.areaWidth*Math.random(),e.object.add(o),e.booms.push(o);for(var t=0;t<e.options.amount;t++){var i=new THREE.MeshBasicMaterial({color:DArray.getRandom(e.options.colors),transparent:!0,side:THREE.DoubleSide}),n=new THREE.Mesh(a,i);o.add(n),n.life=1,n.destination={},n.destination.x=(Math.random()-.5)*(2*e.options.radius)*Math.random(),n.destination.y=(Math.random()-.5)*(2*e.options.radius)*Math.random(),n.destination.z=(Math.random()-.5)*(2*e.options.radius)*Math.random(),n.rotation.x=DMath.random(360),n.rotation.y=DMath.random(360),n.rotation.z=DMath.random(360);var r=DMath.randomFromTo(2,5);n.scale.x=r,n.scale.y=r,n.rotateSpeedX=DMath.randomPlusMinus(.4),n.rotateSpeedY=DMath.randomPlusMinus(.4),n.rotateSpeedZ=DMath.randomPlusMinus(.4)}o.dispose=function(){for(var t=0;t<o.children.length;t++){var e=o.children[t];e.material.dispose(),e.geometry.dispose(),o.remove(e),e=null}o.parent.remove(o),o=null}},this.update=function(){Math.random()<e.options.rate&&e.explode();for(var o=0;o<e.booms.length;o++){for(var t=e.booms[o],a=0;a<t.children.length;a++){var i=t.children[a];i.destination.y-=DMath.randomFromTo(3,6),i.life-=DMath.randomFromTo(.005,.01);var n=(i.destination.x-i.position.x)/80,r=(i.destination.y-i.position.y)/80,s=(i.destination.z-i.position.z)/80;i.position.x+=n,i.position.y+=r,i.position.z+=s,i.rotation.y+=i.rotateSpeedY,i.rotation.x+=i.rotateSpeedX,i.rotation.z+=i.rotateSpeedZ,i.position.y<-e.options.fallingHeight&&(i.material.dispose(),i.geometry.dispose(),t.remove(i),i=null)}t.children.length<=10&&(t.dispose(),e.booms=DArray.remove(t,e.booms)),t.children.length}},this.dispose=function(){for(var o=0;o<e.particles.length;o++){var t=e.particles[o];t.material.dispose(),t.geometry.dispose(),e.object.remove(t),t=null}e.object.parent.remove(e.object),e.object=null,e.update=function(){}},this}
       /* Gametime.js initialization */
-      gametime.set("key", "pub-c-c44c8fc4-612e-4fc3-b875-4398f01da63c", "sub-c-b6832794-3c08-11ec-b2c1-a25c7fcd9558");
+      gametime.set("key", "pub-c-61965947-3f17-4d68-97f4-7ff836c75b3e", "sub-c-5ebee0f0-c27d-48c1-bd20-4d167102bcc7");
       gametime.set("channel", new URLSearchParams(location.search).get("lobby"));
       gametime.make("connect");
       gametime.make("countdown");

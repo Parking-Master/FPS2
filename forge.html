@@ -302,7 +302,7 @@
     <script src="https://threejs.org/examples/js/exporters/GLTFExporter.js"></script>
     <script src="userman.js"></script>
     <script>
-      Parse.initialize("LqX1XKq0Bpz0kpGKQO4si2d93jP9JaMzBqGJAoZB","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
+      Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
       Notiflix.Notify.init({timeout:5000,position:"right-bottom",info:{background:"#fff",textColor:"#38b6ff",notiflixIconColor:"#38b6ff"}});
       if (userMan.isLoggedIn) {
         userMan.get("didVisitForge") == "false" ? (Notiflix.Notify.info("You earned 100 points for visiting forge!"), userMan.set("didVisitForge", true, () => {}), userMan.set("points", (userMan.get("points") - 0) + 100, () => {})) : void(0);
