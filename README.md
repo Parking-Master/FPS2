@@ -8,7 +8,7 @@ A big thanks to the 3d modelers for helping create some of the items used in thi
 
 ### Ok, it's great. But where do I play it?
 The game is fully available for everyone to play. The website is hosted with __GitHub Pages__ at:
-<p align="center"><a href="https://fps2.serveo.net">f p s 2 . s e r v e o . n e t</a></p>
+<p align="center"><a href="https://fps2.uk.to">f p s 2 . s e r v e o . n e t</a></p>
 
 ## About
 Why is FPS 2 better than the original?
@@ -118,7 +118,7 @@ All controls are basically the same as the original.
 <blockquote>[Lᐳ] - Walk Right</blockquote>
 
 ### Menu and Options controls
-_Note: These are minimized help lists. To view the full ones, go to [fps2.serveo.net](https://fps2.serveo.net) and click "help"._
+_Note: These are minimized help lists. To view the full ones, go to [fps2.uk.to](https://fps2.uk.to) and click "help"._
 
 #### To play a game
 - Go to the main menu.
