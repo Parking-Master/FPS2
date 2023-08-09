@@ -1,5 +1,5 @@
 typeof Parse == "undefined" && import("https://npmcdn.com/parse@3.4.4/dist/parse.min.js");
-Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol", "jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR");
+Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol", "FKPsxeAmmINZlZwmPBL0U0dwPzvZGYHVp95jG7G2");
 Parse.serverURL = "https://parseapi.back4app.com/";
 ChatHistory = new Parse.Object.extend("Chat");
 chatHistory = {};
