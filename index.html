@@ -541,7 +541,7 @@
       });
       id = Math.random().toString();
       lockInput = null;
-      Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol","jiUMOANkTqQHpyfaCbgxALRFDj2ckLpFkG0L9uHR"),Parse.serverURL="https://parseapi.back4app.com/";
+      Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol","FKPsxeAmmINZlZwmPBL0U0dwPzvZGYHVp95jG7G2"),Parse.serverURL="https://parseapi.back4app.com/";
       Lobby = new Parse.Object.extend("Lobby");
       HelpLikes = new Parse.Object.extend("HelpLikes");
       createlobbytext = "";
@@ -621,6 +621,11 @@
                   title: "Find Lobby",
                   content: content
                 });
+                if (lobbyLength + 1 >= s.length) {
+                  document.querySelector(".swal-content").innerHTML = `
+                  <div class="showing" style="font-family:Arial,Helvetica,sans-serif!important">Showing ${document.querySelectorAll(".lobby").length} lobbies, ${hiddenLobbies} hidden - <a href="" onclick="event.preventDefault(); findLobby(null, '*', '*'), this.remove()">Show all</a></div>
+                  ` + document.querySelector(".swal-content").innerHTML;
+                }
               }
             }));
             setTimeout(() => {
