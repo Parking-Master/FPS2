@@ -106,7 +106,7 @@
         }
         return i + "th";
       }
-      Parse.initialize("Izi3O97u5yYIBD7nzBkFIaWJ38wr8w2Ani3eDgol","FKPsxeAmmINZlZwmPBL0U0dwPzvZGYHVp95jG7G2"),Parse.serverURL="https://parseapi.back4app.com/";
+      Parse.initialize("gwlM6egCi027TOsKb5f1jznv32JyWtrvfqin5v4W","ZJQWbKcGrD8iWwSeMR71Y7wAh0yMBo3Ph2bGEDsm"),Parse.serverURL="https://parseapi.back4app.com/";
       ids = 0;
       function createTable(user) {
         let points = (user.get("points") - 0);
@@ -123,7 +123,7 @@
         </div>
         `;
       }
-      new Parse.Query(Parse.Object.extend("User")).find("objectId").then((e=>{for(let t=0;t<e.length;t++){let r=new Parse.User;r.set("objectId",e[t].id),createTable(r)}}));
+      new Parse.Query(Parse.Object.extend("User")).find({type:"objectId"}).then((e=>{for(let t=0;t<e.length;t++){let r=new Parse.User;r.set("objectId",e[t].id),createTable(r)}}));
     </script>
   </body>
 </html>
