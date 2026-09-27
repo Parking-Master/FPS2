@@ -8,7 +8,7 @@ A big thanks to the 3d modelers for helping create some of the items used in thi
 
 ### Ok, it's great. But where do I play it?
 The game is fully available for everyone to play. The website is hosted with __GitHub Pages__ at:
-<p align="center"><a href="https://fps2.parkingmaster.tk">f p s 2 . p a r k i n g m a s t e r . t k </a></p>
+<p align="center"><a href="https://2.fps.webredirect.org">2 . f p s . w e b r e d i r e c t . o r g </a></p>
 
 ## About
 Why is FPS 2 better than the original?
