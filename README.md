@@ -118,7 +118,7 @@ All controls are basically the same as the original.
 <blockquote>[Lᐳ] - Walk Right</blockquote>
 
 ### Menu and Options controls
-_Note: These are minimized help lists. To view the full ones, go to [fps2.parkingmaster.tk](https://fps2.parkingmaster.tk) and click "help"._
+_Note: These are minimized help lists. To view the full ones, go to [2.fps.webredirect.org](https://2.fps.webredirect.org) and click "help"._
 
 #### To play a game
 - Go to the main menu.
